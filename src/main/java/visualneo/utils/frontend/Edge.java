@@ -16,14 +16,17 @@ public class Edge extends Line {
         this.startVertex = startVertex;
         this.endVertex = endVertex;
         // Set the line
-        this.setStartX(startVertex.x + VERTEX_RADIUS);
-        this.setStartY(startVertex.y + VERTEX_RADIUS);
-        this.setEndX(endVertex.x + VERTEX_RADIUS);
-        this.setEndY(endVertex.y + VERTEX_RADIUS);
+        updatePos();
         setStroke(Color.BLACK);
         setStrokeWidth(3);
         System.out.println("An Edge from (" + startVertex.x + " , " + startVertex.y + ") to " +
                 "(" + endVertex.x + " , " + endVertex.y + ")" + " is created!");
+    }
+    public void updatePos(){
+        this.setStartX(startVertex.x + VERTEX_RADIUS);
+        this.setStartY(startVertex.y + VERTEX_RADIUS);
+        this.setEndX(endVertex.x + VERTEX_RADIUS);
+        this.setEndY(endVertex.y + VERTEX_RADIUS);
     }
 
 }
