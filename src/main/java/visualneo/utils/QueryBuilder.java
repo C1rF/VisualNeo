@@ -1,4 +1,4 @@
-package neo4jvqi.utils;
+package visualneo.utils;
 
 // Class representing a Cypher query statement
 class QueryBuilder {

@@ -1,4 +1,4 @@
-package neo4jvqi.utils;
+package visualneo.utils;
 
 import java.util.ArrayList;
 import java.util.Iterator;

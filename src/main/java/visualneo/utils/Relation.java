@@ -1,4 +1,4 @@
-package neo4jvqi.utils;
+package visualneo.utils;
 
 public class Relation extends Entity {
 
