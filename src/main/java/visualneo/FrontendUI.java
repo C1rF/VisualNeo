@@ -182,7 +182,7 @@ public class FrontendUI extends BorderPane{
                                         // If the status is EDGE_2, meaning that we are choosing the second Vertex
                                         if(s == Status.EDGE_2){
                                             // Create a new Edge between the two
-                                            Edge temp_edge =  new Edge(startVertex, temp);
+                                            Edge temp_edge =  new Edge(startVertex, temp, false);
                                             listOfEdges.add(temp_edge);
                                             drawingBoard.getChildren().add(temp_edge);
                                             temp_edge.toBack();
