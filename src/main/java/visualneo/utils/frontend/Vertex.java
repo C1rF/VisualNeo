@@ -76,8 +76,8 @@ public class Vertex extends StackPane {
     }
 
     public void dragged(MouseEvent m) {
-        if(FrontendUI.getStatus() == FrontendUI.Status.SELECT)
-            m.consume();
+        if(FrontendUI.getStatus() != FrontendUI.Status.SELECT)
+            return;
         // (m.getX() - offX) contains the minor changes of x coordinate
         // (m.getY() - offY) contains the minor changes of y coordinate
         x += m.getX() - offX; // keep updating the coordinate

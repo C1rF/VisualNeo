@@ -8,6 +8,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import visualneo.utils.frontend.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FrontendUI extends BorderPane{
 
@@ -166,8 +167,25 @@ public class FrontendUI extends BorderPane{
                             if(s == Status.ERASE) {
                                 int numOfVertices = listOfVertices.size();
                                 for(int i =0; i < numOfVertices; i++) {
-                                    if(listOfVertices.get(i).isFocused()) {
-                                        drawingBoard.getChildren().remove(listOfVertices.get(i));
+                                    Vertex temp = listOfVertices.get(i);
+                                    if(temp.isFocused()) {
+                                        // First remove all its connected edges
+                                        int numOfEdges = listOfEdges.size();
+                                        List<Integer> index_list = new ArrayList<Integer>();
+                                        for(int j=0; j<numOfEdges; j++){
+                                            Edge temp_edge = listOfEdges.get(j);
+                                            if( temp_edge.startVertex == temp || temp_edge.endVertex == temp){
+                                                // Remove the edge both from the board and the ArrayList
+                                                drawingBoard.getChildren().remove(temp_edge);
+                                                index_list.add(j);
+                                            }
+                                        }
+                                        for(int t = index_list.size()-1; t >= 0; t--){
+                                            int j = index_list.get(t);
+                                            listOfEdges.remove(j);
+                                        }
+                                        // Then remove the vertex
+                                        drawingBoard.getChildren().remove(temp);
                                         listOfVertices.remove(i);
                                         break;
                                     }
@@ -181,11 +199,15 @@ public class FrontendUI extends BorderPane{
                                     if(temp.isFocused()) {
                                         // If the status is EDGE_2, meaning that we are choosing the second Vertex
                                         if(s == Status.EDGE_2){
-                                            // Create a new Edge between the two
-                                            Edge temp_edge =  new Edge(startVertex, temp, false);
-                                            listOfEdges.add(temp_edge);
-                                            drawingBoard.getChildren().add(temp_edge);
-                                            temp_edge.toBack();
+                                            // Create a new Edge between the two if they are not the same vertex
+                                            if(startVertex != temp){
+                                                Edge temp_edge =  new Edge(startVertex, temp, false);
+                                                listOfEdges.add(temp_edge);
+                                                drawingBoard.getChildren().add(temp_edge);
+                                                temp_edge.toBack();
+                                            }
+                                            // No matter whether the edge is created or not
+                                            // Return to original state and remove focus
                                             s = Status.EDGE_1;
                                             // Remove the focus
                                             drawingBoard.requestFocus();
@@ -221,8 +243,14 @@ public class FrontendUI extends BorderPane{
                                     Vertex temp = listOfVertices.get(i);
                                     if(temp.isFocused()) {
                                         // Now we know that temp is focused
-                                        System.out.println("Drag the vertex");
-
+                                        // System.out.println("Drag the vertex");
+                                        int numOfEdges = listOfEdges.size();
+                                        for(int j=0; j<numOfEdges; j++){
+                                            Edge temp_edge = listOfEdges.get(j);
+                                            if( temp_edge.startVertex == temp || temp_edge.endVertex == temp){
+                                                temp_edge.updatePos();
+                                            }
+                                        }
                                     }
                                 }
                             }
