@@ -6,12 +6,12 @@ import javafx.scene.input.MouseEvent;
 public class Edge extends Line {
 
     private final int VERTEX_RADIUS = 20;
-    Vertex startVertex;
-    Vertex endVertex;
+    public Vertex startVertex;
+    public Vertex endVertex;
     String relationship;
-    boolean directed = false;
+    public boolean directed;
 
-    public Edge(Vertex startVertex, Vertex endVertex) {
+    public Edge(Vertex startVertex, Vertex endVertex, boolean directed) {
         super();
         this.startVertex = startVertex;
         this.endVertex = endVertex;

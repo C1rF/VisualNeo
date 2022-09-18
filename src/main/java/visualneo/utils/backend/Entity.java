@@ -1,4 +1,4 @@
-package visualneo.utils;
+package visualneo.utils.backend;
 
 import java.util.UUID;
 

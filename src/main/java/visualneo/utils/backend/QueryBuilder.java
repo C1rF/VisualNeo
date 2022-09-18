@@ -1,4 +1,4 @@
-package visualneo.utils;
+package visualneo.utils.backend;
 
 // Class representing a Cypher query statement
 class QueryBuilder {

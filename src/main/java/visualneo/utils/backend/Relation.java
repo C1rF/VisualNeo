@@ -1,4 +1,4 @@
-package visualneo.utils;
+package visualneo.utils.backend;
 
 public class Relation extends Entity {
 

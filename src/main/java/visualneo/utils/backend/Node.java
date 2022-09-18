@@ -1,8 +1,10 @@
-package visualneo.utils;
+package visualneo.utils.backend;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.function.Consumer;
+
+import visualneo.utils.frontend.Vertex;
 
 public class Node extends Entity {
 
@@ -12,6 +14,10 @@ public class Node extends Entity {
 
     public Node(String label) {
         super(label);
+    }
+
+    public Node(Vertex vertex) {
+        this((String) null);
     }
 
     boolean related() {
