@@ -5,8 +5,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
+import visualneo.FrontendUI;
+import visualneo.VisualNeoApp;
 
-public class Vertex extends StackPane{
+public class Vertex extends StackPane {
 
     // record the position of center of the Vertex
     double x,y;
@@ -64,7 +66,8 @@ public class Vertex extends StackPane{
     }
 
     public void pressed(MouseEvent m) {
-        //System.out.println("A Vertex was clicked at x="+m.getX()+" y="+m.getY());
+        if(FrontendUI.getStatus() == FrontendUI.Status.SELECT)
+            m.consume();
         offX = m.getX();
         offY = m.getY();
         if(!isFocused){
@@ -73,7 +76,8 @@ public class Vertex extends StackPane{
     }
 
     public void dragged(MouseEvent m) {
-        m.consume();
+        if(FrontendUI.getStatus() == FrontendUI.Status.SELECT)
+            m.consume();
         // (m.getX() - offX) contains the minor changes of x coordinate
         // (m.getY() - offY) contains the minor changes of y coordinate
         x += m.getX() - offX; // keep updating the coordinate
