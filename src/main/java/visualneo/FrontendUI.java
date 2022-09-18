@@ -11,6 +11,8 @@ import java.util.ArrayList;
 
 public class FrontendUI extends BorderPane{
 
+    private final VisualNeoApp app;
+
     // Current Status
     public enum Status {EMPTY, VERTEX , EDGE_1, EDGE_2, ERASE, SELECT};
     public static Status s = Status.EMPTY;
@@ -26,7 +28,8 @@ public class FrontendUI extends BorderPane{
     // A temperate startVertex
     Vertex startVertex;
 
-    public FrontendUI(){
+    FrontendUI(VisualNeoApp app){
+        this.app = app;
         implementMenuBar();
         implementLeft();
         implementRight();

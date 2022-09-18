@@ -15,19 +15,23 @@ import java.util.ArrayList;
 
 public class VisualNeoApp extends Application {
 
+    FrontendUI gui;
+    QueryHandler handler;
+
     @Override
     public void start(Stage stage) {
+        handler = new QueryHandler(this);
         initUI(stage);
     }
     public static void main(String[] args) {
         launch();
     }
-    public void initUI(Stage stage){
+    private void initUI(Stage stage){
         String javaVersion = System.getProperty("java.version");
         String javafxVersion = System.getProperty("javafx.version");
         System.out.println("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
 
-        FrontendUI gui = new FrontendUI();
+        gui = new FrontendUI(this);
         Scene scene = new Scene(gui, 1200, 700);
         stage.setScene(scene);
         stage.setTitle("Our FYP");
