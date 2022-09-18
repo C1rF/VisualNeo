@@ -1,4 +1,6 @@
-package visualneo.utils;
+package visualneo.utils.backend;
+
+import visualneo.utils.frontend.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +16,23 @@ public class Graph {
         this.relations = relations;
 
         validate();
+    }
+
+    public static Graph fromDrawing(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
+        HashMap<Vertex, Node> links = new HashMap<>();
+        vertices.forEach(vertex -> {
+            links.put(vertex, new Node(vertex));
+        });
+        ArrayList<Relation> relations = new ArrayList<>();
+        edges.forEach(edge -> {
+            relations.add(new Relation(
+                    edge.directed,
+                    links.get(edge.startVertex),
+                    links.get(edge.endVertex),
+                    null));
+        });
+
+        return new Graph(new ArrayList<>(links.values()), relations);
     }
 
     private void validate() throws IllegalArgumentException {

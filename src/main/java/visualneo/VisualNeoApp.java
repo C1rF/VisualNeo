@@ -206,7 +206,7 @@ public class VisualNeoApp extends Application {
                                         // If the status is EDGE_2, meaning that we are choosing the second Vertex
                                         if(s == Status.EDGE_2){
                                             // Create a new Edge between the two
-                                            Edge temp_edge =  new Edge(startVertex, temp);
+                                            Edge temp_edge =  new Edge(startVertex, temp, false);
 //                                            temp_edge.setStartX(startVertex.x);
 //                                            temp_edge.setStartY(startVertex.y);
 //                                            temp_edge.setEndX(temp.x);
