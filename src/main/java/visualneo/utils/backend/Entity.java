@@ -1,37 +1,42 @@
 package visualneo.utils.backend;
 
-import java.util.UUID;
+abstract class Entity implements Comparable<Entity> {
 
-abstract class Entity {
+    private static int count;
 
-    private final UUID id = UUID.randomUUID();
-    final String varName;
+    private final int id = ++count;
     final String label;
+
+    //TODO Add properties
 
     // Pass null for an unlabeled node/relationship
     protected Entity(String label) {
         this.label = label;
-        varName = generateVarName();
     }
 
     boolean isLabeled() {
         return (label != null);
     }
 
-    abstract String generateVarName();
-
     @Override
     public int hashCode() {
-        return id.hashCode();
+        int hash = 17;
+        hash = 37 * hash + id;
+        hash = 37 * hash + (label == null ? 0 : label.hashCode());
+        return hash;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!(obj instanceof Entity))
+        if (!(obj instanceof Entity other))
             return false;
-        Entity other = (Entity)obj;
-        return this.id.equals(other.id);
+        return id == other.id;
+    }
+
+    @Override
+    public int compareTo(Entity other) {
+        return id - other.id;
     }
 }
