@@ -2,8 +2,6 @@ package visualneo.utils.backend;
 
 public class Relation extends Entity {
 
-    private static int relationCount;
-
     final boolean directed;
 
     final Node start;
@@ -28,13 +26,34 @@ public class Relation extends Entity {
         return null;
     }
 
+    // Check whether two relations are duplicate/indistinguishable
+    // Two distinct relations are indistinguishable iff they have the same origin, target, label, and properties
+    // This method assumes the other relation is non-null and the two relations are distinct
+    boolean duplicates(Relation other) {
+//        if (other == null || this == other)
+//            return false;
+
+        if (directed && other.directed) {
+            if (start != other.start || end != other.end)
+                return false;
+        }
+        else if ((start != other.start || end != other.end) && (start != other.end || end != other.start))
+            return false;
+
+        return resembles(other);
+    }
+
+    // Check whether two relations have the same label and properties
+    // This method assumes the other relation is non-null and the two relations are distinct
+    boolean resembles(Relation other) {
+        if (!label.equals(other.label))
+            return false;
+        //TODO Add equality check on properties
+        return true;
+    }
+
     void detach() {
         start.detach(this);
         end.detach(this);
-    }
-
-    @Override
-    String generateVarName() {
-        return ("r" + String.valueOf(++relationCount));
     }
 }

@@ -18,6 +18,11 @@
       <artifactId>javafx-controls</artifactId>
       <version>18.0.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.neo4j.driver</groupId>
+      <artifactId>neo4j-java-driver</artifactId>
+      <version>4.4.9</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -46,21 +51,5 @@
   <packaging>jar</packaging>
   <name>visual-neo</name>
   <url>http://maven.apache.org</url>
-
-
-<!--  <dependencies>-->
-<!--    <dependency>-->
-<!--      <groupId>junit</groupId>-->
-<!--      <artifactId>junit</artifactId>-->
-<!--      <version>3.8.1</version>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
-<!--    <dependency>-->
-<!--      <groupId>org.jetbrains</groupId>-->
-<!--      <artifactId>annotations</artifactId>-->
-<!--      <version>13.0</version>-->
-<!--      <scope>compile</scope>-->
-<!--    </dependency>-->
-<!--  </dependencies>-->
 
 </project>
