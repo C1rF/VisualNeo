@@ -18,6 +18,15 @@ abstract class Entity implements Comparable<Entity> {
         return (label != null);
     }
 
+    boolean hasProperty() {
+        //TODO Implement this
+        return false;
+    }
+
+    static void recount() {
+        count = 0;
+    }
+
     @Override
     public int hashCode() {
         int hash = 17;

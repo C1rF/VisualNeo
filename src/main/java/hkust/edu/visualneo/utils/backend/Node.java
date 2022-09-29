@@ -7,9 +7,9 @@ import hkust.edu.visualneo.utils.frontend.Vertex;
 
 public class Node extends Entity {
 
-    private static int count;
+    private static int nodeCount;
 
-    private final int id = ++count;
+    private final int nodeId = ++nodeCount;
 
     final ArrayList<Relation> relations = new ArrayList<>();
 
@@ -83,8 +83,12 @@ public class Node extends Entity {
         relations.remove(relation);
     }
 
+    static void recount() {
+        nodeCount = 0;
+    }
+
     @Override
     public String toString() {
-        return "r" + String.valueOf(id);
+        return "r" + String.valueOf(nodeId);
     }
 }
