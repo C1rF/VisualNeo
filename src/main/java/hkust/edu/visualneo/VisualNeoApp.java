@@ -8,6 +8,14 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class VisualNeoApp extends Application {
+
+    final QueryHandler queryHandler;
+
+    public VisualNeoApp() {
+        super();
+        queryHandler = new QueryHandler(this);
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(VisualNeoApp.class.getResource("fxml/visualneo-home.fxml"));
