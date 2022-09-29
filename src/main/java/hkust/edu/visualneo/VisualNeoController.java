@@ -13,7 +13,7 @@ import java.util.List;
 
 public class VisualNeoController {
 
-    private final VisualNeoApp app;
+    private VisualNeoApp app;
 
     @FXML
     private Button btn_clear;
@@ -71,7 +71,9 @@ public class VisualNeoController {
      * The constructor.
      * The constructor is called before initialize() method.
      */
-    public VisualNeoController(VisualNeoApp app) {
+    public VisualNeoController() { }
+
+    public void setApp(VisualNeoApp app) {
         this.app = app;
     }
 
