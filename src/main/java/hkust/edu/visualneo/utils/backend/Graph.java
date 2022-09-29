@@ -121,4 +121,9 @@ public class Graph {
 
         return dupPairs;
     }
+
+    public static void recount() {
+        Entity.recount();
+        Node.recount();
+    }
 }

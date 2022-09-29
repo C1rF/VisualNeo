@@ -1,6 +1,7 @@
 package hkust.edu.visualneo.utils.backend;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 // Class representing a Cypher query statement
@@ -16,15 +17,21 @@ public class QueryBuilder {
         indent();
         builder.append("MATCH");
         Iterator<Relation> relationIter = graph.relations.iterator();
-        while (true) {
-            Relation relation = relationIter.next();
+        if (!relationIter.hasNext()) {
             newLine();
-            translateNode(relation.start);
-            translateRelation(relation);
-            translateNode(relation.end);
-            if (!relationIter.hasNext())
-                break;
-            builder.append(",");
+            translateNode(graph.nodes.get(0));
+        }
+        else {
+            while (true) {
+                Relation relation = relationIter.next();
+                newLine();
+                translateNode(relation.start);
+                translateRelation(relation);
+                translateNode(relation.end);
+                if (!relationIter.hasNext())
+                    break;
+                builder.append(",");
+            }
         }
         unindent();
         newLine();
@@ -45,9 +52,9 @@ public class QueryBuilder {
                     break;
                 builder.append(",");
             }
+            unindent();
+            newLine();
         }
-        unindent();
-        newLine();
 
         // RETURN clause
         indent();
@@ -71,7 +78,9 @@ public class QueryBuilder {
 
     private void newLine() {
         builder.append(System.lineSeparator());
-        builder.append(new char[2 * indentCount]);
+        char[] tabs = new char[2 * indentCount];
+        Arrays.fill(tabs, ' ');
+        builder.append(tabs);
     }
 
     private void clear() {
@@ -91,16 +100,19 @@ public class QueryBuilder {
     }
 
     private void translateRelation(Relation relation) {
-        builder.append("-[");
-        builder.append(relation);
-        if (relation.isLabeled()) {
-            builder.append(":");
-            builder.append(relation.label);
-        }
-        //TODO Add property translation
-        if (relation.directed)
-            builder.append("]->");
-        else
+        if (!relation.isLabeled() && !relation.hasProperty())
+            builder.append("--");
+        else {
+            builder.append("-[");
+//            builder.append(relation);
+            if (relation.isLabeled()) {
+                builder.append(":");
+                builder.append(relation.label);
+            }
+            //TODO Add property translation
             builder.append("]-");
+        }
+        if (relation.directed)
+            builder.append(">");
     }
 }

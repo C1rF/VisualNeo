@@ -21,5 +21,6 @@ public class QueryHandler {
         System.out.println(query);
 
 
+        Graph.recount();
     }
 }
