@@ -1,12 +1,12 @@
-package visualneo.utils.frontend;
+package hkust.edu.visualneo.utils.frontend;
 
+import hkust.edu.visualneo.VisualNeoController;
+import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
-import visualneo.FrontendUI;
-import visualneo.VisualNeoApp;
 
 public class Vertex extends StackPane {
 
@@ -41,6 +41,20 @@ public class Vertex extends StackPane {
         setPos();
 
         // Set Focus Effect
+        setFocusEffect();
+
+        // Give them event handler
+        c.addEventHandler( MouseEvent.MOUSE_PRESSED, e->{if(canSelect) { pressed(e);}  } );
+        c.addEventHandler( MouseEvent.MOUSE_DRAGGED, e->{if(canSelect) { dragged(e);}  } );
+        c.addEventHandler( MouseEvent.MOUSE_ENTERED, e->{if(canSelect) { mouseEntered(e);}  } );
+        c.addEventHandler( MouseEvent.MOUSE_EXITED, e->{if(canSelect) { mouseExited(e);}  } );
+        c.addEventHandler( MouseEvent.MOUSE_RELEASED, e->{if(canSelect) { mouseReleased(e);}  } );
+
+
+        System.out.println("A new Vertex is created.");
+    }
+
+    public void setFocusEffect(){
         setFocusTraversable(true);
         focusedProperty().addListener(
                 (obs, oldVal, newVal) ->
@@ -57,26 +71,35 @@ public class Vertex extends StackPane {
                     }
                 }
         );
-
-        // Give them event handler
-        addEventHandler( MouseEvent.MOUSE_PRESSED, e->{if(canSelect) { pressed(e);}  } );
-        addEventHandler( MouseEvent.MOUSE_DRAGGED, e->{if(canSelect) { dragged(e);}  } );
-
-        System.out.println("A new Vertex is created.");
+    }
+    private void mouseEntered(MouseEvent m) {
+        if(VisualNeoController.getStatus() == VisualNeoController.Status.SELECT){
+            getScene().setCursor(Cursor.HAND);
+        }
+        else if(VisualNeoController.getStatus() == VisualNeoController.Status.ERASE){
+            getScene().setCursor(Cursor.DISAPPEAR);
+        }
+    }
+    private void mouseExited(MouseEvent m) {
+        getScene().setCursor(Cursor.DEFAULT);
+    }
+    private void mouseReleased(MouseEvent m){
+        mouseEntered(m);
     }
 
-    public void pressed(MouseEvent m) {
-        if(FrontendUI.getStatus() == FrontendUI.Status.SELECT)
-            m.consume();
+    private void pressed(MouseEvent m) {
         offX = m.getX();
         offY = m.getY();
         if(!isFocused){
             requestFocus();
         }
+        if(VisualNeoController.getStatus() == VisualNeoController.Status.SELECT){
+            m.consume();
+        }
     }
 
     public void dragged(MouseEvent m) {
-        if(FrontendUI.getStatus() != FrontendUI.Status.SELECT)
+        if(VisualNeoController.getStatus() != VisualNeoController.Status.SELECT)
             return;
         // (m.getX() - offX) contains the minor changes of x coordinate
         // (m.getY() - offY) contains the minor changes of y coordinate
@@ -84,6 +107,7 @@ public class Vertex extends StackPane {
         y += m.getY() - offY; // keep updating the coordinate
         //System.out.println(x+" "+y+" "+width+" "+height);
         setPos();
+        getScene().setCursor(Cursor.CLOSED_HAND);
 
     }
     public void setPos() {
