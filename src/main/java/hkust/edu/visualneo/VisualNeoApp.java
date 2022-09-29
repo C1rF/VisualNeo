@@ -23,6 +23,8 @@ public class VisualNeoApp extends Application {
         stage.setTitle("VisualNeo");
         stage.setScene(scene);
         stage.show();
+
+        queryHandler = new QueryHandler(this);
     }
 
     public static void main(String[] args) {
