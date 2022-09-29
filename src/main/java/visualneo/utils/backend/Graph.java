@@ -9,15 +9,10 @@ public class Graph {
     final ArrayList<Node> nodes;
     final ArrayList<Relation> relations;
 
-//    final HashMap<String, ArrayList<Node>> nodesByLabel;
-//    final HashMap<String, ArrayList<Relation>> relationsByLabel;
-
     public Graph(ArrayList<Node> nodes,
                  ArrayList<Relation> relations) {
         this.nodes = nodes;
         this.relations = relations;
-//        this.nodesByLabel = nodesByLabel;
-//        this.relationsByLabel = relationsByLabel;
 
         validate();
     }
@@ -25,20 +20,6 @@ public class Graph {
     public static Graph fromDrawing(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
         HashMap<Vertex, Node> links = new HashMap<>();
         vertices.forEach(vertex -> links.put(vertex, new Node(vertex)));
-//        HashMap<String, ArrayList<Node>> nodesByLabel = new HashMap<>();
-//        HashMap<String, ArrayList<Relation>> relationsByLabel = new HashMap<>();
-
-//        vertices.forEach(vertex -> {
-//            Node node = new Node(vertex);
-//            links.put(vertex, node);
-//            if (nodesByLabel.containsKey(node.label))
-//                nodesByLabel.get(node.label).add(node);
-//            else {
-//                ArrayList<Node> nodesCategorized = new ArrayList<>();
-//                nodesCategorized.add(node);
-//                nodesByLabel.put(node.label, nodesCategorized);
-//            }
-//        });
 
         ArrayList<Relation> relations = new ArrayList<>();
         edges.forEach(edge -> relations.add(new Relation(
@@ -46,21 +27,6 @@ public class Graph {
                     links.get(edge.startVertex),
                     links.get(edge.endVertex),
                     null)));
-//        edges.forEach(edge -> {
-//            Relation relation = new Relation(
-//                    edge.directed,
-//                    links.get(edge.startVertex),
-//                    links.get(edge.endVertex),
-//                    null);
-//            relations.add(relation);
-//            if (relationsByLabel.containsKey(relation.label))
-//                relationsByLabel.get(relation.label).add(relation);
-//            else {
-//                ArrayList<Relation> relationsCategorized = new ArrayList<>();
-//                relationsCategorized.add(relation);
-//                relationsByLabel.put(relation.label, relationsCategorized);
-//            }
-//        });
 
         return new Graph(new ArrayList<>(links.values()), relations);
     }

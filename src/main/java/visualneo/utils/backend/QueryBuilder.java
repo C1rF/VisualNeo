@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 // Class representing a Cypher query statement
-class QueryBuilder {
+public class QueryBuilder {
 
-    private static final StringBuilder builder = new StringBuilder();
-    private static final int indentSize = 2;
-    private static int indentCount;
+    private final StringBuilder builder = new StringBuilder();
+    private int indentCount;
 
-    public static String translate(Graph graph) {
+    public String translate(Graph graph) {
         clear();
 
         // MATCH clause
@@ -61,26 +60,26 @@ class QueryBuilder {
         return builder.toString();
     }
 
-    private static void indent() {
+    private void indent() {
         indentCount++;
     }
 
-    private static void unindent() {
+    private void unindent() {
         if (--indentCount < 0)
             indentCount = 0;
     }
 
-    private static void newLine() {
+    private void newLine() {
         builder.append(System.lineSeparator());
-        builder.append(new char[indentSize * indentCount]);
+        builder.append(new char[2 * indentCount]);
     }
 
-    private static void clear() {
+    private void clear() {
         builder.setLength(0);
         indentCount = 0;
     }
 
-    private static void translateNode(Node node) {
+    private void translateNode(Node node) {
         builder.append("(");
         builder.append(node);
         if (node.isLabeled()) {
@@ -91,7 +90,7 @@ class QueryBuilder {
         builder.append(")");
     }
 
-    private static void translateRelation(Relation relation) {
+    private void translateRelation(Relation relation) {
         builder.append("-[");
         builder.append(relation);
         if (relation.isLabeled()) {
