@@ -1,4 +1,4 @@
-package visualneo.utils.backend;
+package hkust.edu.visualneo.utils.backend;
 
 abstract class Entity implements Comparable<Entity> {
 

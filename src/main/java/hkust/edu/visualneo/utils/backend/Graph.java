@@ -1,6 +1,6 @@
-package visualneo.utils.backend;
+package hkust.edu.visualneo.utils.backend;
 
-import visualneo.utils.frontend.*;
+import hkust.edu.visualneo.utils.frontend.*;
 
 import java.util.*;
 
@@ -23,10 +23,10 @@ public class Graph {
 
         ArrayList<Relation> relations = new ArrayList<>();
         edges.forEach(edge -> relations.add(new Relation(
-                    edge.directed,
-                    links.get(edge.startVertex),
-                    links.get(edge.endVertex),
-                    null)));
+                edge.directed,
+                links.get(edge.startVertex),
+                links.get(edge.endVertex),
+                null)));
 
         return new Graph(new ArrayList<>(links.values()), relations);
     }

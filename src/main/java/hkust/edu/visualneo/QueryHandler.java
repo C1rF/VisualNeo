@@ -1,9 +1,9 @@
-package visualneo;
+package hkust.edu.visualneo;
 
-import visualneo.utils.backend.Graph;
-import visualneo.utils.backend.QueryBuilder;
-import visualneo.utils.frontend.Edge;
-import visualneo.utils.frontend.Vertex;
+import hkust.edu.visualneo.utils.backend.Graph;
+import hkust.edu.visualneo.utils.backend.QueryBuilder;
+import hkust.edu.visualneo.utils.frontend.Edge;
+import hkust.edu.visualneo.utils.frontend.Vertex;
 
 import java.util.ArrayList;
 

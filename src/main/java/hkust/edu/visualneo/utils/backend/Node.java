@@ -1,9 +1,9 @@
-package visualneo.utils.backend;
+package hkust.edu.visualneo.utils.backend;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import visualneo.utils.frontend.Vertex;
+import hkust.edu.visualneo.utils.frontend.Vertex;
 
 public class Node extends Entity {
 
