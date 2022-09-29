@@ -14,6 +14,8 @@ import java.util.List;
 
 public class VisualNeoController {
 
+    private final VisualNeoApp app;
+
     @FXML
     private Button btn_clear;
 
@@ -53,8 +55,6 @@ public class VisualNeoController {
     @FXML
     private Button btn_similarity_search;
 
-    private VisualNeoApp app;
-
     // ALL Status
     public enum Status {EMPTY, VERTEX , EDGE_1, EDGE_2, ERASE, SELECT};
     // Current Status
@@ -72,8 +72,8 @@ public class VisualNeoController {
      * The constructor.
      * The constructor is called before initialize() method.
      */
-    public VisualNeoController() {
-
+    public VisualNeoController(VisualNeoApp app) {
+        this.app = app;
     }
 
     /**
@@ -84,16 +84,6 @@ public class VisualNeoController {
     private void initialize() {
          s = Status.EMPTY;
     }
-
-    /**
-     * Is called by the VisualNeo application to give a reference back to itself.
-     *
-     * @param app
-     */
-    public void setApp(VisualNeoApp app) {
-        this.app = app;
-    }
-
 
     /**
      * Called when the user clicks on the clear button.
@@ -310,7 +300,7 @@ public class VisualNeoController {
      */
     @FXML
     private void handleExactSearch() {
-
+        app.queryHandler.search(listOfVertices, listOfEdges);
     }
 
     /**
