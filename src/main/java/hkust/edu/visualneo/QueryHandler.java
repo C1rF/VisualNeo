@@ -15,7 +15,7 @@ public class QueryHandler {
         this.app = app;
     }
 
-    void search(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
+    void exactSearch(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
         Graph queryPattern = Graph.fromDrawing(vertices, edges);
         String query = new QueryBuilder().translate(queryPattern);
         System.out.println(query);

@@ -3,7 +3,6 @@ package hkust.edu.visualneo;
 import hkust.edu.visualneo.utils.frontend.*;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -300,7 +299,7 @@ public class VisualNeoController {
      */
     @FXML
     private void handleExactSearch() {
-        app.queryHandler.search(listOfVertices, listOfEdges);
+        app.queryHandler.exactSearch(listOfVertices, listOfEdges);
     }
 
     /**
