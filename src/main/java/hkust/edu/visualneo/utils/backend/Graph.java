@@ -31,9 +31,9 @@ public class Graph {
         return new Graph(new ArrayList<>(links.values()), relations);
     }
 
-    private void validate() throws IllegalArgumentException {
+    private void validate() throws RuntimeException {
         if (!checkNonNull())
-            throw new IllegalArgumentException("Null/Empty Entity!");
+            throw new NullPointerException("Null/Empty Entity!");
         if (!checkCompleteness())
             throw new IllegalArgumentException("Node/Relation list is not complete!");
         if (!checkConnectivity())

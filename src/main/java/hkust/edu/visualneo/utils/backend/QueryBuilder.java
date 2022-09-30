@@ -7,11 +7,33 @@ import java.util.Iterator;
 // Class representing a Cypher query statement
 public class QueryBuilder {
 
-    private final StringBuilder builder = new StringBuilder();
-    private int indentCount;
+    private final static StringBuilder builder = new StringBuilder();
+    private static int indentCount;
+
+    public final static String metadataQuery = """
+            CALL
+              db.labels() YIELD label
+            WITH
+              label ORDER BY label
+            WITH
+              collect(label) AS labels
+            CALL
+              db.relationshipTypes() YIELD relationshipType
+            WITH
+              labels, relationshipType ORDER BY relationshipType
+            WITH
+              labels, collect(relationshipType) AS relationshipTypes
+            CALL
+              db.propertyKeys() YIELD propertyKey
+            WITH
+              labels, relationshipTypes, propertyKey ORDER BY propertyKey
+            WITH
+              labels, relationshipTypes, collect(propertyKey) AS propertyKeys
+            RETURN
+              labels, relationshipTypes, propertyKeys""";
 
     //TODO Modify this
-    public String translate(Graph graph) {
+    public static String translate(Graph graph) {
         clear();
 
         // MATCH clause
@@ -68,28 +90,28 @@ public class QueryBuilder {
         return builder.toString();
     }
 
-    private void indent() {
+    private static void indent() {
         indentCount++;
     }
 
-    private void unindent() {
+    private static void unindent() {
         if (--indentCount < 0)
             indentCount = 0;
     }
 
-    private void newLine() {
+    private static void newLine() {
         builder.append(System.lineSeparator());
         char[] tabs = new char[2 * indentCount];
         Arrays.fill(tabs, ' ');
         builder.append(tabs);
     }
 
-    private void clear() {
+    private static void clear() {
         builder.setLength(0);
         indentCount = 0;
     }
 
-    private void translateNode(Node node) {
+    private static void translateNode(Node node) {
         builder.append("(");
         builder.append(node);
         if (node.isLabeled()) {
@@ -100,7 +122,7 @@ public class QueryBuilder {
         builder.append(")");
     }
 
-    private void translateRelation(Relation relation) {
+    private static void translateRelation(Relation relation) {
         if (!relation.isLabeled() && !relation.hasProperty())
             builder.append("--");
         else {
