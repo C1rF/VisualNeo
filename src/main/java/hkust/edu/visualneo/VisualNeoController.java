@@ -2,12 +2,16 @@ package hkust.edu.visualneo;
 
 import hkust.edu.visualneo.utils.frontend.*;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -285,8 +289,21 @@ public class VisualNeoController {
      * Called when the user click on Load Database button
      */
     @FXML
-    private void handleLoadDB() {
+    private void handleLoadDB() throws IOException {
+        // Pop up the load database window
+        FXMLLoader fxmlLoader = new FXMLLoader(VisualNeoController.class.getResource("fxml/load-database.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 292, 280);
+        LoadDatabaseController db_controller = fxmlLoader.<LoadDatabaseController>getController();
+        db_controller.setVisualNeoController(this);
+        Stage stage = new Stage();
+        stage.setTitle("Load Database");
+        stage.setScene(scene);
+        stage.show();
+    }
 
+    public void submitDBInfo(String uri, String user, String password){
+        //System.out.println(uri +"  "+ user +"  "+ password);
+        app.queryHandler.loadDatabase(uri, user, password);
     }
 
     /**
