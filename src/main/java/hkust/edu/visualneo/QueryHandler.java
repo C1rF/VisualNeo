@@ -23,6 +23,17 @@ public class QueryHandler {
             Objects.requireNonNull(relationLabels);
             Objects.requireNonNull(propertyKeys);
         }
+
+        @Override
+        public String toString() {
+            return String.format("""
+                    Node Labels:     %1$s
+                    Relation Labels: %2$s
+                    Property Keys:   %3$s""",
+                    nodeLabels().toString(),
+                    relationLabels().toString(),
+                    propertyKeys().toString());
+        }
     }
 
     private final VisualNeoApp app;
@@ -60,6 +71,8 @@ public class QueryHandler {
     void loadDatabase(String uri, String user, String password) {
         initDriver(uri, user, password);
         fetchMetadata();
+
+        System.out.println(meta);
     }
 
     void exactSearch(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
