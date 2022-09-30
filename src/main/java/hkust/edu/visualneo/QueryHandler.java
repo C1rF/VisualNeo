@@ -15,11 +15,13 @@ public class QueryHandler {
         this.app = app;
     }
 
+    void loadDatabase(String uri, String user, String password) {
+    }
+
     void exactSearch(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
         Graph queryPattern = Graph.fromDrawing(vertices, edges);
         String query = new QueryBuilder().translate(queryPattern);
         System.out.println(query);
-
 
         Graph.recount();
     }

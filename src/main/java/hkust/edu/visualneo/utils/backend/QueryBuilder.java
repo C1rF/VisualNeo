@@ -10,6 +10,7 @@ public class QueryBuilder {
     private final StringBuilder builder = new StringBuilder();
     private int indentCount;
 
+    //TODO Modify this
     public String translate(Graph graph) {
         clear();
 
@@ -48,9 +49,9 @@ public class QueryBuilder {
                 builder.append(pair.head);
                 builder.append(" <> ");
                 builder.append(pair.tail);
-                if (!relationIter.hasNext())
+                if (!pairIter.hasNext())
                     break;
-                builder.append(",");
+                builder.append(" AND");
             }
             unindent();
             newLine();

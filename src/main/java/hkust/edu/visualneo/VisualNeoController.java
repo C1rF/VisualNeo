@@ -93,6 +93,7 @@ public class VisualNeoController {
     @FXML
     private void handleClear() {
         listOfVertices.clear();
+        listOfEdges.clear();
         Drawboard.getChildren().clear();
     }
 
