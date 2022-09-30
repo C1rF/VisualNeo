@@ -45,11 +45,11 @@ public class Relation extends Entity {
 
     // Check whether two relations have the same label and properties
     // This method assumes the other relation is non-null and the two relations are distinct
-    boolean resembles(Relation other) {
-        if (!label.equals(other.label))
+    @Override
+    boolean resembles(Entity other) {
+        if (!(other instanceof Relation))
             return false;
-        //TODO Add equality check on properties
-        return true;
+        return super.resembles(other);
     }
 
     void detach() {

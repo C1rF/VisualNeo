@@ -27,6 +27,17 @@ abstract class Entity implements Comparable<Entity> {
         count = 0;
     }
 
+    // Check whether two entities have the same label and properties
+    // This method assumes the other entity is non-null and the two entities are distinct
+    boolean resembles(Entity other) {
+        if (label == null)
+            return other.label == null;
+        if (!label.equals(other.label))
+            return false;
+        //TODO Add equality check on properties
+        return true;
+    }
+
     @Override
     public int hashCode() {
         int hash = 17;

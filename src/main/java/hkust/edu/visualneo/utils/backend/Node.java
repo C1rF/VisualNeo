@@ -66,13 +66,13 @@ public class Node extends Entity {
 
     // Check whether two distinct nodes have the same label and properties
     // This method assumes the other node is non-null
-    boolean resembles(Node other) {
+    @Override
+    boolean resembles(Entity other) {
+        if (!(other instanceof Node))
+            return false;
         if (this == other)
             return false;
-        if (!label.equals(other.label))
-            return false;
-        //TODO Add equality check on properties
-        return true;
+        return super.resembles(other);
     }
 
     void attach(Relation relation) {
@@ -89,6 +89,6 @@ public class Node extends Entity {
 
     @Override
     public String toString() {
-        return "r" + String.valueOf(nodeId);
+        return "n" + String.valueOf(nodeId);
     }
 }
