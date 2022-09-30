@@ -5,6 +5,10 @@ import hkust.edu.visualneo.utils.backend.QueryBuilder;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.Vertex;
 
+import org.neo4j.driver.Driver;
+import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.AuthTokens;
+
 import java.util.ArrayList;
 
 public class QueryHandler {
@@ -16,6 +20,7 @@ public class QueryHandler {
     }
 
     void loadDatabase(String uri, String user, String password) {
+        Driver driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
     }
 
     void exactSearch(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
