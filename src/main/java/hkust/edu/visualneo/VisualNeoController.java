@@ -6,7 +6,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -57,6 +59,28 @@ public class VisualNeoController {
 
     @FXML
     private Button btn_similarity_search;
+
+    @FXML
+    private ChoiceBox<String> choicebox_node_label;
+
+    @FXML
+    private Button btn_add_node_label;
+
+    @FXML
+    private ChoiceBox<String> choicebox_relation_label;
+
+    @FXML
+    private Button btn_add_relation_label;
+
+    @FXML
+    private ChoiceBox<String> choicebox_property;
+
+    @FXML
+    private TextField textfield_property_value;
+
+    @FXML
+    private Button btn_add_property;
+
 
     // ALL Status
     public enum Status {EMPTY, VERTEX , EDGE_1, EDGE_2, ERASE, SELECT};
@@ -306,6 +330,16 @@ public class VisualNeoController {
         app.queryHandler.loadDatabase(uri, user, password);
     }
 
+    public void updateUIWithMetaInfo(){
+        QueryHandler.DbMetadata metadata = app.queryHandler.getMeta();
+        metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
+        metadata.relationLabels().forEach(label -> choicebox_relation_label.getItems().add(label));
+        metadata.propertyKeys().forEach(property -> choicebox_property.getItems().add(property));
+        btn_add_node_label.setDisable(false);
+        btn_add_relation_label.setDisable(false);
+        btn_add_property.setDisable(false);
+    }
+
     /**
      * Called when the user click on Generate Patterns button
      */
@@ -329,6 +363,17 @@ public class VisualNeoController {
     private void handleSimilaritySearch() {
 
     }
+
+    @FXML
+    void handleAddLabel() {
+
+    }
+
+    @FXML
+    void handleAddProperty() {
+
+    }
+
 
     /**
      * Called when the user's mouse enter a button
