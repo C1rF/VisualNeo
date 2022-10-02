@@ -6,12 +6,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -74,13 +72,28 @@ public class VisualNeoController {
     private Button btn_add_relation_label;
 
     @FXML
-    private ChoiceBox<String> choicebox_property;
+    private ChoiceBox<String> choicebox_property_name;
+
+    @FXML
+    private ChoiceBox<String> choicebox_property_type;
 
     @FXML
     private TextField textfield_property_value;
 
     @FXML
     private Button btn_add_property;
+
+    @FXML
+    private ScrollPane info_pane;
+
+    @FXML
+    private Text text_node_relation_info;
+
+    @FXML
+    private Text text_label_info;
+
+    @FXML
+    private Text text_property_info;
 
 
     // ALL Status
@@ -113,6 +126,8 @@ public class VisualNeoController {
     @FXML
     private void initialize() {
          s = Status.EMPTY;
+        choicebox_property_type.getItems().addAll("Integer", "Float", "String", "Boolean");
+        choicebox_property_type.getSelectionModel().select("Integer");
     }
 
     /**
@@ -335,7 +350,7 @@ public class VisualNeoController {
         DbMetadata metadata = app.queryHandler.getMeta();
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
         metadata.relationLabels().forEach(label -> choicebox_relation_label.getItems().add(label));
-        metadata.propertyKeys().forEach(property -> choicebox_property.getItems().add(property));
+        metadata.propertyKeys().forEach(property -> choicebox_property_name.getItems().add(property));
         btn_add_node_label.setDisable(false);
         btn_add_relation_label.setDisable(false);
         btn_add_property.setDisable(false);
