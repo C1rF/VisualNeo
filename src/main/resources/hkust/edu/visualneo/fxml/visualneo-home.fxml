@@ -192,7 +192,7 @@
                      <content>
                         <AnchorPane prefHeight="228.0" prefWidth="298.0">
                            <children>
-                              <Text fx:id="text_node_relation_info" layoutX="32.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Node Information" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                              <Text fx:id="text_node_or_relation" layoutX="32.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Node Information" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
                                  <font>
                                     <Font size="16.0" />
                                  </font>

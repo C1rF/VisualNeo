@@ -10,6 +10,8 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
+
 import java.lang.Math;
 
 public class Edge extends GraphElement {
@@ -26,6 +28,7 @@ public class Edge extends GraphElement {
         super();
         this.startVertex = startVertex;
         this.endVertex = endVertex;
+        label_displayed = new Text("");
         // Set the position (of the StackPane)
         setPos();
         // Set the line
@@ -34,7 +37,7 @@ public class Edge extends GraphElement {
         edge.setStroke(Color.BLACK);
         edge.setStrokeWidth(4);
         // Display the line on the StackPane
-        getChildren().add(edge);
+        getChildren().addAll(edge, label_displayed);
 
         // Set focus effect
         setFocusEffect();
