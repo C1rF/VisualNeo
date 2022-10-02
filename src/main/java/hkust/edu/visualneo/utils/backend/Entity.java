@@ -1,5 +1,11 @@
 package hkust.edu.visualneo.utils.backend;
 
+import org.neo4j.driver.Value;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+
 abstract class Entity implements Comparable<Entity> {
 
     private static int count;
@@ -7,20 +13,20 @@ abstract class Entity implements Comparable<Entity> {
     private final int id = ++count;
     final String label;
 
-    //TODO Add properties
+    final HashMap<String, Value> properties;
 
     // Pass null for an unlabeled node/relationship
-    protected Entity(String label) {
+    protected Entity(String label, HashMap<String, Value> properties) {
         this.label = label;
+        this.properties = Objects.requireNonNull(properties, "The property list is null!");
     }
 
-    boolean isLabeled() {
-        return (label != null);
+    boolean hasLabel() {
+        return label != null;
     }
 
     boolean hasProperty() {
-        //TODO Implement this
-        return false;
+        return !properties.isEmpty();
     }
 
     static void recount() {
@@ -30,12 +36,7 @@ abstract class Entity implements Comparable<Entity> {
     // Check whether two entities have the same label and properties
     // This method assumes the other entity is non-null and the two entities are distinct
     boolean resembles(Entity other) {
-        if (label == null)
-            return other.label == null;
-        if (!label.equals(other.label))
-            return false;
-        //TODO Add equality check on properties
-        return true;
+        return label.equals(other.label) && properties.equals(other.properties);
     }
 
     @Override
@@ -43,6 +44,7 @@ abstract class Entity implements Comparable<Entity> {
         int hash = 17;
         hash = 37 * hash + id;
         hash = 37 * hash + (label == null ? 0 : label.hashCode());
+        hash = 37 * hash + properties.hashCode();
         return hash;
     }
 
