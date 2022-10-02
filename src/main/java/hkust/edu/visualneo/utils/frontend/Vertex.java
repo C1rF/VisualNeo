@@ -28,8 +28,8 @@ public class Vertex extends GraphElement {
         setPrefWidth(VERTEX_RADIUS);
         setPrefHeight(VERTEX_RADIUS);
         c = new Circle(VERTEX_RADIUS, COLOR);
-        text_label = new Text("");
-        getChildren().addAll(c,text_label);
+        label_displayed = new Text("");
+        getChildren().addAll(c,label_displayed);
         setPos();
 
         // Set Focus Effect
@@ -95,17 +95,13 @@ public class Vertex extends GraphElement {
 
     @Override
     public String toString() {
-        String circle_info =  x+" "+y +" "+text_label.getText()+" "+ text_property.getText();
+        String circle_info =  x+" "+y +" "+label_displayed.getText()+" "+ label_displayed.getText();
         return circle_info;
     }
 
     public void updatePos(double newX, double newY) {
         x = newX;
         y = newY;
-    }
-
-    public void setText(String input_text) {
-        text_label.setText(input_text);
     }
 
 }

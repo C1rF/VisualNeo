@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
@@ -7,11 +8,13 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -55,28 +58,6 @@
           </Menu>
         </menus>
       </MenuBar>
-      <TabPane layoutX="959.0" layoutY="84.0" minWidth="100.0" prefHeight="200.0" prefWidth="300.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
-        <tabs>
-          <Tab text="Basic Patterns">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="534.0" prefWidth="200.0">
-                     <children>
-                        <ScrollPane prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children>
-                  </AnchorPane>
-            </content>
-          </Tab>
-          <Tab text="Canned Patterns">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <ScrollPane layoutX="39.0" layoutY="140.0" prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children>
-                  </AnchorPane>
-            </content>
-          </Tab>
-        </tabs>
-      </TabPane>
       <VBox layoutX="24.0" layoutY="62.0" minWidth="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0">
          <children>
             <Button fx:id="btn_load_db" mnemonicParsing="false" onAction="#handleLoadDB" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Load Database" />
@@ -98,7 +79,11 @@
                                                 <Font size="14.0" />
                                              </font>
                                           </Text>
-                                          <ChoiceBox fx:id="choicebox_node_label" layoutX="10.0" layoutY="95.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0" />
+                                          <ChoiceBox fx:id="choicebox_node_label" layoutX="10.0" layoutY="95.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+                                             <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                             </cursor>
+                                          </ChoiceBox>
                                           <Button fx:id="btn_add_node_label" disable="true" layoutX="99.0" layoutY="79.0" mnemonicParsing="false" onAction="#handleAddLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Node Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
                                           <Text layoutX="10.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Node:" underline="true">
                                              <font>
@@ -115,7 +100,11 @@
                                                 <Font size="18.0" />
                                              </font>
                                           </Text>
-                                          <ChoiceBox fx:id="choicebox_relation_label" layoutX="14.0" layoutY="222.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="215.0" />
+                                          <ChoiceBox fx:id="choicebox_relation_label" layoutX="14.0" layoutY="222.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="215.0">
+                                             <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                             </cursor>
+                                          </ChoiceBox>
                                           <Button fx:id="btn_add_relation_label" disable="true" layoutX="55.0" layoutY="261.0" mnemonicParsing="false" onAction="#handleAddLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Relation Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="260.0" />
                                        </children>
                                     </AnchorPane>
@@ -133,19 +122,33 @@
                                  <content>
                                     <AnchorPane prefHeight="496.0" prefWidth="198.0">
                                        <children>
-                                          <Text layoutX="33.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                          <Text layoutX="33.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Name:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
                                              <font>
                                                 <Font size="14.0" />
                                              </font>
                                           </Text>
-                                          <ChoiceBox fx:id="choicebox_property" layoutX="14.0" layoutY="39.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0" />
-                                          <Text layoutX="14.0" layoutY="95.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Value:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="70.0">
+                                          <ChoiceBox fx:id="choicebox_property_name" layoutX="14.0" layoutY="39.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
+                                             <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                             </cursor>
+                                          </ChoiceBox>
+                                          <Text layoutX="14.0" layoutY="95.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Value:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="130.0">
                                              <font>
                                                 <Font size="14.0" />
                                              </font>
                                           </Text>
-                                          <TextField fx:id="textfield_property_value" layoutX="10.0" layoutY="99.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="90.0" />
-                                          <Button fx:id="btn_add_property" disable="true" layoutX="115.0" layoutY="152.0" mnemonicParsing="false" onAction="#handleAddProperty" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Property" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="140.0" />
+                                          <TextField fx:id="textfield_property_value" layoutX="10.0" layoutY="99.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="150.0" />
+                                          <Button fx:id="btn_add_property" disable="true" layoutX="115.0" layoutY="152.0" mnemonicParsing="false" onAction="#handleAddProperty" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Property" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="200.0" />
+                                          <Text layoutX="24.0" layoutY="200.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Type:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="70.0">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                          </Text>
+                                          <ChoiceBox fx:id="choicebox_property_type" layoutX="26.0" layoutY="103.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="90.0">
+                                             <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                             </cursor>
+                                          </ChoiceBox>
                                        </children>
                                     </AnchorPane>
                                  </content></ScrollPane>
@@ -155,6 +158,79 @@
                 </Tab>
               </tabs>
             </TabPane>
+         </children>
+      </VBox>
+      <VBox prefHeight="200.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+         <children>
+            <TabPane minWidth="100.0" prefHeight="600.0" prefWidth="300.0" tabClosingPolicy="UNAVAILABLE">
+              <tabs>
+                <Tab text="Basic Patterns">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="200.0">
+                           <children>
+                              <ScrollPane prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                <Tab text="Canned Patterns">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <ScrollPane layoutX="39.0" layoutY="140.0" prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+              </tabs>
+            </TabPane>
+            <AnchorPane prefHeight="290.0" prefWidth="300.0">
+               <children>
+                  <Pane layoutX="-20.0" layoutY="-10.0" prefHeight="230.0" prefWidth="300.0" style="-fx-background-color: #f4f4f4;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <Separator halignment="LEFT" orientation="VERTICAL" prefHeight="200.0" translateX="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ScrollPane fx:id="info_pane" prefHeight="280.0" prefWidth="300.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <content>
+                        <AnchorPane prefHeight="228.0" prefWidth="298.0">
+                           <children>
+                              <Text fx:id="text_node_or_relation" layoutX="32.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Node Information" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Text>
+                              <HBox layoutX="10.0" layoutY="50.0" spacing="60.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="50.0">
+                                 <children>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="text_label_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </HBox>
+                              <HBox layoutX="10.0" layoutY="106.431640625" spacing="32.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="110.0">
+                                 <children>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Properties:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="text_property_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                     </content>
+                  </ScrollPane>
+               </children>
+            </AnchorPane>
          </children>
       </VBox>
    </children>

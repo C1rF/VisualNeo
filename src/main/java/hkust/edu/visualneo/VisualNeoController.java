@@ -6,21 +6,26 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.neo4j.driver.Value;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class VisualNeoController {
 
     private VisualNeoApp app;
+
+    private Scene scene;
+
+    private GraphElement last_focused;
 
     @FXML
     private Button btn_clear;
@@ -74,13 +79,28 @@ public class VisualNeoController {
     private Button btn_add_relation_label;
 
     @FXML
-    private ChoiceBox<String> choicebox_property;
+    private ChoiceBox<String> choicebox_property_name;
+
+    @FXML
+    private ChoiceBox<String> choicebox_property_type;
 
     @FXML
     private TextField textfield_property_value;
 
     @FXML
+    private Text text_node_or_relation;
+
+    @FXML
     private Button btn_add_property;
+
+    @FXML
+    private ScrollPane info_pane;
+
+    @FXML
+    private Text text_label_info;
+
+    @FXML
+    private Text text_property_info;
 
 
     // ALL Status
@@ -105,6 +125,46 @@ public class VisualNeoController {
     public void setApp(VisualNeoApp app) {
         this.app = app;
     }
+    public void setScene(Scene scene){
+        this.scene = scene;
+        scene.focusOwnerProperty().addListener(
+                (prop, oldNode, newNode) -> {
+
+                    // Check whether the old node is a Vertex or Edge
+                    // This is used to create labels for Vertex or Edge
+                    if(oldNode instanceof GraphElement) {
+                        //System.out.println("Focus left from a GraphElement");
+                        last_focused = (GraphElement) oldNode;
+                    }
+                    else {
+                        //System.out.println("Focus NOT left from a GraphElement");
+                        last_focused = null;
+                    }
+
+                    // Check whether the new node is a Vertex or Edge
+                    // This is used to decide whether to show the info pane
+                    if(newNode instanceof GraphElement) {
+                        //System.out.println("New focus is a GraphElement");
+                        info_pane.setVisible(true);
+                        if(newNode instanceof Vertex)
+                            text_node_or_relation.setText("Node Information");
+                        else
+                            text_node_or_relation.setText("Relation Information");
+                        StringBuilder builder = new StringBuilder();
+                        text_label_info.setText(((GraphElement) newNode).getLabel());
+                        HashMap<String, Value> properties = ((GraphElement) newNode).getProp();
+                        for (String propertyKey : properties.keySet()) {
+                            builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
+                        }
+                        text_property_info.setText(builder.toString());
+                    }
+                    else {
+                        //System.out.println("New focus is NOT a GraphElement");
+                        info_pane.setVisible(false);
+                    }
+
+                });
+    }
 
     /**
      * Initializes the controller class. This method is automatically called
@@ -113,6 +173,9 @@ public class VisualNeoController {
     @FXML
     private void initialize() {
          s = Status.EMPTY;
+        choicebox_property_type.getItems().addAll("Integer", "Float", "String", "Boolean");
+        choicebox_property_type.getSelectionModel().select("Integer");
+        last_focused = null;
     }
 
     /**
@@ -335,10 +398,13 @@ public class VisualNeoController {
         DbMetadata metadata = app.queryHandler.getMeta();
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
         metadata.relationLabels().forEach(label -> choicebox_relation_label.getItems().add(label));
-        metadata.propertyKeys().forEach(property -> choicebox_property.getItems().add(property));
+        metadata.propertyKeys().forEach(property -> choicebox_property_name.getItems().add(property));
         btn_add_node_label.setDisable(false);
         btn_add_relation_label.setDisable(false);
         btn_add_property.setDisable(false);
+        choicebox_node_label.getSelectionModel().selectFirst();
+        choicebox_relation_label.getSelectionModel().selectFirst();
+        choicebox_property_name.getSelectionModel().selectFirst();
     }
 
     /**
@@ -367,8 +433,32 @@ public class VisualNeoController {
 
     @FXML
     void handleAddLabel() {
-
+        // TODO: Split this to two functions
+        // Add Node labels to the Vertex/Edge
+        if(last_focused != null){
+            try{
+                if(last_focused instanceof Vertex)
+                    last_focused.addLabel(choicebox_node_label.getValue());
+                else
+                    last_focused.addLabel(choicebox_relation_label.getValue());
+                System.out.println("Successfully add the label");
+            }catch (Exception e){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Label Addition Error");
+                alert.setHeaderText("Cannot add the label.");
+                alert.setContentText("Please select the correct element!");
+                alert.showAndWait();
+            }
+        }
+        else{
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Label Addition Error");
+            alert.setHeaderText("Cannot add the label.");
+            alert.setContentText("Please select the correct element!");
+            alert.showAndWait();
+        }
     }
+
 
     @FXML
     void handleAddProperty() {
