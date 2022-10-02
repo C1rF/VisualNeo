@@ -29,8 +29,8 @@ public class Relation extends Entity {
         this(edge.directed,
                 links.get(edge.startVertex),
                 links.get(edge.endVertex),
-                edge.label,
-                edge.properties);
+                edge.getLabel(),
+                edge.getProp());
     }
 
     Node other(Node node) {

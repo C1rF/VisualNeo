@@ -20,7 +20,7 @@ public class Node extends Entity {
     }
 
     Node(Vertex vertex) {
-        this(vertex.label, vertex.properties);
+        this(vertex.getLabel(), vertex.getProp());
     }
 
     boolean related() {
