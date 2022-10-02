@@ -11,6 +11,7 @@ import java.util.Iterator;
 public class QueryBuilder {
 
     private final static StringBuilder builder = new StringBuilder();
+
     private static int indentCount;
 
     public final static String metadataQuery = """
@@ -64,6 +65,7 @@ public class QueryBuilder {
 
         // WHERE clause
 //        ArrayList<Pair<Node>> dupPairs = graph.getDuplicateNodePairs();
+        //TODO Modify this naive approach
         ArrayList<Pair<Node>> dupPairs = new ArrayList<>();
         for (int i = 0; i < graph.nodes.size(); ++i) {
             for (int j = i + 1; j < graph.nodes.size(); ++j) {
