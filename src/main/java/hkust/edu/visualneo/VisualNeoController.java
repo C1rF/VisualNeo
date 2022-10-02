@@ -1,5 +1,6 @@
 package hkust.edu.visualneo;
 
+import hkust.edu.visualneo.utils.backend.DbMetadata;
 import hkust.edu.visualneo.utils.frontend.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -331,7 +332,7 @@ public class VisualNeoController {
     }
 
     public void updateUIWithMetaInfo(){
-        QueryHandler.DbMetadata metadata = app.queryHandler.getMeta();
+        DbMetadata metadata = app.queryHandler.getMeta();
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
         metadata.relationLabels().forEach(label -> choicebox_relation_label.getItems().add(label));
         metadata.propertyKeys().forEach(property -> choicebox_property.getItems().add(property));

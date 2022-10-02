@@ -1,5 +1,6 @@
 package hkust.edu.visualneo;
 
+import hkust.edu.visualneo.utils.backend.DbMetadata;
 import hkust.edu.visualneo.utils.backend.Graph;
 import hkust.edu.visualneo.utils.backend.QueryBuilder;
 import hkust.edu.visualneo.utils.frontend.Edge;
@@ -9,32 +10,8 @@ import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class QueryHandler {
-
-    record DbMetadata(
-            ArrayList<String> nodeLabels,
-            ArrayList<String> relationLabels,
-            ArrayList<String> propertyKeys) {
-
-        DbMetadata {
-            Objects.requireNonNull(nodeLabels);
-            Objects.requireNonNull(relationLabels);
-            Objects.requireNonNull(propertyKeys);
-        }
-
-        @Override
-        public String toString() {
-            return String.format("""
-                    Node Labels:     %1$s
-                    Relation Labels: %2$s
-                    Property Keys:   %3$s""",
-                    nodeLabels().toString(),
-                    relationLabels().toString(),
-                    propertyKeys().toString());
-        }
-    }
 
     private final VisualNeoApp app;
 
