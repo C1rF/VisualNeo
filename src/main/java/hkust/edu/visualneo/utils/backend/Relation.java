@@ -1,5 +1,13 @@
 package hkust.edu.visualneo.utils.backend;
 
+import hkust.edu.visualneo.utils.frontend.Edge;
+import hkust.edu.visualneo.utils.frontend.Vertex;
+import org.neo4j.driver.Value;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+
 public class Relation extends Entity {
 
     final boolean directed;
@@ -7,15 +15,22 @@ public class Relation extends Entity {
     final Node start;
     final Node end;
 
-    public Relation(boolean directed, Node start, Node end, String label) throws IllegalArgumentException {
-        super(label);
+    public Relation(boolean directed, Node start, Node end,
+            String label, HashMap<String, Value> properties) {
+        super(label, properties);
         this.directed = directed;
-        if (start == null || end == null)
-            throw new IllegalArgumentException("A relation cannot connect null node(s)!");
+        this.start = Objects.requireNonNull(start, "The start node is null!");
+        this.end = Objects.requireNonNull(end, "The end node is null!");
         start.attach(this);
         end.attach(this);
-        this.start = start;
-        this.end = end;
+    }
+
+    public Relation(Edge edge, HashMap<Vertex, Node> links) {
+        this(edge.directed,
+                links.get(edge.startVertex),
+                links.get(edge.endVertex),
+                edge.label,
+                edge.properties);
     }
 
     Node other(Node node) {

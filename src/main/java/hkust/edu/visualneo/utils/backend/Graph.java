@@ -22,11 +22,7 @@ public class Graph {
         vertices.forEach(vertex -> links.put(vertex, new Node(vertex)));
 
         ArrayList<Relation> relations = new ArrayList<>();
-        edges.forEach(edge -> relations.add(new Relation(
-                edge.directed,
-                links.get(edge.startVertex),
-                links.get(edge.endVertex),
-                null)));
+        edges.forEach(edge -> relations.add(new Relation(edge, links)));
 
         return new Graph(new ArrayList<>(links.values()), relations);
     }
@@ -116,7 +112,7 @@ public class Graph {
         dupSets.forEach(dupSet -> {
             for (int i = 0; i < dupSet.size(); ++i)
                 for (int j = i + 1; j < dupSet.size(); ++j)
-                    dupPairs.add(new Pair(dupSet.get(i), dupSet.get(j)));
+                    dupPairs.add(new Pair<>(dupSet.get(i), dupSet.get(j)));
         });
 
         return dupPairs;

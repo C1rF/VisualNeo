@@ -1,5 +1,8 @@
 package hkust.edu.visualneo.utils.backend;
 
+import org.neo4j.driver.Value;
+import org.neo4j.driver.internal.types.InternalTypeSystem;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -53,14 +56,20 @@ public class QueryBuilder {
                 translateNode(relation.end);
                 if (!relationIter.hasNext())
                     break;
-                builder.append(",");
+                builder.append(',');
             }
         }
         unindent();
         newLine();
 
         // WHERE clause
-        ArrayList<Pair<Node>> dupPairs = graph.getDuplicateNodePairs();
+//        ArrayList<Pair<Node>> dupPairs = graph.getDuplicateNodePairs();
+        ArrayList<Pair<Node>> dupPairs = new ArrayList<>();
+        for (int i = 0; i < graph.nodes.size(); ++i) {
+            for (int j = i + 1; j < graph.nodes.size(); ++j) {
+                dupPairs.add(new Pair<>(graph.nodes.get(i), graph.nodes.get(j)));
+            }
+        }
         if (!dupPairs.isEmpty()) {
             indent();
             builder.append("WHERE");
@@ -111,31 +120,49 @@ public class QueryBuilder {
         indentCount = 0;
     }
 
-    private static void translateNode(Node node) {
-        builder.append("(");
-        builder.append(node);
-        if (node.isLabeled()) {
-            builder.append(":");
-            builder.append(node.label);
+    private static void translateEntity(Entity entity) {
+        if (entity.hasLabel()) {
+            builder.append(':');
+            builder.append(entity.label);
         }
-        //TODO Add property translation
-        builder.append(")");
+
+        if (entity.hasProperty()) {
+            builder.append(" {");
+            Iterator<String> propertyIter = entity.properties.keySet().iterator();
+            while (true) {
+                String propertyKey = propertyIter.next();
+                builder.append(propertyKey);
+                builder.append(": ");
+                Value value = entity.properties.get(propertyKey);
+                if (value.hasType(InternalTypeSystem.TYPE_SYSTEM.STRING()))
+                    builder.append(String.format("'%s'", value));
+                else
+                    builder.append(value);
+                if (!propertyIter.hasNext())
+                    break;
+                builder.append(", ");
+            }
+            builder.append('}');
+        }
+    }
+
+    private static void translateNode(Node node) {
+        builder.append('(');
+        builder.append(node);
+        translateEntity(node);
+        builder.append(')');
     }
 
     private static void translateRelation(Relation relation) {
-        if (!relation.isLabeled() && !relation.hasProperty())
+        if (!relation.hasLabel() && !relation.hasProperty())
             builder.append("--");
         else {
             builder.append("-[");
 //            builder.append(relation);
-            if (relation.isLabeled()) {
-                builder.append(":");
-                builder.append(relation.label);
-            }
-            //TODO Add property translation
+            translateEntity(relation);
             builder.append("]-");
         }
         if (relation.directed)
-            builder.append(">");
+            builder.append('>');
     }
 }
