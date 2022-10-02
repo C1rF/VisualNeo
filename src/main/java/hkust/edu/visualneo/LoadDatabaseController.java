@@ -1,6 +1,7 @@
 package hkust.edu.visualneo;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -34,8 +35,19 @@ public class LoadDatabaseController {
         String uri = textfield_uri.getText();
         String user = textfield_user.getText();
         String password = textfield_password.getText();
-        controller.submitDBInfo(uri, user, password);
-        handleCancel();
+        try{
+            controller.submitDBInfo(uri, user, password);
+            // If the database is successfully connected, close the window
+            handleCancel();
+            // update the UI with the database meta info
+            controller.updateUIWithMetaInfo();
+        }catch (Exception e){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Database Connection Error");
+            alert.setHeaderText("Cannot connect the database. ");
+            alert.setContentText("The provided information is not correct!");
+            alert.showAndWait();
+        }
     }
 
     public void setVisualNeoController(VisualNeoController controller){

@@ -12,9 +12,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import java.lang.Math;
 
-public class Edge extends StackPane {
+public class Edge extends GraphElement {
 
-    private final int VERTEX_RADIUS = 20;
     public Vertex startVertex;
     public Vertex endVertex;
     String relationship;
@@ -22,11 +21,6 @@ public class Edge extends StackPane {
     public boolean directed;
 
     public Line edge;
-
-    // A boolean variable indicates whether it can be selected and moved now
-    public boolean canSelect = false;
-    // A boolean variable indicates whether it is the focus right now
-    public boolean isFocused = false;
 
     public Edge(Vertex startVertex, Vertex endVertex, boolean directed){
         super();
@@ -76,17 +70,6 @@ public class Edge extends StackPane {
         );
     }
 
-    private void mouseEntered(MouseEvent m) {
-        if(VisualNeoController.getStatus() == VisualNeoController.Status.SELECT){
-            getScene().setCursor(Cursor.HAND);
-        }
-        else if(VisualNeoController.getStatus() == VisualNeoController.Status.ERASE){
-            getScene().setCursor(Cursor.DISAPPEAR);
-        }
-    }
-    private void mouseExited(MouseEvent m) {
-        getScene().setCursor(Cursor.DEFAULT);
-    }
 
     /**
      *  Request focus when pressed
