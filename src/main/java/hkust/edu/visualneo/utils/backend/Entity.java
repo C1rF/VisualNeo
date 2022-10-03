@@ -2,8 +2,7 @@ package hkust.edu.visualneo.utils.backend;
 
 import org.neo4j.driver.Value;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 abstract class Entity implements Comparable<Entity> {
@@ -13,10 +12,10 @@ abstract class Entity implements Comparable<Entity> {
     private final int id = ++count;
     final String label;
 
-    final HashMap<String, Value> properties;
+    final Map<String, Value> properties;
 
     // Pass null for an unlabeled node/relationship
-    protected Entity(String label, HashMap<String, Value> properties) {
+    protected Entity(String label, Map<String, Value> properties) {
         this.label = label;
         this.properties = Objects.requireNonNull(properties, "The property list is null!");
     }

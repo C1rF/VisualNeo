@@ -17,12 +17,14 @@ public class Graph {
         validate();
     }
 
+    // Construct a graph from vertices and edges, generated nodes and relations are sorted
     public static Graph fromDrawing(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
-        HashMap<Vertex, Node> links = new HashMap<>();
+        Map<Vertex, Node> links = new LinkedHashMap<>();
         vertices.forEach(vertex -> links.put(vertex, new Node(vertex)));
 
         ArrayList<Relation> relations = new ArrayList<>();
         edges.forEach(edge -> relations.add(new Relation(edge, links)));
+        relations.sort(Comparator.comparing(o -> o.start));
 
         return new Graph(new ArrayList<>(links.values()), relations);
     }
@@ -78,7 +80,7 @@ public class Graph {
     }
 
     // Generate all duplicate/indistinguishable node pairs, used for inequality constraints
-    //TODO Enhance efficiency
+    // TODO: Enhance efficiency
     ArrayList<Pair<Node>> getDuplicateNodePairs() {
         HashSet<Pair<Node>> dupPairs = new HashSet<>();
         for (Node node : nodes) {

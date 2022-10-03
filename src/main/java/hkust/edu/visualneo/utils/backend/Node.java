@@ -1,11 +1,11 @@
 package hkust.edu.visualneo.utils.backend;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import hkust.edu.visualneo.utils.frontend.Vertex;
 import org.neo4j.driver.Value;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
 
 public class Node extends Entity {
 
@@ -15,7 +15,7 @@ public class Node extends Entity {
 
     final ArrayList<Relation> relations = new ArrayList<>();
 
-    Node(String label, HashMap<String, Value> properties) {
+    Node(String label, Map<String, Value> properties) {
         super(label, properties);
     }
 
