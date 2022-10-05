@@ -36,7 +36,7 @@ public class QueryBuilder {
             RETURN
               labels, relationshipTypes, propertyKeys""";
 
-    //TODO Modify this
+    // TODO: Modify this
     public static String translate(Graph graph) {
         clear();
 
@@ -65,11 +65,11 @@ public class QueryBuilder {
 
         // WHERE clause
 //        ArrayList<Pair<Node>> dupPairs = graph.getDuplicateNodePairs();
-        //TODO Modify this naive approach
+        // TODO: Modify this naive approach
         ArrayList<Pair<Node>> dupPairs = new ArrayList<>();
         for (int i = 0; i < graph.nodes.size(); ++i) {
             for (int j = i + 1; j < graph.nodes.size(); ++j) {
-                dupPairs.add(new Pair<>(graph.nodes.get(i), graph.nodes.get(j)));
+                dupPairs.add(Pair.ordered(graph.nodes.get(i), graph.nodes.get(j)));
             }
         }
         if (!dupPairs.isEmpty()) {
@@ -79,9 +79,9 @@ public class QueryBuilder {
             while (true) {
                 Pair<Node> pair = pairIter.next();
                 newLine();
-                builder.append(pair.head);
+                builder.append(pair.head());
                 builder.append(" <> ");
-                builder.append(pair.tail);
+                builder.append(pair.tail());
                 if (!pairIter.hasNext())
                     break;
                 builder.append(" AND");
@@ -93,7 +93,7 @@ public class QueryBuilder {
         // RETURN clause
         indent();
         builder.append("RETURN");
-        //TODO Refine return conditions
+        // TODO: Refine return conditions
         newLine();
         builder.append(graph.nodes.get(0));
         unindent();

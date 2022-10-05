@@ -17,12 +17,14 @@ public class Graph {
         validate();
     }
 
+    // Construct a graph from vertices and edges, generated nodes and relations are sorted
     public static Graph fromDrawing(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
-        HashMap<Vertex, Node> links = new HashMap<>();
+        Map<Vertex, Node> links = new LinkedHashMap<>();
         vertices.forEach(vertex -> links.put(vertex, new Node(vertex)));
 
         ArrayList<Relation> relations = new ArrayList<>();
         edges.forEach(edge -> relations.add(new Relation(edge, links)));
+        relations.sort(Comparator.comparing(o -> o.start));
 
         return new Graph(new ArrayList<>(links.values()), relations);
     }
@@ -43,13 +45,14 @@ public class Graph {
     }
 
     private boolean checkCompleteness() {
-        for (Node node : nodes) {
-            for (Relation relation : node.relations)
-                if (!relations.contains(relation))
-                    return false;
+        Set<Node> nodeSet = new HashSet<>(nodes);
+        Set<Relation> relationSet = new HashSet<>(relations);
+        for (Node node : nodeSet) {
+            if (!relationSet.containsAll(node.relations))
+                return false;
         }
-        for (Relation relation : relations) {
-            if (!nodes.contains(relation.start) || !nodes.contains(relation.end))
+        for (Relation relation : relationSet) {
+            if (!nodeSet.contains(relation.start) || !nodes.contains(relation.end))
                 return false;
         }
         return true;
@@ -78,7 +81,7 @@ public class Graph {
     }
 
     // Generate all duplicate/indistinguishable node pairs, used for inequality constraints
-    //TODO Enhance efficiency
+    // TODO: Enhance efficiency
     ArrayList<Pair<Node>> getDuplicateNodePairs() {
         HashSet<Pair<Node>> dupPairs = new HashSet<>();
         for (Node node : nodes) {
@@ -112,7 +115,7 @@ public class Graph {
         dupSets.forEach(dupSet -> {
             for (int i = 0; i < dupSet.size(); ++i)
                 for (int j = i + 1; j < dupSet.size(); ++j)
-                    dupPairs.add(new Pair<>(dupSet.get(i), dupSet.get(j)));
+                    dupPairs.add(Pair.ordered(dupSet.get(i), dupSet.get(j)));
         });
 
         return dupPairs;

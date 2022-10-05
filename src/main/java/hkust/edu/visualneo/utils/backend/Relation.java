@@ -4,8 +4,7 @@ import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.Vertex;
 import org.neo4j.driver.Value;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class Relation extends Entity {
@@ -16,16 +15,24 @@ public class Relation extends Entity {
     final Node end;
 
     public Relation(boolean directed, Node start, Node end,
-            String label, HashMap<String, Value> properties) {
+                    String label, Map<String, Value> properties) {
         super(label, properties);
         this.directed = directed;
-        this.start = Objects.requireNonNull(start, "The start node is null!");
-        this.end = Objects.requireNonNull(end, "The end node is null!");
+        Objects.requireNonNull(start, "Node is null!");
+        Objects.requireNonNull(end, "Node is null!");
+        if (!directed && start.compareTo(end) > 0) {
+            this.start = end;
+            this.end = start;
+        }
+        else {
+            this.start = start;
+            this.end = end;
+        }
         start.attach(this);
         end.attach(this);
     }
 
-    public Relation(Edge edge, HashMap<Vertex, Node> links) {
+    public Relation(Edge edge, Map<Vertex, Node> links) {
         this(edge.directed,
                 links.get(edge.startVertex),
                 links.get(edge.endVertex),
@@ -58,7 +65,7 @@ public class Relation extends Entity {
         return resembles(other);
     }
 
-    // Check whether two relations have the same label and properties
+    // Check whether two relations can match the same relation
     // This method assumes the other relation is non-null and the two relations are distinct
     @Override
     boolean resembles(Entity other) {
