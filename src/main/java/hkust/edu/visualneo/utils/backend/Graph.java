@@ -114,7 +114,7 @@ public class Graph {
         dupSets.forEach(dupSet -> {
             for (int i = 0; i < dupSet.size(); ++i)
                 for (int j = i + 1; j < dupSet.size(); ++j)
-                    dupPairs.add(new Pair<>(dupSet.get(i), dupSet.get(j)));
+                    dupPairs.add(Pair.ordered(dupSet.get(i), dupSet.get(j)));
         });
 
         return dupPairs;

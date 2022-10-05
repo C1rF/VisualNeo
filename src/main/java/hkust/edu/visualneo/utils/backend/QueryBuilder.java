@@ -69,7 +69,7 @@ public class QueryBuilder {
         ArrayList<Pair<Node>> dupPairs = new ArrayList<>();
         for (int i = 0; i < graph.nodes.size(); ++i) {
             for (int j = i + 1; j < graph.nodes.size(); ++j) {
-                dupPairs.add(new Pair<>(graph.nodes.get(i), graph.nodes.get(j)));
+                dupPairs.add(Pair.ordered(graph.nodes.get(i), graph.nodes.get(j)));
             }
         }
         if (!dupPairs.isEmpty()) {
@@ -79,9 +79,9 @@ public class QueryBuilder {
             while (true) {
                 Pair<Node> pair = pairIter.next();
                 newLine();
-                builder.append(pair.head);
+                builder.append(pair.head());
                 builder.append(" <> ");
-                builder.append(pair.tail);
+                builder.append(pair.tail());
                 if (!pairIter.hasNext())
                     break;
                 builder.append(" AND");

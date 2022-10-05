@@ -65,7 +65,7 @@ public class Relation extends Entity {
         return resembles(other);
     }
 
-    // Check whether two relations have the same label and properties
+    // Check whether two relations can match the same relation
     // This method assumes the other relation is non-null and the two relations are distinct
     @Override
     boolean resembles(Entity other) {

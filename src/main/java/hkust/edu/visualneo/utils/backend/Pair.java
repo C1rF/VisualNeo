@@ -1,23 +1,27 @@
 package hkust.edu.visualneo.utils.backend;
 
-public class Pair<E extends Comparable<? super E>> {
+import java.util.Objects;
 
-    final E head;
-    final E tail;
+public record Pair<E>(E head, E tail) {
 
-    Pair(E first, E second) throws IllegalArgumentException {
-        if (first == null || second == null)
-            throw new IllegalArgumentException("Null element(s)!");
+    public Pair {
+        Objects.requireNonNull(head, "Null element!");
+        Objects.requireNonNull(tail, "Null element!");
+        if (head.equals(tail))
+            throw new IllegalArgumentException("Elements in a pair should be distinct!");
+    }
+
+    public static <E extends Comparable<? super E>> Pair<E> ordered(E first, E second) {
+        Objects.requireNonNull(first, "Null element!");
+        Objects.requireNonNull(second, "Null element!");
         if (first.equals(second))
             throw new IllegalArgumentException("Elements in a pair should be distinct!");
 
         if (first.compareTo(second) < 0) {
-            head = first;
-            tail = second;
+            return new Pair<>(first, second);
         }
         else {
-            head = second;
-            tail = first;
+            return new Pair<>(second, first);
         }
     }
 
@@ -36,5 +40,10 @@ public class Pair<E extends Comparable<? super E>> {
         hash = 37 * hash + head.hashCode();
         hash = 37 * hash + tail.hashCode();
         return hash;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%1$s, %2$s)", head, tail);
     }
 }

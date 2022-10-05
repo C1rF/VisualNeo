@@ -32,7 +32,7 @@ public class Node extends Entity {
     }
 
     // Two distinct node are indistinguishable in the neighborhood of this node
-    // iff they and the relations between them and this node have the same label and properties
+    // iff they and the relations between them and this node can match the same node
     ArrayList<Pair<Node>> getDuplicateNeighborPairs() {
         HashSet<Node> dups = new HashSet<>();
         ArrayList<ArrayList<Node>> dupSets = new ArrayList<>();
@@ -60,13 +60,13 @@ public class Node extends Entity {
         dupSets.forEach(dupSet -> {
             for (int i = 0; i < dupSet.size(); ++i)
                 for (int j = i + 1; j < dupSet.size(); ++j)
-                    dupPairs.add(new Pair<>(dupSet.get(i), dupSet.get(j)));
+                    dupPairs.add(Pair.ordered(dupSet.get(i), dupSet.get(j)));
         });
 
         return dupPairs;
     }
 
-    // Check whether two distinct nodes have the same label and properties
+    // Check whether two distinct nodes can match the same node
     // This method assumes the other node is non-null
     @Override
     boolean resembles(Entity other) {

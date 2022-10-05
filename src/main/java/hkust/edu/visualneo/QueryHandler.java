@@ -28,7 +28,7 @@ public class QueryHandler {
         this.driver = driver;
     }
 
-    private void fetchMetadata() {
+    private void retrieveMetadata() {
         try (Session session = driver.session(SessionConfig.builder().withDefaultAccessMode(AccessMode.READ).build())) {
             meta = session.readTransaction(tx -> {
                 Record metaRecord = tx.run(QueryBuilder.metadataQuery).single();
@@ -47,7 +47,7 @@ public class QueryHandler {
 
     void loadDatabase(String uri, String user, String password) {
         initDriver(uri, user, password);
-        fetchMetadata();
+        retrieveMetadata();
 
         System.out.println(meta);
     }
