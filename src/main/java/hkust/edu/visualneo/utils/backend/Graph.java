@@ -45,13 +45,14 @@ public class Graph {
     }
 
     private boolean checkCompleteness() {
-        for (Node node : nodes) {
-            for (Relation relation : node.relations)
-                if (!relations.contains(relation))
-                    return false;
+        Set<Node> nodeSet = new HashSet<>(nodes);
+        Set<Relation> relationSet = new HashSet<>(relations);
+        for (Node node : nodeSet) {
+            if (!relationSet.containsAll(node.relations))
+                return false;
         }
-        for (Relation relation : relations) {
-            if (!nodes.contains(relation.start) || !nodes.contains(relation.end))
+        for (Relation relation : relationSet) {
+            if (!nodeSet.contains(relation.start) || !nodes.contains(relation.end))
                 return false;
         }
         return true;
