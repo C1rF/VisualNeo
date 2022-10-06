@@ -10,9 +10,7 @@ import hkust.edu.visualneo.utils.frontend.Vertex;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,9 +41,8 @@ public class QueryHandler {
     }
 
     private void initDriver(String uri, String user, String password) {
-        Driver driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
+        driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
         driver.verifyConnectivity();
-        this.driver = driver;
     }
 
     private void retrieveMetadata() {
@@ -58,19 +55,19 @@ public class QueryHandler {
                     tx.run(Consts.RELATIONSHIP_COUNT_QUERY)
                             .single().get(0).asInt());
 
-            Function<Record, String> mapper = record -> String.valueOf(record.get(0)).replace("\"", "");
+            Function<Record, String> mapper = record -> record.get(0).asString();
 
-            ArrayList<String> nodeLabels = new ArrayList<>(session.readTransaction(tx ->
+            Set<String> nodeLabels = session.readTransaction(tx ->
                     tx.run(Consts.LABELS_QUERY)
-                            .stream().map(mapper).sorted().toList()));
+                            .stream().map(mapper).collect(Collectors.toCollection(TreeSet::new)));
 
-            ArrayList<String> relationLabels = new ArrayList<>(session.readTransaction(tx ->
+            Set<String> relationLabels = session.readTransaction(tx ->
                     tx.run(Consts.RELATIONSHIP_TYPES_QUERY)
-                            .stream().map(mapper).sorted().toList()));
+                            .stream().map(mapper).collect(Collectors.toCollection(TreeSet::new)));
 
-            ArrayList<String> propertyKeys = new ArrayList<>(session.readTransaction(tx ->
+            Set<String> propertyKeys = session.readTransaction(tx ->
                     tx.run(Consts.PROPERTY_KEYS_QUERY)
-                            .stream().map(mapper).sorted().toList()));
+                            .stream().map(mapper).collect(Collectors.toCollection(TreeSet::new)));
 
             Map<String, Integer> nodeCountByLabel = nodeLabels.stream().collect(Collectors.toMap(
                     Function.identity(),

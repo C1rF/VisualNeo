@@ -9,6 +9,9 @@ import java.util.Objects;
 
 public class Relation extends Entity {
 
+    private static int relationCount;
+    private final int relationId = ++relationCount;
+
     final boolean directed;
 
     final Node start;
@@ -74,8 +77,23 @@ public class Relation extends Entity {
         return super.resembles(other);
     }
 
-    void detach() {
-        start.detach(this);
-        end.detach(this);
+    @Override
+    public String name() {
+        return 'r' + String.valueOf(relationId);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("""
+                %1$s
+                Start Node: %2$s
+                End Node: %3$s""",
+                super.toString(),
+                start.name(),
+                end.name());
+    }
+
+    static void recount() {
+        relationCount = 0;
     }
 }
