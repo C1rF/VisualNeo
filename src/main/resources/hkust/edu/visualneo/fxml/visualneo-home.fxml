@@ -22,7 +22,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400.0" minWidth="500.0" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hkust.edu.visualneo.VisualNeoController">
    <children>
-      <AnchorPane layoutX="276.0" layoutY="168.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="30.0">
+      <AnchorPane fx:id="middle_anchor_pane" layoutX="276.0" layoutY="168.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="30.0">
          <children>
             <ToolBar layoutX="188.0" layoutY="102.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <items>
@@ -68,44 +68,52 @@
               <tabs>
                 <Tab text="Labels">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="499.0" prefWidth="164.0">
                            <children>
                               <ScrollPane layoutX="-6.0" layoutY="49.0" prefHeight="498.5" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <content>
                                     <AnchorPane prefHeight="496.0" prefWidth="198.0">
                                        <children>
-                                          <Text layoutX="44.0" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Label:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="40.0">
-                                             <font>
-                                                <Font size="14.0" />
-                                             </font>
-                                          </Text>
-                                          <ChoiceBox fx:id="choicebox_node_label" layoutX="10.0" layoutY="95.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </ChoiceBox>
-                                          <Button fx:id="btn_add_node_label" disable="true" layoutX="99.0" layoutY="79.0" mnemonicParsing="false" onAction="#handleAddLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Node Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
-                                          <Text layoutX="10.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Node:" underline="true">
-                                             <font>
-                                                <Font size="18.0" />
-                                             </font>
-                                          </Text>
-                                          <Text layoutX="10.0" layoutY="196.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Label:" AnchorPane.topAnchor="195.0">
-                                             <font>
-                                                <Font size="14.0" />
-                                             </font>
-                                          </Text>
-                                          <Text layoutX="14.0" layoutY="168.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Relation:" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="160.59765625">
-                                             <font>
-                                                <Font size="18.0" />
-                                             </font>
-                                          </Text>
-                                          <ChoiceBox fx:id="choicebox_relation_label" layoutX="14.0" layoutY="222.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="215.0">
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </ChoiceBox>
-                                          <Button fx:id="btn_add_relation_label" disable="true" layoutX="55.0" layoutY="261.0" mnemonicParsing="false" onAction="#handleAddLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Relation Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="260.0" />
+                                          <AnchorPane fx:id="pane_node_label" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <children>
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Node:" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                                   <font>
+                                                      <Font size="18.0" />
+                                                   </font>
+                                                </Text>
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="40.0">
+                                                   <font>
+                                                      <Font size="14.0" />
+                                                   </font>
+                                                </Text>
+                                                <ChoiceBox fx:id="choicebox_node_label" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+                                                   <cursor>
+                                                      <Cursor fx:constant="HAND" />
+                                                   </cursor>
+                                                </ChoiceBox>
+                                                <Button fx:id="btn_add_node_label" disable="true" mnemonicParsing="false" onAction="#handleAddLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
+                                             </children>
+                                          </AnchorPane>
+                                          <AnchorPane fx:id="pane_relation_label" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <children>
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Relation:" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                                   <font>
+                                                      <Font size="18.0" />
+                                                   </font>
+                                                </Text>
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="40.0">
+                                                   <font>
+                                                      <Font size="14.0" />
+                                                   </font>
+                                                </Text>
+                                                <ChoiceBox fx:id="choicebox_relation_label" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+                                                   <cursor>
+                                                      <Cursor fx:constant="HAND" />
+                                                   </cursor>
+                                                </ChoiceBox>
+                                                <Button fx:id="btn_add_relation_label" disable="true" mnemonicParsing="false" onAction="#handleAddLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
+                                             </children>
+                                          </AnchorPane>
                                        </children>
                                     </AnchorPane>
                                  </content>
@@ -120,7 +128,7 @@
                            <children>
                               <ScrollPane layoutX="-20.0" layoutY="169.0" prefHeight="498.5" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <content>
-                                    <AnchorPane prefHeight="496.0" prefWidth="198.0">
+                                    <AnchorPane fx:id="pane_property" prefHeight="496.0" prefWidth="198.0" visible="false">
                                        <children>
                                           <Text layoutX="33.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Name:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
                                              <font>
