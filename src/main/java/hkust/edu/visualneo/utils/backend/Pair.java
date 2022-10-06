@@ -2,6 +2,9 @@ package hkust.edu.visualneo.utils.backend;
 
 import java.util.Objects;
 
+import static hkust.edu.visualneo.utils.backend.Consts.INITIAL_PRIME;
+import static hkust.edu.visualneo.utils.backend.Consts.MULTIPLIER_PRIME;
+
 public record Pair<E>(E head, E tail) {
 
     public Pair {
@@ -36,9 +39,9 @@ public record Pair<E>(E head, E tail) {
 
     @Override
     public int hashCode() {
-        int hash = 17;
-        hash = 37 * hash + head.hashCode();
-        hash = 37 * hash + tail.hashCode();
+        int hash = INITIAL_PRIME;
+        hash = MULTIPLIER_PRIME * hash + head.hashCode();
+        hash = MULTIPLIER_PRIME * hash + tail.hashCode();
         return hash;
     }
 

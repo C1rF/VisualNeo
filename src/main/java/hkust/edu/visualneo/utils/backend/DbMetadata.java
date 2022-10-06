@@ -1,9 +1,6 @@
 package hkust.edu.visualneo.utils.backend;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public record DbMetadata(
@@ -11,7 +8,7 @@ public record DbMetadata(
         int relationCount,
         Map<String, Integer> nodeCountByLabel,
         Map<String, Integer> relationCountByLabel,
-        ArrayList<String> propertyKeys) {
+        Set<String> propertyKeys) {
 
     public DbMetadata {
         Objects.requireNonNull(nodeCountByLabel);
@@ -19,12 +16,12 @@ public record DbMetadata(
         Objects.requireNonNull(propertyKeys);
     }
 
-    public ArrayList<String> nodeLabels() {
-        return new ArrayList<>(nodeCountByLabel.keySet());
+    public Set<String> nodeLabels() {
+        return nodeCountByLabel.keySet();
     }
 
-    public ArrayList<String> relationLabels() {
-        return new ArrayList<>(relationCountByLabel.keySet());
+    public Set<String> relationLabels() {
+        return relationCountByLabel.keySet();
     }
 
     public int nodeCountOf(String label) {

@@ -5,6 +5,9 @@ import org.neo4j.driver.Value;
 import java.util.Map;
 import java.util.Objects;
 
+import static hkust.edu.visualneo.utils.backend.Consts.INITIAL_PRIME;
+import static hkust.edu.visualneo.utils.backend.Consts.MULTIPLIER_PRIME;
+
 abstract class Entity implements Comparable<Entity> {
 
     private static int count;
@@ -46,12 +49,16 @@ abstract class Entity implements Comparable<Entity> {
         return true;
     }
 
+    public String name() {
+        return 'e' + String.valueOf(id);
+    }
+
     @Override
     public int hashCode() {
-        int hash = 17;
-        hash = 37 * hash + id;
-        hash = 37 * hash + (label == null ? 0 : label.hashCode());
-        hash = 37 * hash + properties.hashCode();
+        int hash = INITIAL_PRIME;
+        hash = MULTIPLIER_PRIME * hash + id;
+        hash = MULTIPLIER_PRIME * hash + (label == null ? 0 : label.hashCode());
+        hash = MULTIPLIER_PRIME * hash + properties.hashCode();
         return hash;
     }
 
@@ -64,6 +71,18 @@ abstract class Entity implements Comparable<Entity> {
         return id == other.id;
     }
 
+    @Override
+    public String toString() {
+        return String.format("""
+                %1$s:
+                Label: %2$s
+                Properties: %3$s""",
+                name(),
+                label,
+                properties);
+    }
+
+    // Doesn't check for null
     @Override
     public int compareTo(Entity other) {
         return id - other.id;

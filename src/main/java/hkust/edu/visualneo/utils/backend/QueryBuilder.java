@@ -3,9 +3,10 @@ package hkust.edu.visualneo.utils.backend;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.*;
+
+import static hkust.edu.visualneo.utils.backend.Consts.NEW_LINE;
+import static hkust.edu.visualneo.utils.backend.Consts.SPACE;
 
 // Class representing a Cypher query statement
 public class QueryBuilder {
@@ -13,28 +14,6 @@ public class QueryBuilder {
     private final static StringBuilder builder = new StringBuilder();
 
     private static int indentCount;
-
-    public final static String metadataQuery = """
-            CALL
-              db.labels() YIELD label
-            WITH
-              label ORDER BY label
-            WITH
-              collect(label) AS labels
-            CALL
-              db.relationshipTypes() YIELD relationshipType
-            WITH
-              labels, relationshipType ORDER BY relationshipType
-            WITH
-              labels, collect(relationshipType) AS relationshipTypes
-            CALL
-              db.propertyKeys() YIELD propertyKey
-            WITH
-              labels, relationshipTypes, propertyKey ORDER BY propertyKey
-            WITH
-              labels, relationshipTypes, collect(propertyKey) AS propertyKeys
-            RETURN
-              labels, relationshipTypes, propertyKeys""";
 
     // TODO: Modify this
     public static String translate(Graph graph) {
@@ -46,7 +25,7 @@ public class QueryBuilder {
         Iterator<Relation> relationIter = graph.relations.iterator();
         if (!relationIter.hasNext()) {
             newLine();
-            translateNode(graph.nodes.get(0));
+            translateNode(graph.nodes.iterator().next());
         }
         else {
             while (true) {
@@ -66,10 +45,11 @@ public class QueryBuilder {
         // WHERE clause
 //        ArrayList<Pair<Node>> dupPairs = graph.getDuplicateNodePairs();
         // TODO: Modify this naive approach
-        ArrayList<Pair<Node>> dupPairs = new ArrayList<>();
-        for (int i = 0; i < graph.nodes.size(); ++i) {
-            for (int j = i + 1; j < graph.nodes.size(); ++j) {
-                dupPairs.add(Pair.ordered(graph.nodes.get(i), graph.nodes.get(j)));
+        List<Pair<Node>> dupPairs = new ArrayList<>();
+        ArrayList<Node> nodes = new ArrayList<>(graph.nodes);
+        for (int i = 0; i < nodes.size(); ++i) {
+            for (int j = i + 1; j < nodes.size(); ++j) {
+                dupPairs.add(Pair.ordered(nodes.get(i), nodes.get(j)));
             }
         }
         if (!dupPairs.isEmpty()) {
@@ -95,7 +75,7 @@ public class QueryBuilder {
         builder.append("RETURN");
         // TODO: Refine return conditions
         newLine();
-        builder.append(graph.nodes.get(0));
+        builder.append(nodes.get(0));
         unindent();
 
         return builder.toString();
@@ -111,9 +91,9 @@ public class QueryBuilder {
     }
 
     private static void newLine() {
-        builder.append(System.lineSeparator());
+        builder.append(NEW_LINE);
         char[] tabs = new char[2 * indentCount];
-        Arrays.fill(tabs, ' ');
+        Arrays.fill(tabs, SPACE);
         builder.append(tabs);
     }
 
@@ -150,7 +130,7 @@ public class QueryBuilder {
 
     private static void translateNode(Node node) {
         builder.append('(');
-        builder.append(node);
+        builder.append(node.name());
         translateEntity(node);
         builder.append(')');
     }
@@ -160,7 +140,7 @@ public class QueryBuilder {
             builder.append("--");
         else {
             builder.append("-[");
-//            builder.append(relation);
+//            builder.append(relation.name());
             translateEntity(relation);
             builder.append("]-");
         }
