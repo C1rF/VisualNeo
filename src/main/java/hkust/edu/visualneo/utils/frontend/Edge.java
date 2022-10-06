@@ -10,37 +10,38 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
+import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
 import java.lang.Math;
+import java.util.Arrays;
 
 public class Edge extends GraphElement {
 
     public Vertex startVertex;
     public Vertex endVertex;
-    String relationship;
-
     public boolean directed;
-
     public Line edge;
 
     public Edge(Vertex startVertex, Vertex endVertex, boolean directed){
+
         super();
         this.startVertex = startVertex;
         this.endVertex = endVertex;
-        label_displayed = new Text("");
+        this.directed = directed;
         // Set the position (of the StackPane)
         setPos();
+
         // Set the line
         edge = new Line();
-        setLine();
         edge.setStroke(Color.BLACK);
-        edge.setStrokeWidth(4);
-        // Display the line on the StackPane
-        getChildren().addAll(edge, label_displayed);
+        edge.setStrokeWidth(5);
+        edge.setStrokeType(StrokeType.CENTERED);
+        setLine();
 
-        // Set focus effect
-        setFocusEffect();
+        // Display the line and label on the StackPane
+        getChildren().addAll(edge, label_displayed);
 
         // Give them event handler
         edge.addEventHandler( MouseEvent.MOUSE_PRESSED, e->{if(canSelect) { pressed(e);}  } );
@@ -48,37 +49,28 @@ public class Edge extends GraphElement {
         edge.addEventHandler( MouseEvent.MOUSE_EXITED, e->{if(canSelect) { mouseExited(e);}  } );
 
         // For Testing
-        // setBackground(new Background(new BackgroundFill(Color.YELLOWGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         System.out.println("An Edge from (" + startVertex.x + " , " + startVertex.y + ") to " +
                 "(" + endVertex.x + " , " + endVertex.y + ")" + " is created!");
     }
 
-    /**
-     *  Request focus when pressed and status is ERASE
-     */
-    public void setFocusEffect() {
-        setFocusTraversable(true);
-        focusedProperty().addListener(
-                (obs, oldVal, newVal) ->
-                {
-                    if(newVal) {
-                        edge.setStrokeWidth(5);
-                        isFocused = true;
-                    }
-                    if(oldVal) {
-                        edge.setStrokeWidth(4);
-                        isFocused = false;
-                    }
-                }
-        );
+    @Override
+    public void becomeFocused(){
+        edge.setStrokeWidth(6);
+        edge.setStroke(new Color(0,0,0,0.7));
     }
 
+    @Override
+    public void removeFocused(){
+        edge.setStrokeWidth(5);
+        edge.setStroke(new Color(0,0,0,0.4));
+    }
 
     /**
      *  Request focus when pressed
      */
-    private void pressed(MouseEvent m) {
-        if(!isFocused) requestFocus();
+    @Override
+    protected void pressed(MouseEvent m) {
+        requestFocus();
         if(VisualNeoController.getStatus() == VisualNeoController.Status.SELECT){
             m.consume();
         }
@@ -133,6 +125,14 @@ public class Edge extends GraphElement {
     }
     private Vertex getTheOtherSide(Vertex oneSide){
         return ((oneSide == startVertex)?endVertex: startVertex);
+    }
+
+    @Override
+    public String toText(){
+        String[] temp = new String[] {String.valueOf(startVertex.getId()),
+                                      String.valueOf(endVertex.getId()),
+                                      label_displayed.getText()};
+        return (String) StringUtil.join(" ", Arrays.asList(temp));
     }
 
 }
