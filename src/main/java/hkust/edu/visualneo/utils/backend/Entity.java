@@ -20,18 +20,19 @@ abstract class Entity implements Comparable<Entity> {
     // Pass null for an unlabeled node/relationship
     protected Entity(String label, Map<String, Value> properties) {
         this.label = label;
-        this.properties = Objects.requireNonNull(properties, "The property list is null!");
+        this.properties = Objects.requireNonNull(properties, "Property list is null!");
     }
+    // TODO: Add constructor with assigned ID
 
-    boolean hasLabel() {
+    public boolean hasLabel() {
         return label != null;
     }
 
-    boolean hasProperty() {
+    public boolean hasProperty() {
         return !properties.isEmpty();
     }
 
-    static void recount() {
+    public static void recount() {
         count = 0;
     }
 

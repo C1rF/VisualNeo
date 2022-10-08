@@ -14,19 +14,19 @@ public class Node extends Entity {
 
     final ArrayList<Relation> relations = new ArrayList<>();
 
-    Node(String label, Map<String, Value> properties) {
+    public Node(String label, Map<String, Value> properties) {
         super(label, properties);
     }
 
-    Node(Vertex vertex) {
+    public Node(Vertex vertex) {
         this(vertex.getLabel(), vertex.getProp());
     }
 
-    boolean related() {
+    public boolean related() {
         return !relations.isEmpty();
     }
 
-    int relationCount() {
+    public int relationCount() {
         return relations.size();
     }
 
@@ -94,7 +94,7 @@ public class Node extends Entity {
         relations.add(relation);
     }
 
-    static void recount() {
+    public static void recount() {
         nodeCount = 0;
     }
 }

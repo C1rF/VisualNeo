@@ -37,6 +37,31 @@ public class Consts {
     public static final String PROPERTY_KEYS_QUERY = """
             CALL
               db.propertyKeys()""";
+    public static final String SCHEMA_QUERY = """
+            CALL
+              db.schema.visualization""";
+    public static final String NODE_TYPE_PROPERTIES_QUERY = """
+            CALL
+              db.schema.nodeTypeProperties()
+            YIELD
+              nodeType, propertyName, propertyTypes, mandatory
+            WHERE
+              propertyName IS NOT NULL
+            WITH
+              nodeType, collect([propertyName, propertyTypes[0]]) AS properties
+            RETURN
+              nodeType, properties""";
+    public static final String REL_TYPE_PROPERTIES_QUERY = """
+            CALL
+              db.schema.relTypeProperties()
+            YIELD
+              relType, propertyName, propertyTypes, mandatory
+            WHERE
+              propertyName IS NOT NULL
+            WITH
+              relType, collect([propertyName, propertyTypes[0]]) AS properties
+            RETURN
+              relType, properties""";
 
     public static String nodeCountByLabelQuery(String label) {
         return String.format(NODE_COUNT_BY_LABEL_QUERY, label);
