@@ -10,8 +10,6 @@ public record Pair<E>(E head, E tail) {
     public Pair {
         Objects.requireNonNull(head, "Null element!");
         Objects.requireNonNull(tail, "Null element!");
-        if (head.equals(tail))
-            throw new IllegalArgumentException("Elements in a pair should be distinct!");
     }
 
     public static <E extends Comparable<? super E>> Pair<E> ordered(E first, E second) {

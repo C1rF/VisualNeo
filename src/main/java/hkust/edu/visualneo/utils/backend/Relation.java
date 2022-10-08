@@ -43,7 +43,7 @@ public class Relation extends Entity {
                 edge.getProp());
     }
 
-    Node other(Node node) {
+    public Node other(Node node) {
         if (node == start)
             return end;
         if (node == end)
@@ -93,7 +93,7 @@ public class Relation extends Entity {
                 end.name());
     }
 
-    static void recount() {
+    public static void recount() {
         relationCount = 0;
     }
 }
