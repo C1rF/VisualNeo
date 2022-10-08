@@ -35,10 +35,10 @@ public record DbMetadata(
     }
 
     public int nodeCountOf(String nodeLabel) {
-        return nodeCountsByLabel.get(nodeLabel);
+        return nodeCountsByLabel.getOrDefault(nodeLabel, 0);
     }
     public int relationCountOf(String relationLabel) {
-        return relationCountsByLabel.get(relationLabel);
+        return relationCountsByLabel.getOrDefault(relationLabel, 0);
     }
 
     public Set<Pair<String>> nodePropertiesOf(String nodeLabel) {
