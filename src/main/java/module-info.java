@@ -7,6 +7,8 @@ module hkust.edu.visualneo {
     requires org.kordamp.bootstrapfx.core;
     requires org.neo4j.driver;
 
+    requires protonpack;
+
     opens hkust.edu.visualneo to javafx.fxml;
     exports hkust.edu.visualneo;
 }

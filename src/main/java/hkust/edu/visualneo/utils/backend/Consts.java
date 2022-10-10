@@ -1,5 +1,7 @@
 package hkust.edu.visualneo.utils.backend;
 
+import java.util.Arrays;
+
 public class Consts {
 
     public static final int INITIAL_PRIME = 17;
@@ -7,6 +9,12 @@ public class Consts {
 
     public static final char SPACE = ' ';
     public static final String NEW_LINE = System.lineSeparator();
+
+    public static char[] separator(int length) {
+        char[] sep = new char[length];
+        Arrays.fill(sep, '-');
+        return sep;
+    }
 
     public static final String NODE_COUNT_QUERY = """
             MATCH

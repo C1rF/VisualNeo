@@ -5,24 +5,21 @@ import org.neo4j.driver.Value;
 import java.util.Map;
 import java.util.Objects;
 
-import static hkust.edu.visualneo.utils.backend.Consts.INITIAL_PRIME;
-import static hkust.edu.visualneo.utils.backend.Consts.MULTIPLIER_PRIME;
+import static hkust.edu.visualneo.utils.backend.Consts.*;
 
 abstract class Entity implements Comparable<Entity> {
 
-    private static int count;
-
-    private final int id = ++count;
+    protected final long id;
     final String label;
 
     final Map<String, Value> properties;
 
     // Pass null for an unlabeled node/relationship
-    protected Entity(String label, Map<String, Value> properties) {
+    protected Entity(long id, String label, Map<String, Value> properties) {
+        this.id = id;
         this.label = label;
         this.properties = Objects.requireNonNull(properties, "Property list is null!");
     }
-    // TODO: Add constructor with assigned ID
 
     public boolean hasLabel() {
         return label != null;
@@ -30,10 +27,6 @@ abstract class Entity implements Comparable<Entity> {
 
     public boolean hasProperty() {
         return !properties.isEmpty();
-    }
-
-    public static void recount() {
-        count = 0;
     }
 
     // Check whether two entities can match the same entity,
@@ -50,42 +43,49 @@ abstract class Entity implements Comparable<Entity> {
         return true;
     }
 
-    public String name() {
-        return 'e' + String.valueOf(id);
+    public String elaborate() {
+        StringBuilder propertiesStr = new StringBuilder();
+        properties.forEach((key, value) ->
+                propertiesStr.append("| |-").append(key).append(':').append(value)
+                        .append(NEW_LINE));
+
+        return String.format("""
+                %1$s
+                |-Label: %2$s
+                |-Properties: %3$s""",
+                this,
+                label == null ? "None" : label,
+                properties.isEmpty() ? "None" : propertiesStr);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(id);
     }
 
     @Override
     public int hashCode() {
         int hash = INITIAL_PRIME;
-        hash = MULTIPLIER_PRIME * hash + id;
+        hash = MULTIPLIER_PRIME * hash + (int) id;
         hash = MULTIPLIER_PRIME * hash + (label == null ? 0 : label.hashCode());
         hash = MULTIPLIER_PRIME * hash + properties.hashCode();
         return hash;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(Object other) {
+        if (this == other)
             return true;
-        if (!(obj instanceof Entity other))
+        if (other == null)
             return false;
-        return id == other.id;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("""
-                %1$s:
-                Label: %2$s
-                Properties: %3$s""",
-                name(),
-                label,
-                properties);
+        if (!getClass().equals(other.getClass()))
+            return false;
+        return id == ((Entity) other).id;
     }
 
     // Doesn't check for null
     @Override
     public int compareTo(Entity other) {
-        return id - other.id;
+        return (int) (id - other.id);
     }
 }

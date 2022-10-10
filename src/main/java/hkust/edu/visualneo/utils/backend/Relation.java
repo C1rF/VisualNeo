@@ -9,17 +9,14 @@ import java.util.Objects;
 
 public class Relation extends Entity {
 
-    private static int relationCount;
-    private final int relationId = ++relationCount;
-
     final boolean directed;
 
     final Node start;
     final Node end;
 
-    public Relation(boolean directed, Node start, Node end,
+    public Relation(long id, boolean directed, Node start, Node end,
                     String label, Map<String, Value> properties) {
-        super(label, properties);
+        super(id, label, properties);
         this.directed = directed;
         Objects.requireNonNull(start, "Node is null!");
         Objects.requireNonNull(end, "Node is null!");
@@ -35,8 +32,9 @@ public class Relation extends Entity {
         end.attach(this);
     }
 
-    public Relation(Edge edge, Map<Vertex, Node> links) {
-        this(edge.directed,
+    public Relation(long id, Edge edge, Map<Vertex, Node> links) {
+        this(id,
+                edge.directed,
                 links.get(edge.startVertex),
                 links.get(edge.endVertex),
                 edge.getLabel(),
@@ -78,22 +76,18 @@ public class Relation extends Entity {
     }
 
     @Override
-    public String name() {
-        return 'r' + String.valueOf(relationId);
+    public String toString() {
+        return 'r' + super.toString();
     }
 
     @Override
-    public String toString() {
+    public String elaborate() {
         return String.format("""
                 %1$s
-                Start Node: %2$s
-                End Node: %3$s""",
-                super.toString(),
-                start.name(),
-                end.name());
-    }
-
-    public static void recount() {
-        relationCount = 0;
+                |-Start Node: %2$s
+                |-End Node: %3$s""",
+                super.elaborate(),
+                start.toString(),
+                end.toString());
     }
 }

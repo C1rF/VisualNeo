@@ -107,10 +107,13 @@ public record DbMetadata(
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
+        
+        char[] sep = Consts.separator(30);
 
-        builder.append("------------------------------")
+        builder.append(sep)
                 .append(NEW_LINE);
-        builder.append("Node Labels:")
+
+        builder.append("Node Labels")
                 .append(NEW_LINE);
         nodeLabels().forEach(nodeLabel -> {
             builder.append("|-").append(nodeLabel)
@@ -129,9 +132,10 @@ public record DbMetadata(
             }
         });
 
-        builder.append("------------------------------")
+        builder.append(sep)
                 .append(NEW_LINE);
-        builder.append("Relation Labels:")
+
+        builder.append("Relation Labels")
                 .append(NEW_LINE);
         relationLabels().forEach(relationLabel -> {
             builder.append("|-").append(relationLabel)
@@ -150,7 +154,8 @@ public record DbMetadata(
             }
         });
 
-        builder.append("------------------------------");
+        builder.append(sep)
+                .append(NEW_LINE);
 
         return builder.toString();
     }

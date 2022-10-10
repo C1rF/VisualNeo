@@ -33,8 +33,6 @@ public class QueryHandler {
         Graph queryPattern = Graph.fromDrawing(vertices, edges);
         String query = QueryBuilder.translate(queryPattern);
         System.out.println(query);
-
-        Graph.recount();
     }
 
     private void initDriver(String uri, String user, String password) {
@@ -124,12 +122,14 @@ public class QueryHandler {
                         .collect(Collectors.toMap(
                                 org.neo4j.driver.types.Node::id,
                                 node -> new Node(
+                                        node.id(),
                                         node.labels().iterator().next(),
                                         Collections.emptyMap())));
 
                 Set<Relation> schemaRelations = rec.get("relationships").asList(Value::asRelationship)
                         .stream()
                         .map(relationship -> new Relation(
+                                relationship.id(),
                                 true,
                                 schemaNodes.get(relationship.startNodeId()),
                                 schemaNodes.get(relationship.endNodeId()),

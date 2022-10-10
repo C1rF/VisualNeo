@@ -78,6 +78,8 @@ public class QueryBuilder {
         builder.append(nodes.get(0));
         unindent();
 
+        System.out.println(graph.elaborate());
+
         return builder.toString();
     }
 
@@ -130,7 +132,7 @@ public class QueryBuilder {
 
     private static void translateNode(Node node) {
         builder.append('(');
-        builder.append(node.name());
+        builder.append(node);
         translateEntity(node);
         builder.append(')');
     }

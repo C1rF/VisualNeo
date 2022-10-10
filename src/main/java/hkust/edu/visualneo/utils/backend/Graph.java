@@ -1,10 +1,14 @@
 package hkust.edu.visualneo.utils.backend;
 
-import hkust.edu.visualneo.utils.frontend.*;
+import com.codepoetics.protonpack.Indexed;
+import com.codepoetics.protonpack.StreamUtils;
+import hkust.edu.visualneo.utils.frontend.Edge;
+import hkust.edu.visualneo.utils.frontend.Vertex;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static hkust.edu.visualneo.utils.backend.Consts.NEW_LINE;
 
 public class Graph {
 
@@ -21,15 +25,15 @@ public class Graph {
 
     // Construct a graph from vertices and edges, generated nodes and relations are sorted
     public static Graph fromDrawing(List<Vertex> vertices, List<Edge> edges) {
-        Map<Vertex, Node> links = vertices.stream().collect(Collectors.toMap(
-                Function.identity(),
-                Node::new,
+        Map<Vertex, Node> links = StreamUtils.zipWithIndex(vertices.stream()).collect(Collectors.toMap(
+                Indexed<Vertex>::getValue,
+                vertexIndexed -> new Node((int) vertexIndexed.getIndex(), vertexIndexed.getValue()),
                 (e1, e2) -> e2,
                 LinkedHashMap::new));
 
-        Set<Relation> relations = edges
-                .stream()
-                .map(edge -> new Relation(edge, links))
+        // TODO: Sort
+        Set<Relation> relations = StreamUtils.zipWithIndex(edges.stream())
+                .map(edgeIndexed -> new Relation(edgeIndexed.getIndex(), edgeIndexed.getValue(), links))
                 .sorted(Comparator.comparing((Relation r) -> r.start).thenComparing(r -> r.end))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -128,9 +132,32 @@ public class Graph {
 //        return dupPairs;
 //    }
 
-    public static void recount() {
-        Entity.recount();
-        Node.recount();
-        Relation.recount();
+    public String elaborate() {
+        StringBuilder builder = new StringBuilder();
+
+        char[] sep = Consts.separator(40);
+
+        builder.append(sep)
+                .append(NEW_LINE);
+
+        builder.append("Nodes")
+                .append(NEW_LINE);
+        nodes.forEach(node ->
+                builder.append("|-").append(node.elaborate().replaceAll("(\r\n?|\n)", "$1" + "| "))
+                        .append(NEW_LINE));
+
+        builder.append(sep)
+                .append(NEW_LINE);
+
+        builder.append("Relations")
+                .append(NEW_LINE);
+        relations.forEach(relation ->
+                builder.append("|-").append(relation.elaborate().replaceAll("(\r\n?|\n)", "$1" + "| "))
+                        .append(NEW_LINE));
+
+        builder.append(sep)
+                .append(NEW_LINE);
+
+        return builder.toString();
     }
 }

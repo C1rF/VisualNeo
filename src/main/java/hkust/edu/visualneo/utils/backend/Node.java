@@ -4,22 +4,18 @@ import hkust.edu.visualneo.utils.frontend.Vertex;
 import org.neo4j.driver.Value;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
 
 public class Node extends Entity {
 
-    private static int nodeCount;
-    private final int nodeId = ++nodeCount;
-
     final ArrayList<Relation> relations = new ArrayList<>();
 
-    public Node(String label, Map<String, Value> properties) {
-        super(label, properties);
+    public Node(long id, String label, Map<String, Value> properties) {
+        super(id, label, properties);
     }
 
-    public Node(Vertex vertex) {
-        this(vertex.getLabel(), vertex.getProp());
+    public Node(long id, Vertex vertex) {
+        this(id, vertex.getLabel(), vertex.getProp());
     }
 
     public boolean related() {
@@ -77,24 +73,20 @@ public class Node extends Entity {
     }
 
     @Override
-    public String name() {
-        return 'n' + String.valueOf(nodeId);
+    public String toString() {
+        return 'n' + super.toString();
     }
 
     @Override
-    public String toString() {
+    public String elaborate() {
         return String.format("""
                 %1$s
-                Relations: %2$s""",
-                super.toString(),
-                relations.stream().map(Relation::name).toList());
+                |-Relations: %2$s""",
+                super.elaborate(),
+                relations.isEmpty() ? "None" : relations.stream().map(Relation::toString).toList());
     }
 
     void attach(Relation relation) {
         relations.add(relation);
-    }
-
-    public static void recount() {
-        nodeCount = 0;
     }
 }
