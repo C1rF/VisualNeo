@@ -2,11 +2,14 @@ package hkust.edu.visualneo;
 
 import hkust.edu.visualneo.utils.backend.DbMetadata;
 import hkust.edu.visualneo.utils.frontend.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -16,10 +19,7 @@ import javafx.stage.Stage;
 import org.neo4j.driver.Value;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class VisualNeoController {
     /**
@@ -96,6 +96,26 @@ public class VisualNeoController {
      */
     @FXML
     private Pane Drawboard;
+
+    /**
+     *   Database Info Pane
+     */
+    @FXML
+    private AnchorPane pane_no_database;
+    @FXML
+    private AnchorPane pane_with_database;
+    @FXML
+    private TableView tableview_node;
+    @FXML
+    private TableColumn<Map, String> node_name_col;
+    @FXML
+    private TableColumn<Map, String> node_count_col;
+    @FXML
+    private TableView tableview_relation;
+    @FXML
+    private TableColumn<Map, String> relation_name_col;
+    @FXML
+    private TableColumn<Map, String> relation_count_col;
 
 
     // The system application
@@ -413,6 +433,16 @@ public class VisualNeoController {
 
     public void updateUIWithMetaInfo(){
         DbMetadata metadata = app.queryHandler.getMeta();
+        // TODO: Update the DatabaseInfo Pane first
+        // First switch the display pane
+        pane_with_database.setVisible(true);
+        pane_no_database.setVisible(false);
+        // Update node table
+        UpdateNodeTable(metadata);
+        UpdateRelationTable(metadata);
+        // TODO: Show the schema
+
+        // Then update the choiceboxs with correct choices
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
         metadata.relationLabels().forEach(label -> choicebox_relation_label.getItems().add(label));
         metadata.propertyKeys().forEach(property -> choicebox_property_name.getItems().add(property));
@@ -519,5 +549,42 @@ public class VisualNeoController {
     }
     public static Status getStatus(){
         return s;
+    }
+
+    private void UpdateNodeTable(DbMetadata metadata){
+        node_name_col.setCellValueFactory(new MapValueFactory<>("Label"));
+        node_count_col.setCellValueFactory(new MapValueFactory<>("Count"));
+        ObservableList<Map<String, Object>> items =
+                FXCollections.<Map<String, Object>>observableArrayList();
+        Set<String> nodeLabels = metadata.nodeLabels();
+        for (String label : nodeLabels) {
+            Map<String, Object> temp_item = new HashMap<>();
+            temp_item.put("Label", label);
+            temp_item.put("Count" , metadata.nodeCountOf(label) );
+            items.add(temp_item);
+        }
+        Map<String, Object> final_item = new HashMap<>();
+        final_item.put("Label", "#SUM");
+        final_item.put("Count" , metadata.nodeCount() );
+        items.add(final_item);
+        tableview_node.getItems().addAll(items);
+    }
+    private void UpdateRelationTable(DbMetadata metadata){
+        relation_name_col.setCellValueFactory(new MapValueFactory<>("Label"));
+        relation_count_col.setCellValueFactory(new MapValueFactory<>("Count"));
+        ObservableList<Map<String, Object>> items =
+                FXCollections.<Map<String, Object>>observableArrayList();
+        Set<String> relationLabels = metadata.relationLabels();
+        for (String label : relationLabels) {
+            Map<String, Object> temp_item = new HashMap<>();
+            temp_item.put("Label", label);
+            temp_item.put("Count" , metadata.relationCountOf(label) );
+            items.add(temp_item);
+        }
+        Map<String, Object> final_item = new HashMap<>();
+        final_item.put("Label", "#SUM");
+        final_item.put("Count" , metadata.relationCount() );
+        items.add(final_item);
+        tableview_relation.getItems().addAll(items);
     }
 }
