@@ -7,6 +7,7 @@ import hkust.edu.visualneo.utils.frontend.Vertex;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Graph implements Expandable {
 
@@ -33,15 +34,35 @@ public class Graph implements Expandable {
                         (e1, e2) -> e2,
                         LinkedHashMap::new));
 
-        // TODO: Sort
+        Stream<Edge> edgesSorted = edges
+                .stream()
+                .sorted((e1, e2) -> {
+                    Node s1 = links.get(e1.startVertex);
+                    Node t1 = links.get(e1.endVertex);
+                    Node s2 = links.get(e2.startVertex);
+                    Node t2 = links.get(e2.endVertex);
+
+                    if (!e1.directed && s1.compareTo(t1) > 0) {
+                        Node temp = s1;
+                        s1 = t1;
+                        t1 = temp;
+                    }
+
+                    if (!e2.directed && s2.compareTo(t2) > 0) {
+                        Node temp = s2;
+                        s2 = t2;
+                        t2 = temp;
+                    }
+
+                    return s1.compareTo(s2) == 0 ? t1.compareTo(t2) : s1.compareTo(s2);
+                });
+
         Set<Relation> relations = StreamUtils
-                .zipWithIndex(edges.stream())
+                .zipWithIndex(edgesSorted)
                 .map(edgeIndexed -> new Relation(
                         edgeIndexed.getIndex(),
                         edgeIndexed.getValue(),
                         links))
-                .sorted(Comparator.comparing((Relation r) -> r.start)
-                                  .thenComparing(r -> r.end))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         return new Graph(new LinkedHashSet<>(links.values()), relations);
