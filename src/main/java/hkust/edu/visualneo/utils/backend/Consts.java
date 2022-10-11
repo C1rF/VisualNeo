@@ -9,13 +9,6 @@ public class Consts {
 
     public static final char SPACE = ' ';
     public static final String NEW_LINE = System.lineSeparator();
-
-    public static char[] separator(int length) {
-        char[] sep = new char[length];
-        Arrays.fill(sep, '-');
-        return sep;
-    }
-
     public static final String NODE_COUNT_QUERY = """
             MATCH
               ()
@@ -71,9 +64,16 @@ public class Consts {
             RETURN
               relType, properties""";
 
+    public static char[] separator(int length) {
+        char[] sep = new char[length];
+        Arrays.fill(sep, '-');
+        return sep;
+    }
+
     public static String nodeCountByLabelQuery(String label) {
         return String.format(NODE_COUNT_BY_LABEL_QUERY, label);
     }
+
     public static String relationshipCountByTypeQuery(String type) {
         return String.format(RELATIONSHIP_COUNT_BY_TYPE_QUERY, type);
     }

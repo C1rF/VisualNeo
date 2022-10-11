@@ -14,6 +14,16 @@ public class Relation extends Entity {
     final Node start;
     final Node end;
 
+    public Relation(long id, Edge edge, Map<Vertex, Node> links) {
+        this(
+                id,
+                edge.directed,
+                links.get(edge.startVertex),
+                links.get(edge.endVertex),
+                edge.getLabel(),
+                edge.getProp());
+    }
+
     public Relation(long id, boolean directed, Node start, Node end,
                     String label, Map<String, Value> properties) {
         super(id, label, properties);
@@ -32,15 +42,6 @@ public class Relation extends Entity {
         end.attach(this);
     }
 
-    public Relation(long id, Edge edge, Map<Vertex, Node> links) {
-        this(id,
-                edge.directed,
-                links.get(edge.startVertex),
-                links.get(edge.endVertex),
-                edge.getLabel(),
-                edge.getProp());
-    }
-
     public Node other(Node node) {
         if (node == start)
             return end;
@@ -53,14 +54,15 @@ public class Relation extends Entity {
     // Two distinct relations are indistinguishable iff they have the same origin, target, label, and properties
     // This method assumes the other relation is non-null and the two relations are distinct
     boolean duplicates(Relation other) {
-//        if (other == null || this == other)
-//            return false;
+        //        if (other == null || this == other)
+        //            return false;
 
         if (directed && other.directed) {
             if (start != other.start || end != other.end)
                 return false;
         }
-        else if ((start != other.start || end != other.end) && (start != other.end || end != other.start))
+        else if ((start != other.start || end != other.end) &&
+                 (start != other.end || end != other.start))
             return false;
 
         return resembles(other);
@@ -80,14 +82,22 @@ public class Relation extends Entity {
         return 'r' + super.toString();
     }
 
+    //    @Override
+    //    public String elaborate() {
+    //        return String.format("""
+    //                %1$s
+    //                |-Start Node: %2$s
+    //                |-End Node: %3$s""",
+    //                super.elaborate(),
+    //                start.toString(),
+    //                end.toString());
+    //    }
+
     @Override
-    public String elaborate() {
-        return String.format("""
-                %1$s
-                |-Start Node: %2$s
-                |-End Node: %3$s""",
-                super.elaborate(),
-                start.toString(),
-                end.toString());
+    public Map<Object, Object> expand() {
+        Map<Object, Object> expansion = super.expand();
+        expansion.put("Start Node", start.toString());
+        expansion.put("End Node", end.toString());
+        return expansion;
     }
 }

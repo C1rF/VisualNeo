@@ -3,7 +3,10 @@ package hkust.edu.visualneo.utils.backend;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import static hkust.edu.visualneo.utils.backend.Consts.NEW_LINE;
 import static hkust.edu.visualneo.utils.backend.Consts.SPACE;
@@ -13,14 +16,14 @@ public class QueryBuilder {
 
     private final static StringBuilder builder = new StringBuilder();
 
-    private static int indentCount;
+    private static int indent;
 
     // TODO: Modify this
     public static String translate(Graph graph) {
         clear();
 
         // MATCH clause
-        indent();
+        increaseIndent();
         builder.append("MATCH");
         Iterator<Relation> relationIter = graph.relations.iterator();
         if (!relationIter.hasNext()) {
@@ -39,11 +42,11 @@ public class QueryBuilder {
                 builder.append(',');
             }
         }
-        unindent();
+        decreaseIndent();
         newLine();
 
         // WHERE clause
-//        ArrayList<Pair<Node>> dupPairs = graph.getDuplicateNodePairs();
+        //        ArrayList<Pair<Node>> dupPairs = graph.getDuplicateNodePairs();
         // TODO: Modify this naive approach
         List<Pair<Node>> dupPairs = new ArrayList<>();
         ArrayList<Node> nodes = new ArrayList<>(graph.nodes);
@@ -53,7 +56,7 @@ public class QueryBuilder {
             }
         }
         if (!dupPairs.isEmpty()) {
-            indent();
+            increaseIndent();
             builder.append("WHERE");
             Iterator<Pair<Node>> pairIter = dupPairs.iterator();
             while (true) {
@@ -66,42 +69,62 @@ public class QueryBuilder {
                     break;
                 builder.append(" AND");
             }
-            unindent();
+            decreaseIndent();
             newLine();
         }
 
         // RETURN clause
-        indent();
+        increaseIndent();
         builder.append("RETURN");
         // TODO: Refine return conditions
         newLine();
         builder.append(nodes.get(0));
-        unindent();
+        decreaseIndent();
 
-        System.out.println(graph.elaborate());
+        System.out.println(new Expander().expand(graph));
 
         return builder.toString();
     }
 
-    private static void indent() {
-        indentCount++;
+    private static void clear() {
+        builder.setLength(0);
+        indent = 0;
     }
 
-    private static void unindent() {
-        if (--indentCount < 0)
-            indentCount = 0;
+    private static void increaseIndent() {
+        indent++;
     }
 
     private static void newLine() {
         builder.append(NEW_LINE);
-        char[] tabs = new char[2 * indentCount];
+        char[] tabs = new char[2 * indent];
         Arrays.fill(tabs, SPACE);
         builder.append(tabs);
     }
 
-    private static void clear() {
-        builder.setLength(0);
-        indentCount = 0;
+    private static void translateNode(Node node) {
+        builder.append('(');
+        builder.append(node);
+        translateEntity(node);
+        builder.append(')');
+    }
+
+    private static void translateRelation(Relation relation) {
+        if (!relation.hasLabel() && !relation.hasProperty())
+            builder.append("--");
+        else {
+            builder.append("-[");
+            //            builder.append(relation.name());
+            translateEntity(relation);
+            builder.append("]-");
+        }
+        if (relation.directed)
+            builder.append('>');
+    }
+
+    private static void decreaseIndent() {
+        if (--indent < 0)
+            indent = 0;
     }
 
     private static void translateEntity(Entity entity) {
@@ -128,25 +151,5 @@ public class QueryBuilder {
             }
             builder.append('}');
         }
-    }
-
-    private static void translateNode(Node node) {
-        builder.append('(');
-        builder.append(node);
-        translateEntity(node);
-        builder.append(')');
-    }
-
-    private static void translateRelation(Relation relation) {
-        if (!relation.hasLabel() && !relation.hasProperty())
-            builder.append("--");
-        else {
-            builder.append("-[");
-//            builder.append(relation.name());
-            translateEntity(relation);
-            builder.append("]-");
-        }
-        if (relation.directed)
-            builder.append('>');
     }
 }
