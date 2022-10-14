@@ -2,24 +2,26 @@ package hkust.edu.visualneo;
 
 import hkust.edu.visualneo.utils.backend.DbMetadata;
 import hkust.edu.visualneo.utils.frontend.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.QuadCurve;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.neo4j.driver.Value;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class VisualNeoController {
     /**
@@ -97,6 +99,26 @@ public class VisualNeoController {
     @FXML
     private Pane Drawboard;
 
+    /**
+     *   Database Info Pane
+     */
+    @FXML
+    private AnchorPane pane_no_database;
+    @FXML
+    private AnchorPane pane_with_database;
+    @FXML
+    private TableView tableview_node;
+    @FXML
+    private TableColumn<Map, String> node_name_col;
+    @FXML
+    private TableColumn<Map, String> node_count_col;
+    @FXML
+    private TableView tableview_relation;
+    @FXML
+    private TableColumn<Map, String> relation_name_col;
+    @FXML
+    private TableColumn<Map, String> relation_count_col;
+
 
     // The system application
     private VisualNeoApp app;
@@ -135,16 +157,16 @@ public class VisualNeoController {
 
                     // Check whether the new node is a Vertex or Edge
                     // Decide whether to show the info pane and label/property panes
-                    if(newNode instanceof GraphElement) {
+                    if(newNode instanceof Circle || newNode instanceof QuadCurve) {
                         // System.out.println("New focus is a GraphElement");
                         // First remove the focus display from the "last" focus
                         if(current_focused != null) current_focused.removeFocused();
                         // Assign the new focus to the current node
-                        current_focused = (GraphElement) newNode;
+                        current_focused = matchGraphElement(newNode);
                         current_focused.becomeFocused();
                         info_pane.setVisible(true);
                         pane_property.setVisible(true);
-                        if(newNode instanceof Vertex){
+                        if(newNode instanceof Circle){
                             pane_node_label.setVisible(true);
                             pane_relation_label.setVisible(false);
                             text_node_or_relation.setText("Node Information");
@@ -157,8 +179,8 @@ public class VisualNeoController {
 
                         // Display the information on the information pane
                         StringBuilder builder = new StringBuilder();
-                        text_label_info.setText(((GraphElement) newNode).getLabel());
-                        HashMap<String, Value> properties = ((GraphElement) newNode).getProp();
+                        text_label_info.setText(current_focused.getLabel());
+                        HashMap<String, Value> properties = current_focused.getProp();
                         for (String propertyKey : properties.keySet()) {
                             builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
                         }
@@ -289,9 +311,9 @@ public class VisualNeoController {
         // System.out.println("Clicked at " + m.getX() + ' ' +  m.getY());
         // If the status is VERTEX, meaning that we need to create the vertex
         if(s == Status.VERTEX) {
-            Vertex temp_vertex = new Vertex(m.getX(), m.getY());
+            Vertex temp_vertex = new Vertex(Drawboard, m.getX(), m.getY());
             listOfVertices.add(temp_vertex);
-            Drawboard.getChildren().add(temp_vertex);
+            temp_vertex.setScene(scene);
             temp_vertex.requestFocus();
         }
 
@@ -308,7 +330,7 @@ public class VisualNeoController {
                     Edge temp_edge = listOfEdges.get(j);
                     if( temp_edge.startVertex == focused_vertex || temp_edge.endVertex == focused_vertex){
                         // Remove the edge both from the board and the ArrayList
-                        Drawboard.getChildren().remove(temp_edge);
+                        temp_edge.eraseShapes();
                         index_list.add(j);
                     }
                 }
@@ -317,7 +339,7 @@ public class VisualNeoController {
                     listOfEdges.remove(j);
                 }
                 // Then remove the vertex itself
-                Drawboard.getChildren().remove(focused_vertex);
+                focused_vertex.eraseShapes();
                 listOfVertices.remove(focused_vertex);
                 // For testing
                 System.out.println("Successfully removed a vertex");
@@ -326,8 +348,11 @@ public class VisualNeoController {
             // Check whether it is an Edge
             if(current_focused instanceof Edge) {
                 Edge focused_edge = (Edge) current_focused;
-                Drawboard.getChildren().remove(focused_edge);
+                Vertex this_startVertex = focused_edge.startVertex;
+                Vertex this_endVertex = focused_edge.endVertex;
+                focused_edge.eraseShapes();
                 listOfEdges.remove(focused_edge);
+                updateEdgeShape(this_startVertex, this_endVertex);
                 System.out.println("Successfully removed an edge");
             }
         }
@@ -341,17 +366,17 @@ public class VisualNeoController {
             // If the status is EDGE_2, meaning that we are choosing the second Vertex
             if(s == Status.EDGE_2){
                 // Create a new Edge between the two if they are not the same vertex
-                if(startVertex != focused_vertex){
-                    Edge temp_edge =  new Edge(startVertex, focused_vertex, false);
-                    startVertex = null;
+                //if(startVertex != focused_vertex){
+                    Edge temp_edge =  new Edge(Drawboard, startVertex, focused_vertex, false);
                     listOfEdges.add(temp_edge);
-                    Drawboard.getChildren().add(temp_edge);
-                    temp_edge.toBack();
+                    updateEdgeShape(startVertex, focused_vertex);
+                    startVertex = null;
+                    temp_edge.setScene(scene);
                     temp_edge.requestFocus();
-                }
-                else{
-                    Drawboard.requestFocus();
-                }
+                //}
+//                else{
+//                    Drawboard.requestFocus();
+//                }
                 // No matter whether the edge is created or not
                 // Return to EDGE_1 state
                 s = Status.EDGE_1;
@@ -384,7 +409,7 @@ public class VisualNeoController {
         for(int j=0; j<numOfEdges; j++){
             Edge temp_edge = listOfEdges.get(j);
             if( temp_edge.startVertex == focused_vertex || temp_edge.endVertex == focused_vertex){
-                temp_edge.updatePos();
+                temp_edge.setCurve();
             }
         }
         // System.out.println("Move all connected edges");
@@ -413,6 +438,16 @@ public class VisualNeoController {
 
     public void updateUIWithMetaInfo(){
         DbMetadata metadata = app.queryHandler.getMeta();
+        // TODO: Update the DatabaseInfo Pane first
+        // First switch the display pane
+        pane_with_database.setVisible(true);
+        pane_no_database.setVisible(false);
+        // Update node table
+        UpdateNodeTable(metadata);
+        UpdateRelationTable(metadata);
+        // TODO: Show the schema
+
+        // Then update the choiceboxs with correct choices
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
         metadata.relationLabels().forEach(label -> choicebox_relation_label.getItems().add(label));
         metadata.propertyKeys().forEach(property -> choicebox_property_name.getItems().add(property));
@@ -520,4 +555,80 @@ public class VisualNeoController {
     public static Status getStatus(){
         return s;
     }
+
+    private GraphElement matchGraphElement(javafx.scene.Node graphNode){
+        if(graphNode instanceof Circle){
+            // Find a Vertex that contains the circle
+            for(int i=0; i<listOfVertices.size(); i++){
+                if(listOfVertices.get(i).containCircle((Circle) graphNode))
+                    return listOfVertices.get(i);
+            }
+        }
+        else{
+            // Find an Edge that contains the edge
+            for(int i=0; i<listOfEdges.size(); i++){
+                if(listOfEdges.get(i).containEdge((QuadCurve) graphNode))
+                    return listOfEdges.get(i);
+            }
+        }
+        return null;
+    }
+
+    private void UpdateNodeTable(DbMetadata metadata){
+        node_name_col.setCellValueFactory(new MapValueFactory<>("Label"));
+        node_count_col.setCellValueFactory(new MapValueFactory<>("Count"));
+        ObservableList<Map<String, Object>> items =
+                FXCollections.<Map<String, Object>>observableArrayList();
+        Set<String> nodeLabels = metadata.nodeLabels();
+        for (String label : nodeLabels) {
+            Map<String, Object> temp_item = new HashMap<>();
+            temp_item.put("Label", label);
+            temp_item.put("Count" , metadata.nodeCountOf(label) );
+            items.add(temp_item);
+        }
+        Map<String, Object> final_item = new HashMap<>();
+        final_item.put("Label", "#SUM");
+        final_item.put("Count" , metadata.nodeCount() );
+        items.add(final_item);
+        tableview_node.getItems().addAll(items);
+    }
+    private void UpdateRelationTable(DbMetadata metadata){
+        relation_name_col.setCellValueFactory(new MapValueFactory<>("Label"));
+        relation_count_col.setCellValueFactory(new MapValueFactory<>("Count"));
+        ObservableList<Map<String, Object>> items =
+                FXCollections.<Map<String, Object>>observableArrayList();
+        Set<String> relationLabels = metadata.relationLabels();
+        for (String label : relationLabels) {
+            Map<String, Object> temp_item = new HashMap<>();
+            temp_item.put("Label", label);
+            temp_item.put("Count" , metadata.relationCountOf(label) );
+            items.add(temp_item);
+        }
+        Map<String, Object> final_item = new HashMap<>();
+        final_item.put("Label", "#SUM");
+        final_item.put("Count" , metadata.relationCount() );
+        items.add(final_item);
+        tableview_relation.getItems().addAll(items);
+    }
+
+    private void updateEdgeShape(Vertex startVertex, Vertex endVertex){
+        int count = 0;
+        ArrayList<Edge> temp_list = new ArrayList<>();
+        for(int i=0; i<listOfEdges.size(); i++){
+            Edge temp = listOfEdges.get(i);
+            if((temp.startVertex == startVertex && temp.endVertex==endVertex) ||
+                    (temp.endVertex == startVertex && temp.startVertex==endVertex)
+            ){
+                count++;
+                temp_list.add(temp);
+            }
+        }
+        for(int i=0; i<count; i++){
+            Edge temp_to_update = temp_list.get(i);
+            temp_to_update.updateOffset(count, i);
+            temp_to_update.setCurve();
+        }
+
+    }
+
 }

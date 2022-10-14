@@ -4,10 +4,7 @@ import hkust.edu.visualneo.VisualNeoController;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
@@ -18,28 +15,34 @@ import java.util.List;
 
 public class Vertex extends GraphElement {
 
-    // record the position of upper-corner of the StackPane
+    // record the position of center of the circle
     double x,y;
     private final Color COLOR = Color.LIGHTGRAY;
     // record the offset (only used for move the object)
     double offX, offY;
     // The shape contains a circle and a text(not necessary) on top of it
-    Circle c;
+    private Circle c;
 
     // Constructor
-    public Vertex(double x, double y) {
+    public Vertex(Pane DrawBoard, double x, double y) {
 
         super();
+        this.DrawBoard = DrawBoard;
         // Set the position
-        this.x = x-VERTEX_RADIUS;
-        this.y = y-VERTEX_RADIUS;
-        setPos();
+        this.x = x;
+        this.y = y;
 
         // Initialize the circle
         c = new Circle(VERTEX_RADIUS, COLOR);
+        setPos();
+
+        // Set focus traversable
+        c.setFocusTraversable(true);
 
         // Display the circle and label on the StackPane
-        getChildren().addAll(c,label_displayed);
+        DrawBoard.getChildren().addAll(c,label_displayed);
+        c.toFront();
+        label_displayed.toFront();
 
         // Give them event handler
         c.addEventHandler( MouseEvent.MOUSE_PRESSED, e->{if(canSelect) { pressed(e);}  } );
@@ -53,6 +56,10 @@ public class Vertex extends GraphElement {
     }
 
     @Override
+    public void requestFocus(){
+        c.requestFocus();
+    }
+    @Override
     public void becomeFocused(){
         c.setStrokeWidth(2);
         c.setStroke(new Color(0, 0, 0, 1));
@@ -62,6 +69,12 @@ public class Vertex extends GraphElement {
     public void removeFocused(){
         c.setStrokeWidth(0);
     }
+    @Override
+    public void eraseShapes(){
+        DrawBoard.getChildren().remove(c);
+        DrawBoard.getChildren().remove(label_displayed);
+    }
+
 
     /**
      *  Request focus when pressed
@@ -70,14 +83,14 @@ public class Vertex extends GraphElement {
     protected void pressed(MouseEvent m) {
         offX = m.getX();
         offY = m.getY();
-        requestFocus();
+        c.requestFocus();
         if(VisualNeoController.getStatus() == VisualNeoController.Status.SELECT) m.consume();
     }
 
     public void dragged(MouseEvent m) {
         if(VisualNeoController.getStatus() != VisualNeoController.Status.SELECT)
             return;
-        getScene().setCursor(Cursor.CLOSED_HAND);
+        scene.setCursor(Cursor.CLOSED_HAND);
         // (m.getX() - offX) contains the minor changes of x coordinate
         // (m.getY() - offY) contains the minor changes of y coordinate
         x += m.getX() - offX; // keep updating the coordinate
@@ -86,8 +99,14 @@ public class Vertex extends GraphElement {
     }
 
     public void setPos() {
-        setLayoutX(x);
-        setLayoutY(y);
+        c.setLayoutX(x);
+        c.setLayoutY(y);
+        label_displayed.setLayoutX(x);
+        label_displayed.setLayoutX(y);
+    }
+
+    public boolean containCircle(Circle circle_to_compare){
+        return (circle_to_compare == c);
     }
 
     @Override
