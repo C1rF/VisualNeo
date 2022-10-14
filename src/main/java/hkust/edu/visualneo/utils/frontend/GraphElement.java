@@ -70,6 +70,7 @@ abstract public class GraphElement{
     abstract public void becomeFocused();
     abstract public void removeFocused();
     abstract public void eraseShapes();
+    abstract public javafx.scene.Node getShape();
     abstract protected void pressed(MouseEvent m);
     abstract public String toText();
 

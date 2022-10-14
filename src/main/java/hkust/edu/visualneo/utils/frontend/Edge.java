@@ -6,6 +6,7 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.QuadCurve;
 import javafx.scene.shape.StrokeType;
@@ -21,6 +22,7 @@ public class Edge extends GraphElement {
     public Vertex endVertex;
     public boolean directed;
     private QuadCurve edge;
+    private CubicCurve self_edge;
     private double offsetIndex;
 
     private boolean selfLoop;
@@ -86,6 +88,13 @@ public class Edge extends GraphElement {
         DrawBoard.getChildren().remove(edge);
         DrawBoard.getChildren().remove(label_displayed);
     }
+    @Override
+    public javafx.scene.Node getShape(){
+        if(selfLoop)
+            return edge;
+        else
+            return self_edge;
+    }
 
     /**
      *  Request focus when pressed
@@ -139,7 +148,7 @@ public class Edge extends GraphElement {
         edge.setEndY(end_y);
 
         // Set the label at the same time
-        label_displayed.setLayoutX(control_pt_x);
+        label_displayed.setLayoutX(control_pt_x-0.2*VERTEX_RADIUS);
         label_displayed.setLayoutY(control_pt_y);
     }
 

@@ -162,7 +162,7 @@
                                                       <Cursor fx:constant="HAND" />
                                                    </cursor>
                                                 </ChoiceBox>
-                                                <Button fx:id="btn_add_node_label" disable="true" mnemonicParsing="false" onAction="#handleAddLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
+                                                <Button fx:id="btn_add_node_label" disable="true" mnemonicParsing="false" onAction="#handleAddNodeLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
                                              </children>
                                           </AnchorPane>
                                           <AnchorPane fx:id="pane_relation_label" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -182,7 +182,7 @@
                                                       <Cursor fx:constant="HAND" />
                                                    </cursor>
                                                 </ChoiceBox>
-                                                <Button fx:id="btn_add_relation_label" disable="true" mnemonicParsing="false" onAction="#handleAddLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
+                                                <Button fx:id="btn_add_relation_label" disable="true" mnemonicParsing="false" onAction="#handleAddRelationLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
                                              </children>
                                           </AnchorPane>
                                        </children>

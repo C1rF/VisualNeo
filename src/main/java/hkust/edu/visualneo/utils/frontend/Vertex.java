@@ -1,17 +1,13 @@
 package hkust.edu.visualneo.utils.frontend;
 
 import hkust.edu.visualneo.VisualNeoController;
-import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Text;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
-
 import java.util.Arrays;
-import java.util.List;
 
 public class Vertex extends GraphElement {
 
@@ -74,6 +70,10 @@ public class Vertex extends GraphElement {
         DrawBoard.getChildren().remove(c);
         DrawBoard.getChildren().remove(label_displayed);
     }
+    @Override
+    public javafx.scene.Node getShape(){
+        return c;
+    }
 
 
     /**
@@ -101,8 +101,8 @@ public class Vertex extends GraphElement {
     public void setPos() {
         c.setLayoutX(x);
         c.setLayoutY(y);
-        label_displayed.setLayoutX(x);
-        label_displayed.setLayoutX(y);
+        label_displayed.setLayoutX(x-0.7*VERTEX_RADIUS);
+        label_displayed.setLayoutY(y+0.2*VERTEX_RADIUS);
     }
 
     public boolean containCircle(Circle circle_to_compare){

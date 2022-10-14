@@ -164,27 +164,7 @@ public class VisualNeoController {
                         // Assign the new focus to the current node
                         current_focused = matchGraphElement(newNode);
                         current_focused.becomeFocused();
-                        info_pane.setVisible(true);
-                        pane_property.setVisible(true);
-                        if(newNode instanceof Circle){
-                            pane_node_label.setVisible(true);
-                            pane_relation_label.setVisible(false);
-                            text_node_or_relation.setText("Node Information");
-                        }
-                        else{
-                            pane_node_label.setVisible(false);
-                            pane_relation_label.setVisible(true);
-                            text_node_or_relation.setText("Relation Information");
-                        }
-
-                        // Display the information on the information pane
-                        StringBuilder builder = new StringBuilder();
-                        text_label_info.setText(current_focused.getLabel());
-                        HashMap<String, Value> properties = current_focused.getProp();
-                        for (String propertyKey : properties.keySet()) {
-                            builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
-                        }
-                        text_property_info.setText(builder.toString());
+                        refreshInfoPane(current_focused);
                     }
                     else {
                         // If the focused element is not a Vertex/Edge
@@ -482,23 +462,11 @@ public class VisualNeoController {
     }
 
     @FXML
-    void handleAddLabel() {
-        // TODO: Split this to two functions
-        // Add Node labels to the Vertex/Edge
-        if(current_focused != null){
-            try{
-                if(current_focused instanceof Vertex)
-                    current_focused.addLabel(choicebox_node_label.getValue());
-                else
-                    current_focused.addLabel(choicebox_relation_label.getValue());
-                System.out.println("Successfully add the label");
-            }catch (Exception e){
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Label Addition Error");
-                alert.setHeaderText("Cannot add the label.");
-                alert.setContentText("Please select the correct element!");
-                alert.showAndWait();
-            }
+    void handleAddNodeLabel() {
+        // Add Node labels to the Vertex
+        if(current_focused != null && current_focused instanceof Vertex){
+            current_focused.addLabel(choicebox_node_label.getValue());
+            refreshInfoPane(current_focused);
         }
         else{
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -508,6 +476,23 @@ public class VisualNeoController {
             alert.showAndWait();
         }
     }
+
+    @FXML
+    void handleAddRelationLabel() {
+        // Add Relation labels to the Edge
+        if(current_focused != null && current_focused instanceof Edge){
+            current_focused.addLabel(choicebox_relation_label.getValue());
+            refreshInfoPane(current_focused);
+        }
+        else{
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Label Addition Error");
+            alert.setHeaderText("Cannot add the label.");
+            alert.setContentText("Please select the correct element!");
+            alert.showAndWait();
+        }
+    }
+
 
     @FXML
     void handleAddProperty() {
@@ -629,6 +614,35 @@ public class VisualNeoController {
             temp_to_update.setCurve();
         }
 
+    }
+
+    /**
+     *   Helper Function
+     *   Given a GraphElement, refresh the InfoPane according to the information
+     */
+    private void refreshInfoPane(GraphElement current_focused){
+        javafx.scene.Node graphical_node = current_focused.getShape();
+        info_pane.setVisible(true);
+        pane_property.setVisible(true);
+        if(graphical_node instanceof Circle){
+            pane_node_label.setVisible(true);
+            pane_relation_label.setVisible(false);
+            text_node_or_relation.setText("Node Information");
+        }
+        else{
+            pane_node_label.setVisible(false);
+            pane_relation_label.setVisible(true);
+            text_node_or_relation.setText("Relation Information");
+        }
+
+        // Display the information on the information pane
+        StringBuilder builder = new StringBuilder();
+        text_label_info.setText(current_focused.getLabel());
+        HashMap<String, Value> properties = current_focused.getProp();
+        for (String propertyKey : properties.keySet()) {
+            builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
+        }
+        text_property_info.setText(builder.toString());
     }
 
 }
