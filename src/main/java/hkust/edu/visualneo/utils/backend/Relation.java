@@ -9,17 +9,24 @@ import java.util.Objects;
 
 public class Relation extends Entity {
 
-    private static int relationCount;
-    private final int relationId = ++relationCount;
-
     final boolean directed;
 
     final Node start;
     final Node end;
 
-    public Relation(boolean directed, Node start, Node end,
+    public Relation(long id, Edge edge, Map<Vertex, Node> links) {
+        this(
+                id,
+                edge.directed,
+                links.get(edge.startVertex),
+                links.get(edge.endVertex),
+                edge.getLabel(),
+                edge.getProp());
+    }
+
+    public Relation(long id, boolean directed, Node start, Node end,
                     String label, Map<String, Value> properties) {
-        super(label, properties);
+        super(id, label, properties);
         this.directed = directed;
         Objects.requireNonNull(start, "Node is null!");
         Objects.requireNonNull(end, "Node is null!");
@@ -35,14 +42,6 @@ public class Relation extends Entity {
         end.attach(this);
     }
 
-    public Relation(Edge edge, Map<Vertex, Node> links) {
-        this(edge.directed,
-                links.get(edge.startVertex),
-                links.get(edge.endVertex),
-                edge.getLabel(),
-                edge.getProp());
-    }
-
     public Node other(Node node) {
         if (node == start)
             return end;
@@ -55,14 +54,15 @@ public class Relation extends Entity {
     // Two distinct relations are indistinguishable iff they have the same origin, target, label, and properties
     // This method assumes the other relation is non-null and the two relations are distinct
     boolean duplicates(Relation other) {
-//        if (other == null || this == other)
-//            return false;
+        //        if (other == null || this == other)
+        //            return false;
 
         if (directed && other.directed) {
             if (start != other.start || end != other.end)
                 return false;
         }
-        else if ((start != other.start || end != other.end) && (start != other.end || end != other.start))
+        else if ((start != other.start || end != other.end) &&
+                 (start != other.end || end != other.start))
             return false;
 
         return resembles(other);
@@ -78,22 +78,26 @@ public class Relation extends Entity {
     }
 
     @Override
-    public String name() {
-        return 'r' + String.valueOf(relationId);
+    public String toString() {
+        return 'r' + super.toString();
     }
+
+    //    @Override
+    //    public String elaborate() {
+    //        return String.format("""
+    //                %1$s
+    //                |-Start Node: %2$s
+    //                |-End Node: %3$s""",
+    //                super.elaborate(),
+    //                start.toString(),
+    //                end.toString());
+    //    }
 
     @Override
-    public String toString() {
-        return String.format("""
-                %1$s
-                Start Node: %2$s
-                End Node: %3$s""",
-                super.toString(),
-                start.name(),
-                end.name());
-    }
-
-    public static void recount() {
-        relationCount = 0;
+    public Map<Object, Object> expand() {
+        Map<Object, Object> expansion = super.expand();
+        expansion.put("Start Node", start.toString());
+        expansion.put("End Node", end.toString());
+        return expansion;
     }
 }

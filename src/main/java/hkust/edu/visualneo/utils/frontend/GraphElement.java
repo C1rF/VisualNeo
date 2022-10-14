@@ -9,7 +9,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import org.neo4j.driver.Value;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 abstract public class GraphElement{
@@ -30,9 +29,7 @@ abstract public class GraphElement{
     protected Pane DrawBoard;
 
     GraphElement(){
-
-        // Initialize the variable
-        label = "";
+        // initialize the arraylist
         properties = new HashMap<>();
         label_displayed = new Text("");
 
