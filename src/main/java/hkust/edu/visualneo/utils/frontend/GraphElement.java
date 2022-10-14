@@ -4,6 +4,7 @@ import hkust.edu.visualneo.VisualNeoController;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import org.neo4j.driver.Value;
@@ -11,7 +12,7 @@ import org.neo4j.driver.Value;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-abstract public class GraphElement extends StackPane {
+abstract public class GraphElement{
 
     // Radius of the Vertex
     final int VERTEX_RADIUS = 25;
@@ -26,6 +27,7 @@ abstract public class GraphElement extends StackPane {
     // Properties attached to the element(node/relation)
     HashMap<String, Value> properties;
     Scene scene;
+    protected Pane DrawBoard;
 
     GraphElement(){
 
@@ -34,13 +36,13 @@ abstract public class GraphElement extends StackPane {
         properties = new HashMap<>();
         label_displayed = new Text("");
 
-        // Set focus effect
-        setFocusTraversable(true);
+    }
 
+    public void setScene(Scene scene){
+        this.scene = scene;
     }
 
      void mouseEntered(MouseEvent m) {
-         scene = getScene();
         if(VisualNeoController.getStatus() == VisualNeoController.Status.SELECT){
             scene.setCursor(Cursor.HAND);
         }
@@ -67,8 +69,10 @@ abstract public class GraphElement extends StackPane {
 
     public HashMap<String,Value> getProp(){return properties;}
 
+    abstract public void requestFocus();
     abstract public void becomeFocused();
     abstract public void removeFocused();
+    abstract public void eraseShapes();
     abstract protected void pressed(MouseEvent m);
     abstract public String toText();
 
