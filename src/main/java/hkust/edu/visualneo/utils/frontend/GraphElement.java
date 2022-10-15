@@ -2,57 +2,38 @@ package hkust.edu.visualneo.utils.frontend;
 
 import hkust.edu.visualneo.VisualNeoController;
 import javafx.scene.Cursor;
-import javafx.scene.Scene;
+import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import org.neo4j.driver.Value;
 
 import java.util.HashMap;
 
-abstract public class GraphElement{
+abstract public class GraphElement extends Group {
 
     // Radius of the Vertex
-    final int VERTEX_RADIUS = 25;
+    protected static final int VERTEX_RADIUS = 25;
     // A boolean variable indicates whether it can be selected and moved now
     public boolean canSelect = false;
-    // A boolean variable indicates whether it is the focus right now
-
-    // UI display
+    // Label shown on the GraphElement
     Text label_displayed;
-    // Labels attached to the element(node/relation)
+    // String of the label
     String label;
     // Properties attached to the element(node/relation)
     HashMap<String, Value> properties;
-    Scene scene;
-    protected Pane DrawBoard;
 
-    GraphElement(){
+    GraphElement() {
         // initialize the arraylist
         properties = new HashMap<>();
         label_displayed = new Text("");
-
     }
 
-    public void setScene(Scene scene){
-        this.scene = scene;
-    }
-
-     void mouseEntered(MouseEvent m) {
-        if(VisualNeoController.getStatus() == VisualNeoController.Status.SELECT){
-            scene.setCursor(Cursor.HAND);
-        }
-        else if(VisualNeoController.getStatus() == VisualNeoController.Status.ERASE){
-            scene.setCursor(Cursor.DISAPPEAR);
-        }
-    }
     void mouseExited(MouseEvent m) {
-         scene.setCursor(Cursor.DEFAULT);
+        getScene().setCursor(Cursor.DEFAULT);
     }
 
-    void mouseReleased(MouseEvent m){
-        if(VisualNeoController.getStatus() == VisualNeoController.Status.SELECT)
+    void mouseReleased(MouseEvent m) {
+        if (VisualNeoController.getStatus() == VisualNeoController.Status.SELECT)
             mouseEntered(m);
     }
 
@@ -62,16 +43,25 @@ abstract public class GraphElement{
         label = new_label;
         label_displayed.setText(new_label);
     }
-    public String getLabel(){return label;}
 
-    public HashMap<String,Value> getProp(){return properties;}
+    public String getLabel() {
+        return label;
+    }
 
-    abstract public void requestFocus();
-    abstract public void becomeFocused();
-    abstract public void removeFocused();
-    abstract public void eraseShapes();
-    abstract public javafx.scene.Node getShape();
+    public HashMap<String, Value> getProp() {
+        return properties;
+    }
+
+    abstract protected void initializeShape();
+
+    abstract public void becomeHighlight();
+
+    abstract public void removeHighlight();
+
     abstract protected void pressed(MouseEvent m);
+
+    abstract protected void mouseEntered(MouseEvent m);
+
     abstract public String toText();
 
 }
