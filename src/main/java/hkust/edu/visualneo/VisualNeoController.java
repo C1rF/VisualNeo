@@ -8,6 +8,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -16,98 +17,100 @@ import org.neo4j.driver.Value;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class VisualNeoController {
-
-    private VisualNeoApp app;
-
-    private Scene scene;
-
-    private GraphElement last_focused;
-
+    /**
+     *   7 Buttons in the toolbox and 1 Label indicating the current tool
+     */
     @FXML
     private Button btn_clear;
-
     @FXML
     private Button btn_select;
-
     @FXML
     private Button btn_vertex;
-
     @FXML
     private Button btn_edge;
-
     @FXML
     private Button btn_erase;
-
     @FXML
     private Button btn_save;
-
     @FXML
     private Button btn_load;
-
     @FXML
     private Label label_current_state;
-
+    /**
+     *   4 Buttons controlling the core operations
+     */
+    @FXML
+    private Button btn_load_db;
+    @FXML
+    private Button btn_generate_p;
+    @FXML
+    private Button btn_exact_search;
+    @FXML
+    private Button btn_similarity_search;
+    /**
+     *   Buttons and Labels in the Label and Property Pane (8 in total)
+     */
+    @FXML
+    private ChoiceBox<String> choicebox_node_label;
+    @FXML
+    private Button btn_add_node_label;
+    @FXML
+    private ChoiceBox<String> choicebox_relation_label;
+    @FXML
+    private Button btn_add_relation_label;
+    @FXML
+    private ChoiceBox<String> choicebox_property_name;
+    @FXML
+    private ChoiceBox<String> choicebox_property_type;
+    @FXML
+    private TextField textfield_property_value;
+    @FXML
+    private Button btn_add_property;
+    /**
+     *   Buttons and Texts in the Info Pane (4 in total)
+     */
+    @FXML
+    private ScrollPane info_pane;
+    @FXML
+    private Text text_node_or_relation;
+    @FXML
+    private Text text_label_info;
+    @FXML
+    private Text text_property_info;
+    /**
+     *   Node Label Pane + Relation Label Pane + Property Pane
+     */
+    @FXML
+    private AnchorPane pane_node_label;
+    @FXML
+    private AnchorPane pane_relation_label;
+    @FXML
+    private AnchorPane pane_property;
+    /**
+     *   Drawing Space
+     */
     @FXML
     private Pane Drawboard;
 
-    @FXML
-    private Button btn_load_db;
 
-    @FXML
-    private Button btn_generate_p;
+    // The system application
+    private VisualNeoApp app;
 
-    @FXML
-    private Button btn_exact_search;
+    // The scene of the main app
+    private Scene scene;
 
-    @FXML
-    private Button btn_similarity_search;
-
-    @FXML
-    private ChoiceBox<String> choicebox_node_label;
-
-    @FXML
-    private Button btn_add_node_label;
-
-    @FXML
-    private ChoiceBox<String> choicebox_relation_label;
-
-    @FXML
-    private Button btn_add_relation_label;
-
-    @FXML
-    private ChoiceBox<String> choicebox_property_name;
-
-    @FXML
-    private ChoiceBox<String> choicebox_property_type;
-
-    @FXML
-    private TextField textfield_property_value;
-
-    @FXML
-    private Text text_node_or_relation;
-
-    @FXML
-    private Button btn_add_property;
-
-    @FXML
-    private ScrollPane info_pane;
-
-    @FXML
-    private Text text_label_info;
-
-    @FXML
-    private Text text_property_info;
-
+    // The current focused element
+    private GraphElement current_focused;
 
     // ALL Status
     public enum Status {EMPTY, VERTEX , EDGE_1, EDGE_2, ERASE, SELECT};
     // Current Status
     public static Status s;
-
 
     // A list that stores all the Vertex objects and Edges objects
     public ArrayList<Vertex> listOfVertices = new ArrayList<Vertex>();
@@ -130,26 +133,29 @@ public class VisualNeoController {
         scene.focusOwnerProperty().addListener(
                 (prop, oldNode, newNode) -> {
 
-                    // Check whether the old node is a Vertex or Edge
-                    // This is used to create labels for Vertex or Edge
-                    if(oldNode instanceof GraphElement) {
-                        //System.out.println("Focus left from a GraphElement");
-                        last_focused = (GraphElement) oldNode;
-                    }
-                    else {
-                        //System.out.println("Focus NOT left from a GraphElement");
-                        last_focused = null;
-                    }
-
                     // Check whether the new node is a Vertex or Edge
-                    // This is used to decide whether to show the info pane
+                    // Decide whether to show the info pane and label/property panes
                     if(newNode instanceof GraphElement) {
-                        //System.out.println("New focus is a GraphElement");
+                        // System.out.println("New focus is a GraphElement");
+                        // First remove the focus display from the "last" focus
+                        if(current_focused != null) current_focused.removeFocused();
+                        // Assign the new focus to the current node
+                        current_focused = (GraphElement) newNode;
+                        current_focused.becomeFocused();
                         info_pane.setVisible(true);
-                        if(newNode instanceof Vertex)
+                        pane_property.setVisible(true);
+                        if(newNode instanceof Vertex){
+                            pane_node_label.setVisible(true);
+                            pane_relation_label.setVisible(false);
                             text_node_or_relation.setText("Node Information");
-                        else
+                        }
+                        else{
+                            pane_node_label.setVisible(false);
+                            pane_relation_label.setVisible(true);
                             text_node_or_relation.setText("Relation Information");
+                        }
+
+                        // Display the information on the information pane
                         StringBuilder builder = new StringBuilder();
                         text_label_info.setText(((GraphElement) newNode).getLabel());
                         HashMap<String, Value> properties = ((GraphElement) newNode).getProp();
@@ -159,10 +165,30 @@ public class VisualNeoController {
                         text_property_info.setText(builder.toString());
                     }
                     else {
-                        //System.out.println("New focus is NOT a GraphElement");
-                        info_pane.setVisible(false);
-                    }
+                        // If the focused element is not a Vertex/Edge
+                        // System.out.println("New focus is NOT a GraphElement");
 
+                        // If the focused item becomes the DrawBoard or buttons on the toolbox
+                        // Remove the current_focused and hide those panes
+                        // Otherwise, do nothing
+
+                        Button[] draw_btns = {btn_clear,btn_select,btn_vertex,btn_edge,btn_erase,btn_save,btn_load};
+                        boolean is_btn = false;
+                        for(int i = 0; i < draw_btns.length; i++){
+                            if(draw_btns[i] == newNode) {
+                                is_btn = true;
+                                break;
+                            }
+                        }
+                        if(newNode == Drawboard || is_btn){
+                            if(current_focused != null) current_focused.removeFocused();
+                            current_focused = null;
+                            info_pane.setVisible(false);
+                            pane_node_label.setVisible(false);
+                            pane_relation_label.setVisible(false);
+                            pane_property.setVisible(false);
+                        }
+                    }
                 });
     }
 
@@ -172,10 +198,8 @@ public class VisualNeoController {
      */
     @FXML
     private void initialize() {
-         s = Status.EMPTY;
-        choicebox_property_type.getItems().addAll("Integer", "Float", "String", "Boolean");
-        choicebox_property_type.getSelectionModel().select("Integer");
-        last_focused = null;
+        s = Status.EMPTY;
+        current_focused = null;
     }
 
     /**
@@ -184,9 +208,9 @@ public class VisualNeoController {
      */
     @FXML
     private void handleClear() {
+        Drawboard.getChildren().clear();
         listOfVertices.clear();
         listOfEdges.clear();
-        Drawboard.getChildren().clear();
     }
 
     /**
@@ -271,19 +295,18 @@ public class VisualNeoController {
             temp_vertex.requestFocus();
         }
 
-        // If the status is ERASE, meaning that we need to erase the focused Vertex
+        // If the status is ERASE, meaning that we need to erase the focused Vertex/Edge
         if(s == Status.ERASE) {
 
-            // Check whether a vertex is selected
-            Vertex temp_vertex = getFocusedVertex();
-            if(temp_vertex != null) {
-                // Now we find the vertex that needs to be removed
+            // Check whether it is a Vertex
+            if(current_focused instanceof Vertex) {
+                Vertex focused_vertex = (Vertex) current_focused;
                 // First remove all its connected edges
                 int numOfEdges = listOfEdges.size();
                 List<Integer> index_list = new ArrayList<Integer>();
                 for(int j=0; j<numOfEdges; j++){
                     Edge temp_edge = listOfEdges.get(j);
-                    if( temp_edge.startVertex == temp_vertex || temp_edge.endVertex == temp_vertex){
+                    if( temp_edge.startVertex == focused_vertex || temp_edge.endVertex == focused_vertex){
                         // Remove the edge both from the board and the ArrayList
                         Drawboard.getChildren().remove(temp_edge);
                         index_list.add(j);
@@ -293,53 +316,50 @@ public class VisualNeoController {
                     int j = index_list.get(t);
                     listOfEdges.remove(j);
                 }
-
                 // Then remove the vertex itself
-                Drawboard.getChildren().remove(temp_vertex);
-                listOfVertices.remove(temp_vertex);
-
+                Drawboard.getChildren().remove(focused_vertex);
+                listOfVertices.remove(focused_vertex);
+                // For testing
                 System.out.println("Successfully removed a vertex");
             }
 
-            // Check whether an edge is selected
-            Edge temp_edge = getFocusedEdge();
-            if(temp_edge != null){
-                // Only need to remove the edge
-                Drawboard.getChildren().remove(temp_edge);
-                listOfEdges.remove(temp_edge);
+            // Check whether it is an Edge
+            if(current_focused instanceof Edge) {
+                Edge focused_edge = (Edge) current_focused;
+                Drawboard.getChildren().remove(focused_edge);
+                listOfEdges.remove(focused_edge);
                 System.out.println("Successfully removed an edge");
             }
         }
 
         // If the status is EDGE_1/EDGE_2, meaning that we are forming the EDGE
         if(s == Status.EDGE_1 || s == Status.EDGE_2) {
-            int numOfVertices = listOfVertices.size();
-            for(int i =0; i < numOfVertices; i++) {
-                Vertex temp = listOfVertices.get(i);
-                if(temp.isFocused()) {
-                    // If the status is EDGE_2, meaning that we are choosing the second Vertex
-                    if(s == Status.EDGE_2){
-                        // Create a new Edge between the two if they are not the same vertex
-                        if(startVertex != temp){
-                            Edge temp_edge =  new Edge(startVertex, temp, false);
-                            listOfEdges.add(temp_edge);
-                            Drawboard.getChildren().add(temp_edge);
-                            temp_edge.toBack();
-                        }
-                        // No matter whether the edge is created or not
-                        // Return to EDGE_1 state and remove focus
-                        s = Status.EDGE_1;
-                        // Remove the focus
-                        Drawboard.requestFocus();
-                        break;
-                    }
-                    // If the status is EDGE_1, meaning that we are choosing the first Vertex
-                    if(s == Status.EDGE_1) {
-                        startVertex = temp;
-                        s = Status.EDGE_2;
-                        break;
-                    }
+
+            if(!(current_focused instanceof Vertex)) return;
+
+            Vertex focused_vertex = (Vertex) current_focused;
+            // If the status is EDGE_2, meaning that we are choosing the second Vertex
+            if(s == Status.EDGE_2){
+                // Create a new Edge between the two if they are not the same vertex
+                if(startVertex != focused_vertex){
+                    Edge temp_edge =  new Edge(startVertex, focused_vertex, false);
+                    startVertex = null;
+                    listOfEdges.add(temp_edge);
+                    Drawboard.getChildren().add(temp_edge);
+                    temp_edge.toBack();
+                    temp_edge.requestFocus();
                 }
+                else{
+                    Drawboard.requestFocus();
+                }
+                // No matter whether the edge is created or not
+                // Return to EDGE_1 state
+                s = Status.EDGE_1;
+            }
+            // If the status is EDGE_1, meaning that we are choosing the first Vertex
+            else if(s == Status.EDGE_1) {
+                startVertex = focused_vertex;
+                s = Status.EDGE_2;
             }
         }
         // If the current state is SELECT, we move the focus to the drawing board.
@@ -356,21 +376,18 @@ public class VisualNeoController {
      */
     @FXML
     private void handleDragOnBoard() {
-        // If the status is SELECT, meaning that we possibly need to move a vertex and relevant edges
-        if (s == Status.SELECT) {
-            Vertex temp = getFocusedVertex();
-            if(temp != null) {
-                // temp is the focused vertex
-                // System.out.println("Drag the vertex");
-                int numOfEdges = listOfEdges.size();
-                for(int j=0; j<numOfEdges; j++){
-                    Edge temp_edge = listOfEdges.get(j);
-                    if( temp_edge.startVertex == temp || temp_edge.endVertex == temp){
-                        temp_edge.updatePos();
-                    }
-                }
+        if (s != Status.SELECT || !(current_focused instanceof Vertex)) return;
+        // If the status is SELECT and current_focused is a Vertex
+        // we need to move all edges that connect to it
+        Vertex focused_vertex = (Vertex) current_focused;
+        int numOfEdges = listOfEdges.size();
+        for(int j=0; j<numOfEdges; j++){
+            Edge temp_edge = listOfEdges.get(j);
+            if( temp_edge.startVertex == focused_vertex || temp_edge.endVertex == focused_vertex){
+                temp_edge.updatePos();
             }
         }
+        // System.out.println("Move all connected edges");
     }
 
     /**
@@ -412,7 +429,6 @@ public class VisualNeoController {
      */
     @FXML
     private void handleGeneratePatterns() {
-
     }
 
     /**
@@ -428,19 +444,18 @@ public class VisualNeoController {
      */
     @FXML
     private void handleSimilaritySearch() {
-
     }
 
     @FXML
     void handleAddLabel() {
         // TODO: Split this to two functions
         // Add Node labels to the Vertex/Edge
-        if(last_focused != null){
+        if(current_focused != null){
             try{
-                if(last_focused instanceof Vertex)
-                    last_focused.addLabel(choicebox_node_label.getValue());
+                if(current_focused instanceof Vertex)
+                    current_focused.addLabel(choicebox_node_label.getValue());
                 else
-                    last_focused.addLabel(choicebox_relation_label.getValue());
+                    current_focused.addLabel(choicebox_relation_label.getValue());
                 System.out.println("Successfully add the label");
             }catch (Exception e){
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -459,12 +474,9 @@ public class VisualNeoController {
         }
     }
 
-
     @FXML
     void handleAddProperty() {
-
     }
-
 
     /**
      * Called when the user's mouse enter a button
@@ -473,7 +485,6 @@ public class VisualNeoController {
     private void handleMouseEnterButton(MouseEvent m) {
         Drawboard.getScene().setCursor(Cursor.HAND);
     }
-
     /**
      * Called when the user's mouse leaves a button
      */
@@ -506,32 +517,7 @@ public class VisualNeoController {
             listOfEdges.get(i).canSelect = true;
         }
     }
-
     public static Status getStatus(){
         return s;
     }
-
-    public Vertex getFocusedVertex(){
-        int numOfVertices = listOfVertices.size();
-        for(int i =0; i < numOfVertices; i++) {
-            Vertex temp = listOfVertices.get(i);
-            if(temp.isFocused()) {
-                // We find the vertex
-                return temp;
-            }
-        }
-        return null;
-    }
-    public Edge getFocusedEdge(){
-        int numOfEdges = listOfEdges.size();
-        for(int i =0; i < numOfEdges; i++) {
-            Edge temp = listOfEdges.get(i);
-            if(temp.isFocused()) {
-                // We find the edge
-                return temp;
-            }
-        }
-        return null;
-    }
-
 }

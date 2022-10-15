@@ -10,14 +10,13 @@ import org.neo4j.driver.Value;
 
 import java.util.HashMap;
 
-public class GraphElement extends StackPane {
+abstract public class GraphElement extends StackPane {
 
     // Radius of the Vertex
     final int VERTEX_RADIUS = 25;
     // A boolean variable indicates whether it can be selected and moved now
     public boolean canSelect = false;
     // A boolean variable indicates whether it is the focus right now
-    public boolean isFocused = false;
 
     // UI display
     Text label_displayed;
@@ -30,6 +29,11 @@ public class GraphElement extends StackPane {
     GraphElement(){
         // initialize the arraylist
         properties = new HashMap<>();
+        label_displayed = new Text("");
+
+        // Set focus effect
+        setFocusTraversable(true);
+
     }
 
      void mouseEntered(MouseEvent m) {
@@ -59,5 +63,10 @@ public class GraphElement extends StackPane {
     public String getLabel(){return label;}
 
     public HashMap<String,Value> getProp(){return properties;}
+
+    abstract public void becomeFocused();
+    abstract public void removeFocused();
+    abstract protected void pressed(MouseEvent m);
+    abstract public String toText();
 
 }
