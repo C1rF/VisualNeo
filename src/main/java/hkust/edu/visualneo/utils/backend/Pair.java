@@ -17,13 +17,8 @@ public record Pair<E>(E head, E tail) {
         Objects.requireNonNull(second, "Null element!");
         if (first.equals(second))
             throw new IllegalArgumentException("Elements in a pair should be distinct!");
-
-        if (first.compareTo(second) < 0) {
-            return new Pair<>(first, second);
-        }
-        else {
-            return new Pair<>(second, first);
-        }
+        
+        return first.compareTo(second) < 0 ? new Pair<>(first, second) : new Pair<>(second, first);
     }
 
     @Override
