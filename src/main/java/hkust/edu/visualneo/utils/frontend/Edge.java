@@ -4,6 +4,7 @@ import hkust.edu.visualneo.VisualNeoController;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.QuadCurve;
@@ -29,6 +30,8 @@ public class Edge extends GraphElement {
         this.directed = directed;
         selfLoop = (startVertex == endVertex);
         offsetIndex = 0;
+        // Notify two vertices to attach it
+        attach();
         // Initialize the shape
         initializeShape();
         setCurve();
@@ -154,6 +157,19 @@ public class Edge extends GraphElement {
             else if (event.getEventType() == MouseEvent.MOUSE_EXITED)
                 mouseExited(event);
         }
+    }
+
+    private void attach() {
+        startVertex.attach(this);
+        endVertex.attach(this);
+    }
+
+    @Override
+    public void eraseFrom(VisualNeoController controller) {
+        startVertex.detach(this);
+        endVertex.detach(this);
+        ((Pane) getParent()).getChildren().remove(this);
+        controller.listOfEdges.remove(this);
     }
 
     /**

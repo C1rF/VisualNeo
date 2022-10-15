@@ -22,7 +22,10 @@ import javafx.stage.Stage;
 import org.neo4j.driver.Value;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class VisualNeoController {
     /**
@@ -305,41 +308,19 @@ public class VisualNeoController {
         if (s == Status.ERASE) {
             GraphElement current_highlight = highlight_element.get();
             // Check whether it is a Vertex
-            if (current_highlight instanceof Vertex) {
-                Vertex focused_vertex = (Vertex) current_highlight;
-                // TODO: Get connected edges directly from the node
-                // First remove all its connected edges
-                int numOfEdges = listOfEdges.size();
-                List<Integer> index_list = new ArrayList<Integer>();
-                for (int j = 0; j < numOfEdges; j++) {
-                    Edge temp_edge = listOfEdges.get(j);
-                    if (temp_edge.startVertex == focused_vertex || temp_edge.endVertex == focused_vertex) {
-                        // Remove the edge both from the DrawBoard first
-                        Drawboard.getChildren().remove(temp_edge);
-                        index_list.add(j);
-                    }
-                }
-                // Remove the edge both from the list
-                for (int t = index_list.size() - 1; t >= 0; t--) {
-                    int j = index_list.get(t);
-                    listOfEdges.remove(j);
-                }
-                // Then remove the vertex itself
+            if (current_highlight instanceof Vertex focused_vertex) {
+                // Remove the vertex itself
                 highlight_element.set(null);
-                Drawboard.getChildren().remove(focused_vertex);
-                listOfVertices.remove(focused_vertex);
+                focused_vertex.eraseFrom(this);
                 // For testing
                 System.out.println("Successfully removed a vertex");
             }
-
             // Check whether it is an Edge
-            if (current_highlight instanceof Edge) {
-                Edge focused_edge = (Edge) current_highlight;
+            if (current_highlight instanceof Edge focused_edge) {
                 Vertex this_startVertex = focused_edge.startVertex;
                 Vertex this_endVertex = focused_edge.endVertex;
                 highlight_element.set(null);
-                Drawboard.getChildren().remove(focused_edge);
-                listOfEdges.remove(focused_edge);
+                focused_edge.eraseFrom(this);
                 updateEdgeShape(this_startVertex, this_endVertex);
                 System.out.println("Successfully removed an edge");
             }

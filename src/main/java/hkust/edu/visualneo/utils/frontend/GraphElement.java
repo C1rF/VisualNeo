@@ -58,6 +58,8 @@ abstract public class GraphElement extends Group {
 
     abstract public void removeHighlight();
 
+    abstract public void eraseFrom(VisualNeoController controller);
+
     abstract protected void pressed(MouseEvent m);
 
     abstract protected void mouseEntered(MouseEvent m);

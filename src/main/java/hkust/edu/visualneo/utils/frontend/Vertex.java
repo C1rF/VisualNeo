@@ -4,11 +4,14 @@ import hkust.edu.visualneo.VisualNeoController;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Vertex extends GraphElement {
 
@@ -19,6 +22,8 @@ public class Vertex extends GraphElement {
     double offX, offY;
     // The shape contains a circle and a text(not necessary) on top of it
     private Circle c;
+
+    private Set<Edge> edges = new HashSet<>();
 
     // Constructor
     public Vertex(double x, double y) {
@@ -122,6 +127,26 @@ public class Vertex extends GraphElement {
             else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
                 mouseReleased(event);
         }
+    }
+
+    public void attach(Edge new_edge) {
+        edges.add(new_edge);
+    }
+
+    public void detach(Edge edge_to_detach) {
+        edges.remove(edge_to_detach);
+    }
+
+    @Override
+    public void eraseFrom(VisualNeoController controller) {
+        Set<Edge> edges_copy = new HashSet<>(edges);
+        edges_copy.forEach(edge -> edge.eraseFrom(controller));
+        ((Pane) getParent()).getChildren().remove(this);
+        controller.listOfVertices.remove(this);
+    }
+
+    public Set<Edge> getAllEdges() {
+        return edges;
     }
 
     /**
