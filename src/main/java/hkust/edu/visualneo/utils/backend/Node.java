@@ -3,12 +3,12 @@ package hkust.edu.visualneo.utils.backend;
 import hkust.edu.visualneo.utils.frontend.Vertex;
 import org.neo4j.driver.Value;
 
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Node extends Entity {
 
-    final ArrayList<Relation> relations = new ArrayList<>();
+    final Set<Relation> relations = new TreeSet<>();
 
     public Node(long id, Vertex vertex) {
         this(id, vertex.getLabel(), vertex.getProp());
@@ -24,6 +24,23 @@ public class Node extends Entity {
 
     public int relationCount() {
         return relations.size();
+    }
+
+    public Set<Node> neighbors() {
+        return relations
+                .stream()
+                .map(relation -> relation.other(this))
+                .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    public Set<Relation> relationsWith(Node other) {
+        if (other == null)
+            return Collections.emptySet();
+
+        return relations
+                .stream()
+                .filter(relation -> other.equals(relation.other(this)))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     void attach(Relation relation) {
@@ -71,8 +88,10 @@ public class Node extends Entity {
     boolean resembles(Entity other) {
         if (!(other instanceof Node))
             return false;
+
         if (this == other)
             return false;
+        
         return super.resembles(other);
     }
 
