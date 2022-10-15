@@ -38,7 +38,7 @@ public class LoadAnimation {
         scene.setFill(null);
         dialogStage.setScene(scene);
 
-        String[] labels_content = {"Load Database .", "Load Database ..", "Load Database ..."};
+        String[] labels_content = {"Loading Database .", "Loading Database ..", "Loading Database ..."};
         Label[] labels = new Label[NUM_LABELS];
         FadeTransition[] fade_all = new FadeTransition[NUM_LABELS];
         FadeTransition[] show_all = new FadeTransition[NUM_LABELS];
