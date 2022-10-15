@@ -4,6 +4,8 @@ import hkust.edu.visualneo.utils.backend.DbMetadata;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.GraphElement;
 import hkust.edu.visualneo.utils.frontend.Vertex;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -126,7 +128,7 @@ public class VisualNeoController {
     private Scene scene;
 
     // The current focused element
-    private GraphElement current_focused;
+    private ObjectProperty<GraphElement> highlight_element = new SimpleObjectProperty<>();
 
     // ALL Status
     public enum Status {EMPTY, VERTEX, EDGE_1, EDGE_2, ERASE, SELECT}
@@ -156,7 +158,23 @@ public class VisualNeoController {
     @FXML
     private void initialize() {
         s = Status.EMPTY;
-        current_focused = null;
+        highlight_element.addListener((observableValue, oldHighlight, newHighlight) -> {
+                    // First we need to remove the highlight from the previous GraphElement
+                    if (oldHighlight != null) oldHighlight.removeHighlight();
+                    // Then depends on the new Highlight, we determine the display
+                    if (newHighlight == null) {
+                        // newHighlight is NOT a GraphElement, hide all panes
+                        info_pane.setVisible(false);
+                        pane_node_label.setVisible(false);
+                        pane_relation_label.setVisible(false);
+                        pane_property.setVisible(false);
+                    } else {
+                        // newHighlight is a GraphElement, show the corresponding panes
+                        newHighlight.becomeHighlight();
+                        refreshAllPane(newHighlight);
+                    }
+                }
+        );
     }
 
     public void setApp(VisualNeoApp app) {
@@ -167,22 +185,15 @@ public class VisualNeoController {
         this.scene = scene;
         scene.focusOwnerProperty().addListener(
                 (prop, oldNode, newNode) -> {
-
                     // Check whether the new node is a GraphElement(Vertex or Edge)
-                    // Decide whether to show the info pane and label/property panes
                     if (newNode instanceof GraphElement) {
                         System.out.println("A GraphElement got focused!");
-                        // First remove the focus display from the "last" focus
-                        if (current_focused != null) current_focused.removeHighlight();
-                        // Assign the new focus to the current_focused
-                        current_focused = (GraphElement) newNode;
-                        current_focused.becomeHighlight();
-                        refreshInfoPane(current_focused);
+                        // Assign the new focus to the current_highlight
+                        highlight_element.set((GraphElement) newNode);
                     } else {
                         // If the focused element is not a GraphElement(Vertex or Edge)
                         System.out.println("A non-GraphElement got focused!");
-                        // If the focused item becomes the DrawBoard or buttons on the toolbox
-                        // Remove the current_focused and hide those panes
+                        // If the focused item becomes the DrawBoard or buttons on the toolbox, set the highlight to null
                         // Otherwise, do nothing
                         Button[] draw_btns = {btn_clear, btn_select, btn_vertex, btn_edge, btn_erase, btn_save, btn_load};
                         boolean is_btn = false;
@@ -192,16 +203,10 @@ public class VisualNeoController {
                                 break;
                             }
                         }
-                        if (newNode == Drawboard || is_btn) {
-                            if (current_focused != null) current_focused.removeHighlight();
-                            current_focused = null;
-                            info_pane.setVisible(false);
-                            pane_node_label.setVisible(false);
-                            pane_relation_label.setVisible(false);
-                            pane_property.setVisible(false);
-                        }
+                        if (newNode == Drawboard || is_btn) highlight_element.set(null);
                     }
-                });
+                }
+        );
     }
 
     /**
@@ -298,10 +303,10 @@ public class VisualNeoController {
 
         // If the status is ERASE, meaning that we need to erase the focused Vertex/Edge
         if (s == Status.ERASE) {
-
+            GraphElement current_highlight = highlight_element.get();
             // Check whether it is a Vertex
-            if (current_focused instanceof Vertex) {
-                Vertex focused_vertex = (Vertex) current_focused;
+            if (current_highlight instanceof Vertex) {
+                Vertex focused_vertex = (Vertex) current_highlight;
                 // TODO: Get connected edges directly from the node
                 // First remove all its connected edges
                 int numOfEdges = listOfEdges.size();
@@ -320,6 +325,7 @@ public class VisualNeoController {
                     listOfEdges.remove(j);
                 }
                 // Then remove the vertex itself
+                highlight_element.set(null);
                 Drawboard.getChildren().remove(focused_vertex);
                 listOfVertices.remove(focused_vertex);
                 // For testing
@@ -327,10 +333,11 @@ public class VisualNeoController {
             }
 
             // Check whether it is an Edge
-            if (current_focused instanceof Edge) {
-                Edge focused_edge = (Edge) current_focused;
+            if (current_highlight instanceof Edge) {
+                Edge focused_edge = (Edge) current_highlight;
                 Vertex this_startVertex = focused_edge.startVertex;
                 Vertex this_endVertex = focused_edge.endVertex;
+                highlight_element.set(null);
                 Drawboard.getChildren().remove(focused_edge);
                 listOfEdges.remove(focused_edge);
                 updateEdgeShape(this_startVertex, this_endVertex);
@@ -341,9 +348,10 @@ public class VisualNeoController {
         // If the status is EDGE_1/EDGE_2, meaning that we are forming the EDGE
         if (s == Status.EDGE_1 || s == Status.EDGE_2) {
 
-            if (!(current_focused instanceof Vertex)) return;
+            GraphElement current_highlight = highlight_element.get();
+            if (!(current_highlight instanceof Vertex)) return;
 
-            Vertex focused_vertex = (Vertex) current_focused;
+            Vertex focused_vertex = (Vertex) current_highlight;
             // If the status is EDGE_2, meaning that we are choosing the second Vertex
             if (s == Status.EDGE_2) {
                 /** Case 1: User clicks the white space, we do nothing but remove the highlight */
@@ -383,10 +391,11 @@ public class VisualNeoController {
      */
     @FXML
     private void handleDragOnBoard() {
-        if (s != Status.SELECT || !(current_focused instanceof Vertex)) return;
-        // If the status is SELECT and current_focused is a Vertex
+        GraphElement current_highlight = highlight_element.get();
+        if (s != Status.SELECT || !(current_highlight instanceof Vertex)) return;
+        // If the status is SELECT and current_highlight is a Vertex
         // we need to move all edges that connect to it
-        Vertex focused_vertex = (Vertex) current_focused;
+        Vertex focused_vertex = (Vertex) current_highlight;
         int numOfEdges = listOfEdges.size();
         for (int j = 0; j < numOfEdges; j++) {
             Edge temp_edge = listOfEdges.get(j);
@@ -465,10 +474,11 @@ public class VisualNeoController {
 
     @FXML
     void handleAddNodeLabel() {
+        GraphElement current_highlight = highlight_element.get();
         // Add Node labels to the Vertex
-        if (current_focused != null && current_focused instanceof Vertex) {
-            current_focused.addLabel(choicebox_node_label.getValue());
-            refreshInfoPane(current_focused);
+        if (current_highlight != null && current_highlight instanceof Vertex) {
+            current_highlight.addLabel(choicebox_node_label.getValue());
+            refreshAllPane(current_highlight);
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Label Addition Error");
@@ -480,10 +490,11 @@ public class VisualNeoController {
 
     @FXML
     void handleAddRelationLabel() {
+        GraphElement current_highlight = highlight_element.get();
         // Add Relation labels to the Edge
-        if (current_focused != null && current_focused instanceof Edge) {
-            current_focused.addLabel(choicebox_relation_label.getValue());
-            refreshInfoPane(current_focused);
+        if (current_highlight != null && current_highlight instanceof Edge) {
+            current_highlight.addLabel(choicebox_relation_label.getValue());
+            refreshAllPane(current_highlight);
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Label Addition Error");
@@ -608,11 +619,11 @@ public class VisualNeoController {
      * Helper Function
      * Given a GraphElement, refresh the InfoPane according to the information
      */
-    private void refreshInfoPane(GraphElement current_focused) {
-        //javafx.scene.Node graphical_node = current_focused.getShape();
+    private void refreshAllPane(GraphElement current_highlight) {
+        //javafx.scene.Node graphical_node = current_highlight.getShape();
         info_pane.setVisible(true);
         pane_property.setVisible(true);
-        if (current_focused instanceof Vertex) {
+        if (current_highlight instanceof Vertex) {
             pane_node_label.setVisible(true);
             pane_relation_label.setVisible(false);
             text_node_or_relation.setText("Node Information");
@@ -624,8 +635,8 @@ public class VisualNeoController {
 
         // Display the information on the information pane
         StringBuilder builder = new StringBuilder();
-        text_label_info.setText(current_focused.getLabel());
-        HashMap<String, Value> properties = current_focused.getProp();
+        text_label_info.setText(current_highlight.getLabel());
+        HashMap<String, Value> properties = current_highlight.getProp();
         for (String propertyKey : properties.keySet()) {
             builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
         }
