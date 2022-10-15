@@ -8,6 +8,7 @@ module hkust.edu.visualneo {
     requires org.neo4j.driver;
 
     requires protonpack;
+    requires java.desktop;
 
     opens hkust.edu.visualneo to javafx.fxml;
     exports hkust.edu.visualneo;
