@@ -317,11 +317,8 @@ public class VisualNeoController {
             }
             // Check whether it is an Edge
             if (current_highlight instanceof Edge focused_edge) {
-                Vertex this_startVertex = focused_edge.startVertex;
-                Vertex this_endVertex = focused_edge.endVertex;
                 highlight_element.set(null);
                 focused_edge.eraseFrom(this);
-                updateEdgeShape(this_startVertex, this_endVertex);
                 System.out.println("Successfully removed an edge");
             }
         }
@@ -336,16 +333,15 @@ public class VisualNeoController {
             // If the status is EDGE_2, meaning that we are choosing the second Vertex
             if (s == Status.EDGE_2) {
                 /** Case 1: User clicks the white space, we do nothing but remove the highlight */
-                if (startVertex == focused_vertex || Drawboard.getScene().getCursor() != Cursor.HAND) {
+                if (startVertex == focused_vertex && Drawboard.getScene().getCursor() != Cursor.HAND) {
                     Drawboard.requestFocus();
                 }
                 /** Case 2: User does want to create an edge between node(s) */
                 else {
                     Edge temp_edge = new Edge(startVertex, focused_vertex, false);
                     Drawboard.getChildren().add(temp_edge);
-                    temp_edge.toBack();
+                    temp_edge.toFront();
                     listOfEdges.add(temp_edge);
-                    updateEdgeShape(startVertex, focused_vertex);
                     startVertex = null;
                     temp_edge.requestFocus();
                 }
@@ -377,13 +373,6 @@ public class VisualNeoController {
         // If the status is SELECT and current_highlight is a Vertex
         // we need to move all edges that connect to it
         Vertex focused_vertex = (Vertex) current_highlight;
-        int numOfEdges = listOfEdges.size();
-        for (int j = 0; j < numOfEdges; j++) {
-            Edge temp_edge = listOfEdges.get(j);
-            if (temp_edge.startVertex == focused_vertex || temp_edge.endVertex == focused_vertex) {
-                temp_edge.setCurve();
-            }
-        }
         // System.out.println("Move all connected edges");
     }
 
@@ -574,26 +563,6 @@ public class VisualNeoController {
         final_item.put("Count", metadata.relationCount());
         items.add(final_item);
         tableview_relation.getItems().addAll(items);
-    }
-
-    private void updateEdgeShape(Vertex startVertex, Vertex endVertex) {
-        int count = 0;
-        ArrayList<Edge> temp_list = new ArrayList<>();
-        for (int i = 0; i < listOfEdges.size(); i++) {
-            Edge temp = listOfEdges.get(i);
-            if ((temp.startVertex == startVertex && temp.endVertex == endVertex) ||
-                    (temp.endVertex == startVertex && temp.startVertex == endVertex)
-            ) {
-                count++;
-                temp_list.add(temp);
-            }
-        }
-        for (int i = 0; i < count; i++) {
-            Edge temp_to_update = temp_list.get(i);
-            temp_to_update.updateOffset(count, i);
-            temp_to_update.setCurve();
-        }
-
     }
 
     /**

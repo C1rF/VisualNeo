@@ -9,9 +9,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Vertex extends GraphElement {
 
@@ -23,7 +22,7 @@ public class Vertex extends GraphElement {
     // The shape contains a circle and a text(not necessary) on top of it
     private Circle c;
 
-    private Set<Edge> edges = new HashSet<>();
+    private Set<Edge> edges = new LinkedHashSet<>();
 
     // Constructor
     public Vertex(double x, double y) {
@@ -106,6 +105,7 @@ public class Vertex extends GraphElement {
     public void setPos() {
         setLayoutX(x);
         setLayoutY(y);
+        updateAllEdges();
     }
 
     /**
@@ -127,6 +127,34 @@ public class Vertex extends GraphElement {
             else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
                 mouseReleased(event);
         }
+    }
+
+    public Set<Edge> edgesBetween(Vertex other) {
+        if (other == null)
+            return Collections.emptySet();
+
+        return edges
+                .stream()
+                .filter(edge -> other.equals(edge.other(this)))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public void updateEdgesBetween(Vertex other) {
+        if (other == null)
+            return;
+
+        edges = edgesBetween(other);
+        int numEdges = edges.size();
+        int edgeIdx = 0;
+        for (Edge edge : edges) {
+            edge.updateIdx(edgeIdx, numEdges);
+            edge.update();
+            ++edgeIdx;
+        }
+    }
+
+    public void updateAllEdges() {
+        edges.forEach(Edge::update);
     }
 
     public void attach(Edge new_edge) {

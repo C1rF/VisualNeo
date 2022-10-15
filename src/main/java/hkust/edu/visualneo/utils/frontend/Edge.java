@@ -6,20 +6,22 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.CubicCurve;
-import javafx.scene.shape.QuadCurve;
+import javafx.scene.shape.*;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
 import java.util.Arrays;
 
 public class Edge extends GraphElement {
 
+    private static final double GAP_ANGLE = Math.PI / 18;
+    private static final double LINE_LENGTH = VERTEX_RADIUS + 5.0;
+
     public Vertex startVertex;
     public Vertex endVertex;
     public boolean directed;
-    private QuadCurve edge;
-    private CubicCurve self_edge;
-    private double offsetIndex;
+    private final Path curve = new Path();
+    private int edgeIdx;
+    private int numEdges;
 
     private boolean selfLoop;
 
@@ -29,19 +31,17 @@ public class Edge extends GraphElement {
         this.endVertex = endVertex;
         this.directed = directed;
         selfLoop = (startVertex == endVertex);
-        offsetIndex = 0;
         // Notify two vertices to attach it
         attach();
         // Initialize the shape
         initializeShape();
-        setCurve();
         // Give them event handler
         mouseEventHandler handler = new mouseEventHandler();
         addEventHandler(MouseEvent.ANY, handler);
         // Add curve and label to the Edge Group (Display)
-        this.getChildren().addAll(edge, label_displayed);
+        this.getChildren().addAll(curve, label_displayed);
         label_displayed.toBack();
-        edge.toBack();
+        curve.toBack();
         // For Testing
         System.out.println("An Edge from (" + startVertex.x + " , " + startVertex.y + ") to " +
                 "(" + endVertex.x + " , " + endVertex.y + ")" + " is created!");
@@ -49,22 +49,21 @@ public class Edge extends GraphElement {
 
     @Override
     protected void initializeShape() {
-        edge = new QuadCurve();
-        edge.setStroke(new Color(0, 0, 0, 0.4));
-        //edge.setStrokeType(StrokeType.CENTERED);
-        edge.setFill(null);
+        curve.setStroke(new Color(0, 0, 0, 0.4));
+//        edge.setStrokeType(StrokeType.CENTERED);
+        curve.setFill(null);
     }
 
     @Override
     public void becomeHighlight() {
-        edge.setStrokeWidth(6);
-        edge.setStroke(new Color(0, 0, 0, 0.7));
+        curve.setStrokeWidth(6);
+        curve.setStroke(new Color(0, 0, 0, 0.7));
     }
 
     @Override
     public void removeHighlight() {
-        edge.setStrokeWidth(5);
-        edge.setStroke(new Color(0, 0, 0, 0.4));
+        curve.setStrokeWidth(5);
+        curve.setStroke(new Color(0, 0, 0, 0.4));
     }
 
     /**
@@ -84,62 +83,97 @@ public class Edge extends GraphElement {
             getScene().setCursor(Cursor.DISAPPEAR);
     }
 
-    /**
-     * Set the position of the line
-     */
-    public void setCurve() {
-        // If this edge is self-connected
-        if (selfLoop) {
-            double x = startVertex.x;
-            double y = startVertex.y;
-            edge.setStartX(x - 0.75 * VERTEX_RADIUS);
-            edge.setStartY(y);
-            edge.setControlX(x);
-            edge.setControlY(y - VERTEX_RADIUS * (4 + offsetIndex));
-            edge.setEndX(x + 0.75 * VERTEX_RADIUS);
-            edge.setEndY(y);
-            // Set the label at the same time
-            label_displayed.setLayoutX(x);
-            label_displayed.setLayoutY(y + VERTEX_RADIUS * offsetIndex);
-            return;
+    public void update() {
+        curve.getElements().clear();
+        
+        if (startVertex.equals(endVertex)) {
+            double cX = startVertex.x;
+            double cY = startVertex.y;
+            // TODO: Modify this
+            double baseAngle = Math.PI / 2;
+            
+            double offsetAngle = (2 * edgeIdx - numEdges + 0.5) * GAP_ANGLE;
+
+            double l1A = baseAngle + offsetAngle;
+            double l1Cos = Math.cos(l1A);
+            double l1Sin = Math.sin(l1A);
+            double l1SX = cX + VERTEX_RADIUS * l1Cos;
+            double l1SY = cY + VERTEX_RADIUS * l1Sin;
+            double l1EX = cX + LINE_LENGTH * l1Cos;
+            double l1EY = cY + LINE_LENGTH * l1Sin;
+
+            double l2A = baseAngle + offsetAngle + GAP_ANGLE;
+            double l2Cos = Math.cos(l2A);
+            double l2Sin = Math.sin(l2A);
+            double l2SX = cX + LINE_LENGTH * l2Cos;
+            double l2SY = cY + LINE_LENGTH * l2Sin;
+            double l2EX = cX + VERTEX_RADIUS * l2Cos;
+            double l2EY = cY + VERTEX_RADIUS * l2Sin;
+
+            double r = LINE_LENGTH * Math.tan(GAP_ANGLE / 2);
+
+            curve.getElements().addAll(
+                    new MoveTo(l1SX, l1SY),
+                    new LineTo(l1EX, l1EY),
+                    new ArcTo(r, r, 0.0, l2SX, l2SY, true, false),
+                    new LineTo(l2EX, l2EY));
         }
+        else {
+            double sX, sY, eX, eY;
+            if (startVertex.x < endVertex.x || startVertex.x == endVertex.x && startVertex.y <= endVertex.y) {
+                sX = startVertex.x;
+                sY = startVertex.y;
+                eX = endVertex.x;
+                eY = endVertex.y;
+            }
+            else {
+                sX = endVertex.x;
+                sY = endVertex.y;
+                eX = startVertex.x;
+                eY = startVertex.y;
+            }
+            double baseAngle = sX == eX ? Math.PI / 2 : Math.atan2(eY - sY, eX - sX);
 
-        double start_x = startVertex.x;
-        double start_y = startVertex.y;
-        double end_x = endVertex.x;
-        double end_y = endVertex.y;
-        // Now we get the four values
-        // Compute the control point's coordinate
-        double L = Math.sqrt(Math.pow(end_y - start_y, 2) + Math.pow(end_x - start_x, 2));
-        double slope = -(end_x - start_x) / (end_y - start_y);
-        double sin_val = slope / Math.sqrt(1 + slope * slope);
-        double cos_val = 1 / Math.sqrt(1 + slope * slope);
-        double control_pt_x = (start_x + end_x) / 2 - L * offsetIndex * cos_val;
-        double control_pt_y = (start_y + end_y) / 2 - L * offsetIndex * sin_val;
-        // Set all the attributes for the edge
-        edge.setStartX(start_x);
-        edge.setStartY(start_y);
-        edge.setControlX(control_pt_x);
-        edge.setControlY(control_pt_y);
-        edge.setEndX(end_x);
-        edge.setEndY(end_y);
+            double offsetAngle = (edgeIdx - (numEdges - 1) / 2.0) * GAP_ANGLE;
 
-        // Set the label at the same time
-        label_displayed.setLayoutX(control_pt_x - 0.2 * VERTEX_RADIUS);
-        label_displayed.setLayoutY(control_pt_y);
+            double l1A = baseAngle + offsetAngle;
+            double l1Cos = Math.cos(l1A);
+            double l1Sin = Math.sin(l1A);
+            double l1SX = sX + VERTEX_RADIUS * l1Cos;
+            double l1SY = sY + VERTEX_RADIUS * l1Sin;
+            double l1EX = sX + LINE_LENGTH * l1Cos;
+            double l1EY = sY + LINE_LENGTH * l1Sin;
+
+            double l2A = baseAngle - offsetAngle + Math.PI;
+            double l2Cos = Math.cos(l2A);
+            double l2Sin = Math.sin(l2A);
+            double l2SX = eX + LINE_LENGTH * l2Cos;
+            double l2SY = eY + LINE_LENGTH * l2Sin;
+            double l2EX = eX + VERTEX_RADIUS * l2Cos;
+            double l2EY = eY + VERTEX_RADIUS * l2Sin;
+
+            double d = Math.sqrt(Math.pow(eY - sY, 2) + Math.pow(eX - sX, 2));
+            double r = offsetAngle == 0.0 ?
+                       Double.POSITIVE_INFINITY :
+                       (d / 2 - VERTEX_RADIUS * Math.cos(offsetAngle)) / Math.sin(offsetAngle);
+
+            curve.getElements().addAll(
+                    new MoveTo(l1SX, l1SY),
+                    new LineTo(l1EX, l1EY),
+                    new ArcTo(r, r, 0.0, l2SX, l2SY, false, edgeIdx < numEdges / 2),
+                    new LineTo(l2EX, l2EY));
+        }
     }
 
     /**
      * Given the num_curves and curve_index, determine the offset of that edge
      *
-     * @param num_curves  number of edges between startVertex and endVertex (including itself)
-     * @param curve_index the index of this edge among all edges between startVertex and endVertex
+     * @param edgeIdx the index of this edge among all edges between startVertex and endVertex
+     * @param numEdges number of edges between startVertex and endVertex (including itself)
      */
-    public void updateOffset(int num_curves, int curve_index) {
-        if (!selfLoop)
-            offsetIndex = 0.14 * curve_index - 0.07 * (num_curves - 1);
-        else
-            offsetIndex = 2 * curve_index;
+    public void updateIdx(int edgeIdx, int numEdges) {
+        this.edgeIdx = edgeIdx;
+        this.numEdges = numEdges;
     }
 
     /**
@@ -162,14 +196,27 @@ public class Edge extends GraphElement {
     private void attach() {
         startVertex.attach(this);
         endVertex.attach(this);
+        startVertex.updateEdgesBetween(endVertex);
+        int x = 0;
     }
 
     @Override
     public void eraseFrom(VisualNeoController controller) {
         startVertex.detach(this);
         endVertex.detach(this);
+        startVertex.updateEdgesBetween(endVertex);
         ((Pane) getParent()).getChildren().remove(this);
         controller.listOfEdges.remove(this);
+    }
+    
+    public Vertex other(Vertex vertex) {
+        if (vertex == startVertex)
+            return endVertex;
+
+        if (vertex == endVertex)
+            return startVertex;
+
+        return null;
     }
 
     /**
