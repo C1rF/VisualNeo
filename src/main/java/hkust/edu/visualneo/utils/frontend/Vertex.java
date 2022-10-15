@@ -143,7 +143,7 @@ public class Vertex extends GraphElement {
         if (other == null)
             return;
 
-        edges = edgesBetween(other);
+        Set<Edge> edges = edgesBetween(other);
         int numEdges = edges.size();
         int edgeIdx = 0;
         for (Edge edge : edges) {

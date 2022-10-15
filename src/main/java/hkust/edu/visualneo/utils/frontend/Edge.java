@@ -13,8 +13,8 @@ import java.util.Arrays;
 
 public class Edge extends GraphElement {
 
-    private static final double GAP_ANGLE = Math.PI / 18;
-    private static final double LINE_LENGTH = VERTEX_RADIUS + 5.0;
+    private static final double GAP_ANGLE = Math.PI / 10;
+    private static final double LINE_LENGTH = VERTEX_RADIUS + 40.0;
 
     public Vertex startVertex;
     public Vertex endVertex;
@@ -115,7 +115,7 @@ public class Edge extends GraphElement {
             curve.getElements().addAll(
                     new MoveTo(l1SX, l1SY),
                     new LineTo(l1EX, l1EY),
-                    new ArcTo(r, r, 0.0, l2SX, l2SY, true, false),
+                    new ArcTo(r, r, 0.0, l2SX, l2SY, true, true),
                     new LineTo(l2EX, l2EY));
         }
         else {
@@ -136,21 +136,17 @@ public class Edge extends GraphElement {
 
             double offsetAngle = (edgeIdx - (numEdges - 1) / 2.0) * GAP_ANGLE;
 
-            double l1A = baseAngle + offsetAngle;
-            double l1Cos = Math.cos(l1A);
-            double l1Sin = Math.sin(l1A);
-            double l1SX = sX + VERTEX_RADIUS * l1Cos;
-            double l1SY = sY + VERTEX_RADIUS * l1Sin;
-            double l1EX = sX + LINE_LENGTH * l1Cos;
-            double l1EY = sY + LINE_LENGTH * l1Sin;
+            double aSA = baseAngle + offsetAngle;
+            double aSCos = Math.cos(aSA);
+            double aSSin = Math.sin(aSA);
+            double aSX = sX + VERTEX_RADIUS * aSCos;
+            double aSY = sY + VERTEX_RADIUS * aSSin;
 
-            double l2A = baseAngle - offsetAngle + Math.PI;
-            double l2Cos = Math.cos(l2A);
-            double l2Sin = Math.sin(l2A);
-            double l2SX = eX + LINE_LENGTH * l2Cos;
-            double l2SY = eY + LINE_LENGTH * l2Sin;
-            double l2EX = eX + VERTEX_RADIUS * l2Cos;
-            double l2EY = eY + VERTEX_RADIUS * l2Sin;
+            double aEA = baseAngle - offsetAngle + Math.PI;
+            double aECos = Math.cos(aEA);
+            double aESin = Math.sin(aEA);
+            double aEX = eX + VERTEX_RADIUS * aECos;
+            double aEY = eY + VERTEX_RADIUS * aESin;
 
             double d = Math.sqrt(Math.pow(eY - sY, 2) + Math.pow(eX - sX, 2));
             double r = offsetAngle == 0.0 ?
@@ -158,10 +154,10 @@ public class Edge extends GraphElement {
                        (d / 2 - VERTEX_RADIUS * Math.cos(offsetAngle)) / Math.sin(offsetAngle);
 
             curve.getElements().addAll(
-                    new MoveTo(l1SX, l1SY),
-                    new LineTo(l1EX, l1EY),
-                    new ArcTo(r, r, 0.0, l2SX, l2SY, false, edgeIdx < numEdges / 2),
-                    new LineTo(l2EX, l2EY));
+                    new MoveTo(aSX, aSY),
+                    ((Double) r).equals(Double.POSITIVE_INFINITY) ?
+                    new LineTo(aEX, aEY) :
+                    new ArcTo(r, r, 0.0, aEX, aEY, false, edgeIdx < numEdges / 2));
         }
     }
 
@@ -197,7 +193,6 @@ public class Edge extends GraphElement {
         startVertex.attach(this);
         endVertex.attach(this);
         startVertex.updateEdgesBetween(endVertex);
-        int x = 0;
     }
 
     @Override
