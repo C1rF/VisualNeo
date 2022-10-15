@@ -37,11 +37,12 @@ abstract class Entity implements Comparable<Entity>, Expandable {
     boolean resembles(Entity other) {
         if (hasLabel() && other.hasLabel() && !label.equals(other.label))
             return false;
-        for (String propertyKey : properties.keySet()) {
+
+        for (String propertyKey : properties.keySet())
             if (other.properties.containsKey(propertyKey) &&
                 !properties.get(propertyKey).equals(other.properties.get(propertyKey)))
                 return false;
-        }
+
         return true;
     }
 

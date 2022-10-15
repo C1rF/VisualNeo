@@ -45,8 +45,10 @@ public class Relation extends Entity {
     public Node other(Node node) {
         if (node == start)
             return end;
+
         if (node == end)
             return start;
+
         return null;
     }
 
@@ -74,6 +76,7 @@ public class Relation extends Entity {
     boolean resembles(Entity other) {
         if (!(other instanceof Relation))
             return false;
+
         return super.resembles(other);
     }
 
