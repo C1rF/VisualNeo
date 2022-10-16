@@ -42,7 +42,7 @@
                               <Label fx:id="label_current_state" text="Current Tool: None" />
                            </items>
                         </ToolBar>
-                        <Pane fx:id="Drawboard" onMouseDragged="#handleDragOnBoard" onMousePressed="#handleClickOnBoard" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
+                        <Pane fx:id="Drawboard" onMousePressed="#handleClickOnBoard" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
                      </children>
                   </AnchorPane>
             </content>

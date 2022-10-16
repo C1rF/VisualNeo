@@ -295,8 +295,7 @@ public class VisualNeoController {
      */
     @FXML
     private void handleClickOnBoard(MouseEvent m) {
-        // System.out.println("Clicked at " + m.getX() + ' ' +  m.getY());
-        // If the status is VERTEX, meaning that we need to create the vertex
+        // If the status is VERTEX, we need to create the vertex
         if (s == Status.VERTEX) {
             Vertex temp_vertex = new Vertex(m.getX(), m.getY());
             Drawboard.getChildren().add(temp_vertex);
@@ -304,12 +303,12 @@ public class VisualNeoController {
             temp_vertex.requestFocus();
         }
 
-        // If the status is ERASE, meaning that we need to erase the focused Vertex/Edge
+        // If the status is ERASE, we need to erase the focused Vertex/Edge
         if (s == Status.ERASE) {
             GraphElement current_highlight = highlight_element.get();
             // Check whether it is a Vertex
             if (current_highlight instanceof Vertex focused_vertex) {
-                // Remove the vertex itself
+                // Remove the vertex
                 highlight_element.set(null);
                 focused_vertex.eraseFrom(this);
                 // For testing
@@ -317,8 +316,10 @@ public class VisualNeoController {
             }
             // Check whether it is an Edge
             if (current_highlight instanceof Edge focused_edge) {
+                // Remove the edge
                 highlight_element.set(null);
                 focused_edge.eraseFrom(this);
+                // For testing
                 System.out.println("Successfully removed an edge");
             }
         }
@@ -364,19 +365,6 @@ public class VisualNeoController {
     }
 
     /**
-     * Called when the user drag on the drawing board
-     */
-    @FXML
-    private void handleDragOnBoard() {
-        GraphElement current_highlight = highlight_element.get();
-        if (s != Status.SELECT || !(current_highlight instanceof Vertex)) return;
-        // If the status is SELECT and current_highlight is a Vertex
-        // we need to move all edges that connect to it
-        Vertex focused_vertex = (Vertex) current_highlight;
-        // System.out.println("Move all connected edges");
-    }
-
-    /**
      * Called when the user click on Load Database button
      */
     @FXML
@@ -393,13 +381,11 @@ public class VisualNeoController {
     }
 
     public void submitDBInfo(String uri, String user, String password) {
-        //System.out.println(uri +"  "+ user +"  "+ password);
         app.queryHandler.loadDatabase(uri, user, password);
     }
 
     public void updateUIWithMetaInfo() {
         DbMetadata metadata = app.queryHandler.getMeta();
-        // TODO: Update the DatabaseInfo Pane first
         // First switch the display pane
         pane_with_database.setVisible(true);
         pane_no_database.setVisible(false);
