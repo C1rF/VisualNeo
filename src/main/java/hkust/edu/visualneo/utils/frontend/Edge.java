@@ -6,14 +6,20 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.*;
+import javafx.scene.shape.ArcTo;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Edge extends GraphElement {
 
-    private static final double GAP_ANGLE = Math.PI / 10;
+    private static final double GAP_ANGLE = Math.PI / 12;
+    private static final double LOOP_SPAN_ANGLE = Math.PI / 6;
+    private static final double LOOP_GAP_ANGLE = Math.PI / 18;
     private static final double LINE_LENGTH = VERTEX_RADIUS + 40.0;
 
     public Vertex startVertex;
@@ -85,14 +91,26 @@ public class Edge extends GraphElement {
 
     public void update() {
         curve.getElements().clear();
-        
+
         if (startVertex.equals(endVertex)) {
             double cX = startVertex.x;
             double cY = startVertex.y;
             // TODO: Modify this
-            double baseAngle = Math.PI / 2;
-            
-            double offsetAngle = (2 * edgeIdx - numEdges + 0.5) * GAP_ANGLE;
+            List<Double> angles = startVertex.computeAngles();
+            double baseAngle = -Math.PI / 2;
+            if (!angles.isEmpty()) {
+                angles.add(angles.get(0) + 2 * Math.PI);
+                double maxSpan = Double.NEGATIVE_INFINITY;
+                for (int i = 1; i < angles.size(); ++i) {
+                    double span = angles.get(i) - angles.get(i - 1);
+                    if (span > maxSpan) {
+                        maxSpan = span;
+                        baseAngle = (angles.get(i) + angles.get(i - 1)) / 2;
+                    }
+                }
+            }
+            double offsetAngle = edgeIdx * (LOOP_SPAN_ANGLE + LOOP_GAP_ANGLE) -
+                                 ((numEdges - 1) * LOOP_GAP_ANGLE + numEdges * LOOP_SPAN_ANGLE) / 2;
 
             double l1A = baseAngle + offsetAngle;
             double l1Cos = Math.cos(l1A);
@@ -102,7 +120,7 @@ public class Edge extends GraphElement {
             double l1EX = cX + LINE_LENGTH * l1Cos;
             double l1EY = cY + LINE_LENGTH * l1Sin;
 
-            double l2A = baseAngle + offsetAngle + GAP_ANGLE;
+            double l2A = baseAngle + offsetAngle + LOOP_SPAN_ANGLE;
             double l2Cos = Math.cos(l2A);
             double l2Sin = Math.sin(l2A);
             double l2SX = cX + LINE_LENGTH * l2Cos;
@@ -110,7 +128,7 @@ public class Edge extends GraphElement {
             double l2EX = cX + VERTEX_RADIUS * l2Cos;
             double l2EY = cY + VERTEX_RADIUS * l2Sin;
 
-            double r = LINE_LENGTH * Math.tan(GAP_ANGLE / 2);
+            double r = LINE_LENGTH * Math.tan(LOOP_SPAN_ANGLE / 2);
 
             curve.getElements().addAll(
                     new MoveTo(l1SX, l1SY),
@@ -192,18 +210,16 @@ public class Edge extends GraphElement {
     private void attach() {
         startVertex.attach(this);
         endVertex.attach(this);
-        startVertex.updateEdgesBetween(endVertex);
     }
 
     @Override
     public void eraseFrom(VisualNeoController controller) {
         startVertex.detach(this);
         endVertex.detach(this);
-        startVertex.updateEdgesBetween(endVertex);
         ((Pane) getParent()).getChildren().remove(this);
         controller.listOfEdges.remove(this);
     }
-    
+
     public Vertex other(Vertex vertex) {
         if (vertex == startVertex)
             return endVertex;

@@ -22,7 +22,7 @@ public class Vertex extends GraphElement {
     // The shape contains a circle and a text(not necessary) on top of it
     private Circle c;
 
-    private Set<Edge> edges = new LinkedHashSet<>();
+    private final Set<Edge> edges = new LinkedHashSet<>();
 
     // Constructor
     public Vertex(double x, double y) {
@@ -105,7 +105,13 @@ public class Vertex extends GraphElement {
     public void setPos() {
         setLayoutX(x);
         setLayoutY(y);
+
         updateAllEdges();
+        edges.forEach(edge -> {
+            Vertex other = edge.other(this);
+            if (!equals(other))
+                other.updateLoops();
+        });
     }
 
     /**
@@ -129,6 +135,20 @@ public class Vertex extends GraphElement {
         }
     }
 
+    public boolean hasLoop() {
+        for (Edge edge : edges)
+            if (equals(edge.other(this)))
+                return true;
+        return false;
+    }
+
+    public Set<Vertex> neighbors() {
+        return edges
+                .stream()
+                .map(edge -> edge.other(this))
+                .collect(Collectors.toSet());
+    }
+
     public Set<Edge> edgesBetween(Vertex other) {
         if (other == null)
             return Collections.emptySet();
@@ -139,10 +159,19 @@ public class Vertex extends GraphElement {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public void updateEdgesBetween(Vertex other) {
-        if (other == null)
-            return;
+    public double angleBetween(Vertex other) {
+        return x == other.x ?
+               y <= other.y ?
+               Math.PI / 2 :
+               3 * Math.PI / 2 :
+               Math.atan2(other.y - y, other.x - x);
+    }
 
+    public void updateLoops() {
+        updateEdgesBetween(this);
+    }
+
+    public void updateEdgesBetween(Vertex other) {
         Set<Edge> edges = edgesBetween(other);
         int numEdges = edges.size();
         int edgeIdx = 0;
@@ -157,12 +186,31 @@ public class Vertex extends GraphElement {
         edges.forEach(Edge::update);
     }
 
+    public List<Double> computeAngles() {
+        return neighbors()
+                .stream()
+                .filter(other -> !other.equals(this))
+                .map(this::angleBetween)
+                .sorted()
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
     public void attach(Edge new_edge) {
         edges.add(new_edge);
+
+        if (equals(new_edge.startVertex))
+            updateEdgesBetween(new_edge.endVertex);
+
+        updateLoops();
     }
 
     public void detach(Edge edge_to_detach) {
         edges.remove(edge_to_detach);
+
+        if (equals(edge_to_detach.startVertex))
+            updateEdgesBetween(edge_to_detach.endVertex);
+
+        updateLoops();
     }
 
     @Override

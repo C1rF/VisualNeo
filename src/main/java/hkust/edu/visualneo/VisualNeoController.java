@@ -340,7 +340,7 @@ public class VisualNeoController {
                 else {
                     Edge temp_edge = new Edge(startVertex, focused_vertex, false);
                     Drawboard.getChildren().add(temp_edge);
-                    temp_edge.toFront();
+                    temp_edge.toBack();
                     listOfEdges.add(temp_edge);
                     startVertex = null;
                     temp_edge.requestFocus();
