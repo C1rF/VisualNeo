@@ -20,7 +20,7 @@ public class Vertex extends GraphElement {
     // record the offset (only used for move the object)
     double offX, offY;
     // The shape contains a circle and a text(not necessary) on top of it
-    private Circle c;
+    private Circle circle;
 
     private final Set<Edge> edges = new LinkedHashSet<>();
 
@@ -35,33 +35,31 @@ public class Vertex extends GraphElement {
         // Set event handler
         mouseEventHandler handler = new mouseEventHandler();
         addEventHandler(MouseEvent.ANY, handler);
-        // Add circle and label to Vertex Group (Display)
-        getChildren().addAll(c, label_displayed);
-        c.toFront();
-        label_displayed.toFront();
         // For Testing
         System.out.println("A new Vertex is created.");
     }
 
     @Override
     protected void initializeShape() {
+        super.initializeShape();
         // Initialize the circle
-        c = new Circle(VERTEX_RADIUS, COLOR);
-        c.setStrokeWidth(0.5);
-        // Initialize the label('s position)
-        label_displayed.setLayoutX(-0.7 * VERTEX_RADIUS);
-        label_displayed.setLayoutY(0.2 * VERTEX_RADIUS);
+        circle = new Circle(VERTEX_RADIUS, COLOR);
+        circle.setStrokeWidth(0.5);
+        // Add circle and label to Vertex Group (Display)
+        getChildren().add(circle);
+        circle.toFront();
+        label_displayed.toFront();
     }
 
     @Override
     public void becomeHighlight() {
-        c.setStrokeWidth(2);
-        c.setStroke(new Color(0, 0, 0, 1));
+        circle.setStrokeWidth(2);
+        circle.setStroke(new Color(0, 0, 0, 1));
     }
 
     @Override
     public void removeHighlight() {
-        c.setStrokeWidth(0.5);
+        circle.setStrokeWidth(0.5);
     }
 
     /**
