@@ -8,13 +8,14 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static hkust.edu.visualneo.utils.backend.Consts.NEW_LINE;
-import static hkust.edu.visualneo.utils.backend.Consts.SPACE;
+import static hkust.edu.visualneo.utils.backend.Queries.NEW_LINE;
 
 // Class representing a Cypher query statement
 public class QueryBuilder {
 
-    private final static StringBuilder builder = new StringBuilder();
+    private static final char SPACE = ' ';
+
+    private static final StringBuilder builder = new StringBuilder();
 
     private static int indent;
 

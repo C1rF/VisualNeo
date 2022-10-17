@@ -2,8 +2,8 @@ package hkust.edu.visualneo.utils.backend;
 
 import java.util.Objects;
 
-import static hkust.edu.visualneo.utils.backend.Consts.INITIAL_PRIME;
-import static hkust.edu.visualneo.utils.backend.Consts.MULTIPLIER_PRIME;
+import static hkust.edu.visualneo.utils.backend.Entity.INITIAL_PRIME;
+import static hkust.edu.visualneo.utils.backend.Entity.MULTIPLIER_PRIME;
 
 public record Pair<E>(E head, E tail) {
 
