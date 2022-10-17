@@ -5,6 +5,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 import org.neo4j.driver.Value;
 
 import java.util.HashMap;
@@ -16,16 +17,19 @@ abstract public class GraphElement extends Group {
     // A boolean variable indicates whether it can be selected and moved now
     public boolean canSelect = false;
     // Label shown on the GraphElement
-    Text label_displayed;
+    protected final Text label_displayed = new Text();
     // String of the label
     String label;
     // Properties attached to the element(node/relation)
     HashMap<String, Value> properties;
 
+    // TODO: Remove these
+//    Rectangle textBound = new Rectangle();
+//    Circle textOrigin = new Circle();
+
     GraphElement() {
         // initialize the arraylist
         properties = new HashMap<>();
-        label_displayed = new Text("");
     }
 
     void mouseExited(MouseEvent m) {
@@ -42,6 +46,19 @@ abstract public class GraphElement extends Group {
         System.out.println("Add Label: " + new_label);
         label = new_label;
         label_displayed.setText(new_label);
+        label_displayed.setTranslateX(-label_displayed.getLayoutBounds().getWidth() / 2);
+        label_displayed.setTranslateY(label_displayed.getLayoutBounds().getHeight() / 2);
+
+//        textBound.setWidth(label_displayed.getLayoutBounds().getWidth());
+//        textBound.setHeight(label_displayed.getLayoutBounds().getHeight());
+//        textBound.setTranslateX(-label_displayed.getLayoutBounds().getWidth() / 2);
+//        textBound.setTranslateY(-label_displayed.getLayoutBounds().getHeight() / 2);
+//        textBound.setLayoutX(label_displayed.getLayoutX());
+//        textBound.setLayoutY(label_displayed.getLayoutY());
+//        textOrigin.setLayoutX(label_displayed.getLayoutX());
+//        textOrigin.setLayoutY(label_displayed.getLayoutY());
+//        textBound.toFront();
+//        textOrigin.toFront();
     }
 
     public String getLabel() {
@@ -52,7 +69,16 @@ abstract public class GraphElement extends Group {
         return properties;
     }
 
-    abstract protected void initializeShape();
+    protected void initializeShape() {
+        getChildren().add(label_displayed);
+        label_displayed.setBoundsType(TextBoundsType.VISUAL);
+
+//        getChildren().addAll(textBound, textOrigin);
+//        textBound.setFill(null);
+//        textBound.setStroke(Color.BLUE);
+//        textOrigin.setRadius(2.5);
+//        textOrigin.setFill(Color.RED);
+    }
 
     abstract public void becomeHighlight();
 

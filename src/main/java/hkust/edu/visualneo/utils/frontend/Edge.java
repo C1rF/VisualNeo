@@ -6,15 +6,25 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.*;
+import javafx.scene.shape.ArcTo;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.scene.transform.Rotate;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
 import java.util.Arrays;
+import java.util.List;
+
+import static java.lang.Math.PI;
 
 public class Edge extends GraphElement {
 
-    private static final double GAP_ANGLE = Math.PI / 10;
+    private static final double GAP_ANGLE = PI / 12;
+    private static final double LOOP_SPAN_ANGLE = PI / 6;
+    private static final double LOOP_GAP_ANGLE = PI / 18;
     private static final double LINE_LENGTH = VERTEX_RADIUS + 40.0;
+    private static final double TEXT_GAP = 10.0;
 
     public Vertex startVertex;
     public Vertex endVertex;
@@ -23,25 +33,18 @@ public class Edge extends GraphElement {
     private int edgeIdx;
     private int numEdges;
 
-    private boolean selfLoop;
-
     public Edge(Vertex startVertex, Vertex endVertex, boolean directed) {
         super();
         this.startVertex = startVertex;
         this.endVertex = endVertex;
         this.directed = directed;
-        selfLoop = (startVertex == endVertex);
-        // Notify two vertices to attach it
-        attach();
-        // Initialize the shape
-        initializeShape();
         // Give them event handler
         mouseEventHandler handler = new mouseEventHandler();
         addEventHandler(MouseEvent.ANY, handler);
-        // Add curve and label to the Edge Group (Display)
-        this.getChildren().addAll(curve, label_displayed);
-        label_displayed.toBack();
-        curve.toBack();
+        // Initialize the shape
+        initializeShape();
+        // Notify two vertices to attach it
+        attach();
         // For Testing
         System.out.println("An Edge from (" + startVertex.x + " , " + startVertex.y + ") to " +
                 "(" + endVertex.x + " , " + endVertex.y + ")" + " is created!");
@@ -49,9 +52,41 @@ public class Edge extends GraphElement {
 
     @Override
     protected void initializeShape() {
+        super.initializeShape();
+        // Add curve and label to the Edge Group (Display)
+        getChildren().add(curve);
+        label_displayed.toBack();
+        curve.toBack();
+
+        getTransforms().add(new Rotate(0.0, 0.0, 0.0));
+        label_displayed.getTransforms().add(new Rotate(0.0, 0.0, 0.0));
+
         curve.setStroke(new Color(0, 0, 0, 0.4));
-//        edge.setStrokeType(StrokeType.CENTERED);
         curve.setFill(null);
+
+        if (startVertex.equals(endVertex)) {
+            double cos = Math.cos(LOOP_SPAN_ANGLE / 2);
+            double sin = Math.sin(LOOP_SPAN_ANGLE / 2);
+            double l1SX = VERTEX_RADIUS * cos;
+            double l1SY = -VERTEX_RADIUS * sin;
+            double l1EX = LINE_LENGTH * cos;
+            double l1EY = -LINE_LENGTH * sin;
+            double l2SX = LINE_LENGTH * cos;
+            double l2SY = LINE_LENGTH * sin;
+            double l2EX = VERTEX_RADIUS * cos;
+            double l2EY = VERTEX_RADIUS * sin;
+
+            double r = LINE_LENGTH * Math.tan(Edge.LOOP_SPAN_ANGLE / 2);
+
+            curve.getElements().addAll(
+                    new MoveTo(l1SX, l1SY),
+                    new LineTo(l1EX, l1EY),
+                    new ArcTo(r, r, 0.0, l2SX, l2SY, true, true),
+                    new LineTo(l2EX, l2EY));
+
+            label_displayed.setLayoutX(LINE_LENGTH / Math.cos(LOOP_SPAN_ANGLE / 2) + VERTEX_RADIUS + TEXT_GAP);
+            label_displayed.setRotate(90.0);
+        }
     }
 
     @Override
@@ -84,43 +119,37 @@ public class Edge extends GraphElement {
     }
 
     public void update() {
-        curve.getElements().clear();
-        
         if (startVertex.equals(endVertex)) {
             double cX = startVertex.x;
             double cY = startVertex.y;
-            // TODO: Modify this
-            double baseAngle = Math.PI / 2;
-            
-            double offsetAngle = (2 * edgeIdx - numEdges + 0.5) * GAP_ANGLE;
 
-            double l1A = baseAngle + offsetAngle;
-            double l1Cos = Math.cos(l1A);
-            double l1Sin = Math.sin(l1A);
-            double l1SX = cX + VERTEX_RADIUS * l1Cos;
-            double l1SY = cY + VERTEX_RADIUS * l1Sin;
-            double l1EX = cX + LINE_LENGTH * l1Cos;
-            double l1EY = cY + LINE_LENGTH * l1Sin;
+            setLayoutX(cX);
+            setLayoutY(cY);
 
-            double l2A = baseAngle + offsetAngle + GAP_ANGLE;
-            double l2Cos = Math.cos(l2A);
-            double l2Sin = Math.sin(l2A);
-            double l2SX = cX + LINE_LENGTH * l2Cos;
-            double l2SY = cY + LINE_LENGTH * l2Sin;
-            double l2EX = cX + VERTEX_RADIUS * l2Cos;
-            double l2EY = cY + VERTEX_RADIUS * l2Sin;
+            List<Double> angles = startVertex.computeAngles();
+            double baseAngle = -PI / 2;
+            if (!angles.isEmpty()) {
+                angles.add(angles.get(0) + 2 * PI);
+                double maxSpan = Double.NEGATIVE_INFINITY;
+                for (int i = 1; i < angles.size(); ++i) {
+                    double span = angles.get(i) - angles.get(i - 1);
+                    if (span > maxSpan) {
+                        maxSpan = span;
+                        baseAngle = (angles.get(i) + angles.get(i - 1)) / 2;
+                    }
+                }
+            }
 
-            double r = LINE_LENGTH * Math.tan(GAP_ANGLE / 2);
+            double offsetAngle = ((2 * edgeIdx - numEdges + 1) * (LOOP_GAP_ANGLE + LOOP_SPAN_ANGLE)) / 2;
+            ((Rotate) getTransforms().get(0)).setAngle(Math.toDegrees(baseAngle + offsetAngle));
 
-            curve.getElements().addAll(
-                    new MoveTo(l1SX, l1SY),
-                    new LineTo(l1EX, l1EY),
-                    new ArcTo(r, r, 0.0, l2SX, l2SY, true, true),
-                    new LineTo(l2EX, l2EY));
+            label_displayed.setRotate(Math.sin(baseAngle + offsetAngle) < 0.0 ? 90.0 : -90.0);
         }
         else {
+            curve.getElements().clear();
+
             double sX, sY, eX, eY;
-            if (startVertex.x < endVertex.x || startVertex.x == endVertex.x && startVertex.y <= endVertex.y) {
+            if (System.identityHashCode(startVertex) < System.identityHashCode(endVertex)) {
                 sX = startVertex.x;
                 sY = startVertex.y;
                 eX = endVertex.x;
@@ -132,32 +161,48 @@ public class Edge extends GraphElement {
                 eX = startVertex.x;
                 eY = startVertex.y;
             }
-            double baseAngle = sX == eX ? Math.PI / 2 : Math.atan2(eY - sY, eX - sX);
 
-            double offsetAngle = (edgeIdx - (numEdges - 1) / 2.0) * GAP_ANGLE;
+            setLayoutX(sX);
+            setLayoutY(sY);
 
-            double aSA = baseAngle + offsetAngle;
-            double aSCos = Math.cos(aSA);
-            double aSSin = Math.sin(aSA);
-            double aSX = sX + VERTEX_RADIUS * aSCos;
-            double aSY = sY + VERTEX_RADIUS * aSSin;
+            double baseAngle = sX == eX ? PI / 2 : Math.atan2(eY - sY, eX - sX);
 
-            double aEA = baseAngle - offsetAngle + Math.PI;
-            double aECos = Math.cos(aEA);
-            double aESin = Math.sin(aEA);
-            double aEX = eX + VERTEX_RADIUS * aECos;
-            double aEY = eY + VERTEX_RADIUS * aESin;
+            ((Rotate) getTransforms().get(0)).setAngle(Math.toDegrees(baseAngle));
 
             double d = Math.sqrt(Math.pow(eY - sY, 2) + Math.pow(eX - sX, 2));
-            double r = offsetAngle == 0.0 ?
-                       Double.POSITIVE_INFINITY :
-                       (d / 2 - VERTEX_RADIUS * Math.cos(offsetAngle)) / Math.sin(offsetAngle);
 
-            curve.getElements().addAll(
-                    new MoveTo(aSX, aSY),
-                    ((Double) r).equals(Double.POSITIVE_INFINITY) ?
-                    new LineTo(aEX, aEY) :
-                    new ArcTo(r, r, 0.0, aEX, aEY, false, edgeIdx < numEdges / 2));
+            if (2 * edgeIdx + 1 == numEdges) {
+                curve.getElements().addAll(
+                        new MoveTo(VERTEX_RADIUS, 0.0),
+                        new LineTo(d - VERTEX_RADIUS, 0.0));
+
+                label_displayed.setLayoutY(Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP);
+            }
+            else {
+                double offsetAngle = (edgeIdx - (numEdges - 1) / 2.0) * GAP_ANGLE;
+
+                double cos = Math.cos(offsetAngle);
+                double sin = Math.sin(offsetAngle);
+
+                double aSX = VERTEX_RADIUS * cos;
+                double aSY = VERTEX_RADIUS * sin;
+
+                double aEX = d - VERTEX_RADIUS * cos;
+                double aEY = VERTEX_RADIUS * sin;
+
+                double r = (d / 2 - VERTEX_RADIUS * cos) / Math.abs(sin);
+                double f = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d / 2, 2));
+
+                curve.getElements().addAll(
+                        new MoveTo(aSX, aSY),
+                        new ArcTo(r, r, 0.0, aEX, aEY, cos < 0.0, edgeIdx < numEdges / 2));
+
+                label_displayed.setLayoutY((edgeIdx < numEdges / 2 ? -f : f) +
+                                           (Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP));
+            }
+
+            label_displayed.setLayoutX(d / 2);
+            label_displayed.setRotate(Math.cos(baseAngle) > 0.0 ? 0.0 : 180.0);
         }
     }
 
@@ -192,18 +237,16 @@ public class Edge extends GraphElement {
     private void attach() {
         startVertex.attach(this);
         endVertex.attach(this);
-        startVertex.updateEdgesBetween(endVertex);
     }
 
     @Override
     public void eraseFrom(VisualNeoController controller) {
         startVertex.detach(this);
         endVertex.detach(this);
-        startVertex.updateEdgesBetween(endVertex);
         ((Pane) getParent()).getChildren().remove(this);
         controller.listOfEdges.remove(this);
     }
-    
+
     public Vertex other(Vertex vertex) {
         if (vertex == startVertex)
             return endVertex;
