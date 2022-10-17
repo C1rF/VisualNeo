@@ -87,6 +87,7 @@ public class Vertex extends GraphElement {
         x += m.getX() - offX; // keep updating the coordinate
         y += m.getY() - offY; // keep updating the coordinate
         setPos();
+        m.consume();
     }
 
     @Override

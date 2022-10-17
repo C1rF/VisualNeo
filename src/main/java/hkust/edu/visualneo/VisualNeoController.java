@@ -11,12 +11,16 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
+import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
+import javafx.scene.SubScene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.neo4j.driver.Value;
@@ -72,8 +76,6 @@ public class VisualNeoController {
     @FXML
     private ChoiceBox<String> choicebox_property_name;
     @FXML
-    private ChoiceBox<String> choicebox_property_type;
-    @FXML
     private TextField textfield_property_value;
     @FXML
     private Button btn_add_property;
@@ -102,6 +104,17 @@ public class VisualNeoController {
      */
     @FXML
     private Pane Drawboard;
+    @FXML
+    private SubScene subscene_drawboard;
+
+    /**
+     * Zoom In and Zoom Out Buttons
+     */
+    @FXML
+    private Button btn_zoom_in;
+
+    @FXML
+    private Button btn_zoom_out;
 
     /**
      * Database Info Pane
@@ -146,6 +159,9 @@ public class VisualNeoController {
 
     // A temperate startVertex
     Vertex startVertex;
+
+    // Camera for zoom in/out and move DrawBoard
+    PerspectiveCamera camera = new PerspectiveCamera();
 
     /**
      * The constructor.
@@ -200,8 +216,8 @@ public class VisualNeoController {
                         // Otherwise, do nothing
                         Button[] draw_btns = {btn_clear, btn_select, btn_vertex, btn_edge, btn_erase, btn_save, btn_load};
                         boolean is_btn = false;
-                        for (int i = 0; i < draw_btns.length; i++) {
-                            if (draw_btns[i] == newNode) {
+                        for (Button btn : draw_btns) {
+                            if (btn == newNode) {
                                 is_btn = true;
                                 break;
                             }
@@ -210,6 +226,25 @@ public class VisualNeoController {
                     }
                 }
         );
+
+        subscene_drawboard.setRoot(Drawboard);
+        subscene_drawboard.setCamera(camera);
+        subscene_drawboard.setFill(Color.BLUE);
+        camera.translateZProperty().set(-100);
+        app.stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            switch (event.getCode()) {
+                case W:
+                    camera.setTranslateZ(camera.getTranslateZ() + 150);
+                    break;
+                case S:
+                    camera.setTranslateZ(camera.getTranslateZ() - 150);
+                    break;
+            }
+        });
+        Drawboard.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            handleClickOnBoard(e);
+        });
+
     }
 
     /**
@@ -218,7 +253,8 @@ public class VisualNeoController {
      */
     @FXML
     private void handleClear() {
-        Drawboard.getChildren().clear();
+        for (Vertex v : listOfVertices) Drawboard.getChildren().remove(v);
+        for (Edge e : listOfEdges) Drawboard.getChildren().remove(e);
         listOfVertices.clear();
         listOfEdges.clear();
     }
@@ -285,8 +321,6 @@ public class VisualNeoController {
      */
     @FXML
     private void handleLoad() {
-        listOfVertices.clear();
-        Drawboard.getChildren().clear();
         // Load the new data
     }
 
@@ -394,10 +428,11 @@ public class VisualNeoController {
         UpdateRelationTable(metadata);
         // TODO: Show the schema
 
-        // Then update the choiceboxs with correct choices
+        // Then update the choice box with correct choices
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
         metadata.relationLabels().forEach(label -> choicebox_relation_label.getItems().add(label));
-        metadata.propertyKeys().forEach(property -> choicebox_property_name.getItems().add(property));
+        // TODO: Add the property choices according to the type (Node/Relation)
+        // Set initial state of all the buttons and choice box
         btn_add_node_label.setDisable(false);
         btn_add_relation_label.setDisable(false);
         btn_add_property.setDisable(false);
@@ -432,7 +467,7 @@ public class VisualNeoController {
     void handleAddNodeLabel() {
         GraphElement current_highlight = highlight_element.get();
         // Add Node labels to the Vertex
-        if (current_highlight != null && current_highlight instanceof Vertex) {
+        if (current_highlight instanceof Vertex) {
             current_highlight.addLabel(choicebox_node_label.getValue());
             refreshAllPane(current_highlight);
         } else {
@@ -448,21 +483,40 @@ public class VisualNeoController {
     void handleAddRelationLabel() {
         GraphElement current_highlight = highlight_element.get();
         // Add Relation labels to the Edge
-        if (current_highlight != null && current_highlight instanceof Edge) {
+        if (current_highlight instanceof Edge) {
             current_highlight.addLabel(choicebox_relation_label.getValue());
             refreshAllPane(current_highlight);
         } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Label Addition Error");
-            alert.setHeaderText("Cannot add the label.");
-            alert.setContentText("Please select the correct element!");
-            alert.showAndWait();
+            throw new RuntimeException("Bug Found!");
         }
     }
 
 
     @FXML
     void handleAddProperty() {
+        GraphElement current_highlight = highlight_element.get();
+        // Add Node/Relation properties to the Node/Relation
+        if (current_highlight instanceof GraphElement) {
+            String prop_name = choicebox_property_name.getValue();
+            String prop_value_text = textfield_property_value.getText();
+            Value prop_value = parsePropValue(prop_value_text);
+            if (prop_value != null) {
+                current_highlight.addProperty(prop_name, prop_value);
+                refreshAllPane(current_highlight);
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Add Property Error");
+                alert.setHeaderText("Cannot add the property.");
+                alert.setContentText("Please input the value in correct form!");
+                alert.showAndWait();
+            }
+        } else {
+            throw new RuntimeException("Bug Found!");
+        }
+    }
+
+    private Value parsePropValue(String input_text) {
+        return null;
     }
 
     /**
@@ -482,31 +536,23 @@ public class VisualNeoController {
     }
 
     private void lockAllVertices() {
-        int numOfVertices = listOfVertices.size();
-        for (int i = 0; i < numOfVertices; i++) {
-            listOfVertices.get(i).canSelect = false;
-        }
+        for (Vertex v : listOfVertices)
+            v.canSelect = false;
     }
 
     private void lockAllEdges() {
-        int numOfEdges = listOfEdges.size();
-        for (int i = 0; i < numOfEdges; i++) {
-            listOfEdges.get(i).canSelect = false;
-        }
+        for (Edge e : listOfEdges)
+            e.canSelect = false;
     }
 
     private void unlockAllVertices() {
-        int numOfVertices = listOfVertices.size();
-        for (int i = 0; i < numOfVertices; i++) {
-            listOfVertices.get(i).canSelect = true;
-        }
+        for (Vertex v : listOfVertices)
+            v.canSelect = true;
     }
 
     private void unlockAllEdges() {
-        int numOfEdges = listOfEdges.size();
-        for (int i = 0; i < numOfEdges; i++) {
-            listOfEdges.get(i).canSelect = true;
-        }
+        for (Edge e : listOfEdges)
+            e.canSelect = true;
     }
 
     public static Status getStatus() {
@@ -559,6 +605,7 @@ public class VisualNeoController {
         //javafx.scene.Node graphical_node = current_highlight.getShape();
         info_pane.setVisible(true);
         pane_property.setVisible(true);
+        // TODO: Change the choices of the choice box accordingly.
         if (current_highlight instanceof Vertex) {
             pane_node_label.setVisible(true);
             pane_relation_label.setVisible(false);
@@ -577,6 +624,15 @@ public class VisualNeoController {
             builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
         }
         text_property_info.setText(builder.toString());
+    }
+
+    @FXML
+    void handleZoomIn() {
+    }
+
+    @FXML
+    void handleZoomOut() {
+
     }
 
 }

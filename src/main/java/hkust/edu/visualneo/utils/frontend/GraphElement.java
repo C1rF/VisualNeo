@@ -44,6 +44,10 @@ abstract public class GraphElement extends Group {
         label_displayed.setText(new_label);
     }
 
+    public void addProperty(String name, Value val) {
+        properties.put(name, val);
+    }
+
     public String getLabel() {
         return label;
     }
