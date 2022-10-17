@@ -14,9 +14,12 @@ import java.util.stream.Collectors;
 
 public class Vertex extends GraphElement {
 
+    // Radius of the Vertex
+    static final double VERTEX_RADIUS = 25.0;
+
     // record the position of center of the circle
     double x, y;
-    private final Color COLOR = Color.LIGHTGRAY;
+    private static final Color CIRCLE_COLOR = Color.LIGHTGRAY;
     // record the offset (only used for move the object)
     double offX, offY;
     // The shape contains a circle and a text(not necessary) on top of it
@@ -43,7 +46,7 @@ public class Vertex extends GraphElement {
     protected void initializeShape() {
         super.initializeShape();
         // Initialize the circle
-        circle = new Circle(VERTEX_RADIUS, COLOR);
+        circle = new Circle(VERTEX_RADIUS, CIRCLE_COLOR);
         circle.setStrokeWidth(0.5);
         // Add circle and label to Vertex Group (Display)
         getChildren().add(circle);

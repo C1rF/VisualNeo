@@ -164,7 +164,7 @@ public class Graph implements Expandable {
     //    public String elaborate() {
     //        StringBuilder builder = new StringBuilder();
     //
-    //        char[] sep = Consts.separator(40);
+    //        char[] sep = Queries.separator(40);
     //
     //        builder.append(sep)
     //                .append(NEW_LINE);

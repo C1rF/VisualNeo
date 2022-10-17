@@ -2,13 +2,10 @@ package hkust.edu.visualneo.utils.backend;
 
 import java.util.Arrays;
 
-public class Consts {
+public class Queries {
 
-    public static final int INITIAL_PRIME = 17;
-    public static final int MULTIPLIER_PRIME = 37;
-
-    public static final char SPACE = ' ';
     public static final String NEW_LINE = System.lineSeparator();
+
     public static final String NODE_COUNT_QUERY = """
             MATCH
               ()
@@ -73,7 +70,6 @@ public class Consts {
     public static String nodeCountByLabelQuery(String label) {
         return String.format(NODE_COUNT_BY_LABEL_QUERY, label);
     }
-
     public static String relationshipCountByTypeQuery(String type) {
         return String.format(RELATIONSHIP_COUNT_BY_TYPE_QUERY, type);
     }

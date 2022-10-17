@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import static hkust.edu.visualneo.utils.backend.Consts.NEW_LINE;
+import static hkust.edu.visualneo.utils.backend.Queries.NEW_LINE;
 
 public class Expander {
 

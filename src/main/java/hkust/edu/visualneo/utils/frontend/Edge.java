@@ -16,6 +16,7 @@ import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 import java.util.Arrays;
 import java.util.List;
 
+import static hkust.edu.visualneo.utils.frontend.Vertex.VERTEX_RADIUS;
 import static java.lang.Math.PI;
 
 public class Edge extends GraphElement {
@@ -23,7 +24,9 @@ public class Edge extends GraphElement {
     private static final double GAP_ANGLE = PI / 12;
     private static final double LOOP_SPAN_ANGLE = PI / 6;
     private static final double LOOP_GAP_ANGLE = PI / 18;
-    private static final double LINE_LENGTH = VERTEX_RADIUS + 40.0;
+    private static final double ARROWHEAD_ANGLE = PI / 3;
+    private static final double LINE_LENGTH = VERTEX_RADIUS + 25.0;
+    private static final double ARROWHEAD_LENGTH = 7.5;
     private static final double TEXT_GAP = 10.0;
 
     public Vertex startVertex;
@@ -61,28 +64,38 @@ public class Edge extends GraphElement {
         getTransforms().add(new Rotate(0.0, 0.0, 0.0));
         label_displayed.getTransforms().add(new Rotate(0.0, 0.0, 0.0));
 
-        curve.setStroke(new Color(0, 0, 0, 0.4));
-        curve.setFill(null);
-
         if (startVertex.equals(endVertex)) {
-            double cos = Math.cos(LOOP_SPAN_ANGLE / 2);
-            double sin = Math.sin(LOOP_SPAN_ANGLE / 2);
-            double l1SX = VERTEX_RADIUS * cos;
-            double l1SY = -VERTEX_RADIUS * sin;
-            double l1EX = LINE_LENGTH * cos;
-            double l1EY = -LINE_LENGTH * sin;
-            double l2SX = LINE_LENGTH * cos;
-            double l2SY = LINE_LENGTH * sin;
-            double l2EX = VERTEX_RADIUS * cos;
-            double l2EY = VERTEX_RADIUS * sin;
+            double sCos = Math.cos(LOOP_SPAN_ANGLE / 2);
+            double sSin = Math.sin(LOOP_SPAN_ANGLE / 2);
+            double lNX = VERTEX_RADIUS * sCos;
+            double lNY = VERTEX_RADIUS * sSin;
+            double lFX = LINE_LENGTH * sCos;
+            double lFY = LINE_LENGTH * sSin;
 
             double r = LINE_LENGTH * Math.tan(Edge.LOOP_SPAN_ANGLE / 2);
 
             curve.getElements().addAll(
-                    new MoveTo(l1SX, l1SY),
-                    new LineTo(l1EX, l1EY),
-                    new ArcTo(r, r, 0.0, l2SX, l2SY, true, true),
-                    new LineTo(l2EX, l2EY));
+                    new MoveTo(lNX, lNY),
+                    new LineTo(lFX, lFY),
+                    new ArcTo(r, r, 0.0, lFX, -lFY, true, false),
+                    new LineTo(lNX, -lNY));
+
+            // TODO: Revert this
+            if (!directed) {
+                double h1Cos = Math.cos((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
+                double h1Sin = Math.sin((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
+                double h1X = lNX + ARROWHEAD_LENGTH * h1Cos;
+                double h1Y = -lNY + ARROWHEAD_LENGTH * h1Sin;
+                double h2Cos = Math.cos((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) / 2);
+                double h2Sin = Math.sin((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) / 2);
+                double h2X = lNX + ARROWHEAD_LENGTH * h2Cos;
+                double h2Y = -lNY + ARROWHEAD_LENGTH * h2Sin;
+
+                curve.getElements().addAll(
+                        new LineTo(h1X, h1Y),
+                        new MoveTo(lNX, -lNY),
+                        new LineTo(h2X, h2Y));
+            }
 
             label_displayed.setLayoutX(LINE_LENGTH / Math.cos(LOOP_SPAN_ANGLE / 2) + VERTEX_RADIUS + TEXT_GAP);
             label_displayed.setRotate(90.0);
@@ -91,13 +104,13 @@ public class Edge extends GraphElement {
 
     @Override
     public void becomeHighlight() {
-        curve.setStrokeWidth(6);
+        curve.setStrokeWidth(3.0);
         curve.setStroke(new Color(0, 0, 0, 0.7));
     }
 
     @Override
     public void removeHighlight() {
-        curve.setStrokeWidth(5);
+        curve.setStrokeWidth(2.0);
         curve.setStroke(new Color(0, 0, 0, 0.4));
     }
 
@@ -149,7 +162,8 @@ public class Edge extends GraphElement {
             curve.getElements().clear();
 
             double sX, sY, eX, eY;
-            if (System.identityHashCode(startVertex) < System.identityHashCode(endVertex)) {
+            boolean reverted = System.identityHashCode(startVertex) < System.identityHashCode(endVertex);
+            if (reverted) {
                 sX = startVertex.x;
                 sY = startVertex.y;
                 eX = endVertex.x;
@@ -162,46 +176,72 @@ public class Edge extends GraphElement {
                 eY = startVertex.y;
             }
 
-            setLayoutX(sX);
-            setLayoutY(sY);
+            setLayoutX((sX + eX) / 2);
+            setLayoutY((sY + eY) / 2);
 
             double baseAngle = sX == eX ? sY < eY ? PI / 2 : -PI / 2 : Math.atan2(eY - sY, eX - sX);
-
             ((Rotate) getTransforms().get(0)).setAngle(Math.toDegrees(baseAngle));
 
             double d = Math.sqrt(Math.pow(eY - sY, 2) + Math.pow(eX - sX, 2));
 
+            double offsetAngle;
+            double aX, aY;
+
             if (2 * edgeIdx + 1 == numEdges) {
+                offsetAngle = 0.0;
+
+                aX = d / 2 - VERTEX_RADIUS;
+                aY = 0.0;
+
                 curve.getElements().addAll(
-                        new MoveTo(VERTEX_RADIUS, 0.0),
-                        new LineTo(d - VERTEX_RADIUS, 0.0));
+                        new MoveTo(-aX, 0.0),
+                        new LineTo(aX, 0.0));
 
                 label_displayed.setLayoutY(Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP);
             }
             else {
-                double offsetAngle = (edgeIdx - (numEdges - 1) / 2.0) * GAP_ANGLE;
+                offsetAngle = (edgeIdx - (numEdges - 1) / 2.0) * GAP_ANGLE;
 
                 double cos = Math.cos(offsetAngle);
                 double sin = Math.sin(offsetAngle);
+                aX = d / 2 - VERTEX_RADIUS * cos;
+                aY = VERTEX_RADIUS * sin;
 
-                double aSX = VERTEX_RADIUS * cos;
-                double aSY = VERTEX_RADIUS * sin;
-
-                double aEX = d - VERTEX_RADIUS * cos;
-                double aEY = VERTEX_RADIUS * sin;
-
-                double r = (d / 2 - VERTEX_RADIUS * cos) / Math.abs(sin);
+                double r = aX / Math.abs(sin);
                 double f = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d / 2, 2));
 
                 curve.getElements().addAll(
-                        new MoveTo(aSX, aSY),
-                        new ArcTo(r, r, 0.0, aEX, aEY, cos < 0.0, edgeIdx < numEdges / 2));
+                        new MoveTo(-aX, aY),
+                        new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, edgeIdx < numEdges / 2));
 
                 label_displayed.setLayoutY((edgeIdx < numEdges / 2 ? -f : f) +
                                            (Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP));
             }
 
-            label_displayed.setLayoutX(d / 2);
+            // TODO: Revert this
+            if (!directed) {
+                double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE / 2);
+                double h1Sin = Math.sin(offsetAngle + ARROWHEAD_ANGLE / 2);
+                double h1X = aX - ARROWHEAD_LENGTH * h1Cos;
+                double h1Y = aY + ARROWHEAD_LENGTH * h1Sin;
+                double h2Cos = Math.cos(offsetAngle - ARROWHEAD_ANGLE / 2);
+                double h2Sin = Math.sin(offsetAngle - ARROWHEAD_ANGLE / 2);
+                double h2X = aX - ARROWHEAD_LENGTH * h2Cos;
+                double h2Y = aY + ARROWHEAD_LENGTH * h2Sin;
+
+                if (reverted)
+                    curve.getElements().addAll(
+                            new LineTo(h1X, h1Y),
+                            new MoveTo(aX, aY),
+                            new LineTo(h2X, h2Y));
+                else
+                    curve.getElements().addAll(
+                            new MoveTo(-aX, aY),
+                            new LineTo(-h1X, h1Y),
+                            new MoveTo(-aX, aY),
+                            new LineTo(-h2X, h2Y));
+            }
+
             label_displayed.setRotate(Math.cos(baseAngle) > 0.0 ? 0.0 : 180.0);
         }
     }
