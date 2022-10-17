@@ -5,6 +5,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 import org.neo4j.driver.Value;
 
 import java.util.HashMap;
@@ -16,7 +17,7 @@ abstract public class GraphElement extends Group {
     // A boolean variable indicates whether it can be selected and moved now
     public boolean canSelect = false;
     // Label shown on the GraphElement
-    Text label_displayed;
+    protected final Text label_displayed = new Text();
     // String of the label
     String label;
     // Properties attached to the element(node/relation)
@@ -25,7 +26,6 @@ abstract public class GraphElement extends Group {
     GraphElement() {
         // initialize the arraylist
         properties = new HashMap<>();
-        label_displayed = new Text("");
     }
 
     void mouseExited(MouseEvent m) {
@@ -42,6 +42,8 @@ abstract public class GraphElement extends Group {
         System.out.println("Add Label: " + new_label);
         label = new_label;
         label_displayed.setText(new_label);
+        label_displayed.setTranslateX(-label_displayed.getLayoutBounds().getWidth() / 2);
+        label_displayed.setTranslateY(label_displayed.getLayoutBounds().getHeight() / 2);
     }
 
     public void addProperty(String name, Value val) {
@@ -56,7 +58,10 @@ abstract public class GraphElement extends Group {
         return properties;
     }
 
-    abstract protected void initializeShape();
+    protected void initializeShape() {
+        getChildren().add(label_displayed);
+        label_displayed.setBoundsType(TextBoundsType.VISUAL);
+    }
 
     abstract public void becomeHighlight();
 

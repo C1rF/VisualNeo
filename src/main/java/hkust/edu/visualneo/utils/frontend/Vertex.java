@@ -20,9 +20,9 @@ public class Vertex extends GraphElement {
     // record the offset (only used for move the object)
     double offX, offY;
     // The shape contains a circle and a text(not necessary) on top of it
-    private Circle c;
+    private Circle circle;
 
-    private Set<Edge> edges = new LinkedHashSet<>();
+    private final Set<Edge> edges = new LinkedHashSet<>();
 
     // Constructor
     public Vertex(double x, double y) {
@@ -35,33 +35,31 @@ public class Vertex extends GraphElement {
         // Set event handler
         mouseEventHandler handler = new mouseEventHandler();
         addEventHandler(MouseEvent.ANY, handler);
-        // Add circle and label to Vertex Group (Display)
-        getChildren().addAll(c, label_displayed);
-        c.toFront();
-        label_displayed.toFront();
         // For Testing
         System.out.println("A new Vertex is created.");
     }
 
     @Override
     protected void initializeShape() {
+        super.initializeShape();
         // Initialize the circle
-        c = new Circle(VERTEX_RADIUS, COLOR);
-        c.setStrokeWidth(0.5);
-        // Initialize the label('s position)
-        label_displayed.setLayoutX(-0.7 * VERTEX_RADIUS);
-        label_displayed.setLayoutY(0.2 * VERTEX_RADIUS);
+        circle = new Circle(VERTEX_RADIUS, COLOR);
+        circle.setStrokeWidth(0.5);
+        // Add circle and label to Vertex Group (Display)
+        getChildren().add(circle);
+        circle.toFront();
+        label_displayed.toFront();
     }
 
     @Override
     public void becomeHighlight() {
-        c.setStrokeWidth(2);
-        c.setStroke(new Color(0, 0, 0, 1));
+        circle.setStrokeWidth(2);
+        circle.setStroke(new Color(0, 0, 0, 1));
     }
 
     @Override
     public void removeHighlight() {
-        c.setStrokeWidth(0.5);
+        circle.setStrokeWidth(0.5);
     }
 
     /**
@@ -106,7 +104,13 @@ public class Vertex extends GraphElement {
     public void setPos() {
         setLayoutX(x);
         setLayoutY(y);
+
         updateAllEdges();
+        edges.forEach(edge -> {
+            Vertex other = edge.other(this);
+            if (!equals(other))
+                other.updateLoops();
+        });
     }
 
     /**
@@ -130,6 +134,20 @@ public class Vertex extends GraphElement {
         }
     }
 
+    public boolean hasLoop() {
+        for (Edge edge : edges)
+            if (equals(edge.other(this)))
+                return true;
+        return false;
+    }
+
+    public Set<Vertex> neighbors() {
+        return edges
+                .stream()
+                .map(edge -> edge.other(this))
+                .collect(Collectors.toSet());
+    }
+
     public Set<Edge> edgesBetween(Vertex other) {
         if (other == null)
             return Collections.emptySet();
@@ -140,10 +158,19 @@ public class Vertex extends GraphElement {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public void updateEdgesBetween(Vertex other) {
-        if (other == null)
-            return;
+    public double angleBetween(Vertex other) {
+        return x == other.x ?
+               y <= other.y ?
+               Math.PI / 2 :
+               3 * Math.PI / 2 :
+               Math.atan2(other.y - y, other.x - x);
+    }
 
+    public void updateLoops() {
+        updateEdgesBetween(this);
+    }
+
+    public void updateEdgesBetween(Vertex other) {
         Set<Edge> edges = edgesBetween(other);
         int numEdges = edges.size();
         int edgeIdx = 0;
@@ -158,12 +185,31 @@ public class Vertex extends GraphElement {
         edges.forEach(Edge::update);
     }
 
+    public List<Double> computeAngles() {
+        return neighbors()
+                .stream()
+                .filter(other -> !other.equals(this))
+                .map(this::angleBetween)
+                .sorted()
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
     public void attach(Edge new_edge) {
         edges.add(new_edge);
+
+        if (equals(new_edge.startVertex))
+            updateEdgesBetween(new_edge.endVertex);
+
+        updateLoops();
     }
 
     public void detach(Edge edge_to_detach) {
         edges.remove(edge_to_detach);
+
+        if (equals(edge_to_detach.startVertex))
+            updateEdgesBetween(edge_to_detach.endVertex);
+
+        updateLoops();
     }
 
     @Override
