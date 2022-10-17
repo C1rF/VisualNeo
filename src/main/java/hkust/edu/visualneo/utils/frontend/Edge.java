@@ -28,6 +28,10 @@ public class Edge extends GraphElement {
     private static final double LINE_LENGTH = VERTEX_RADIUS + 25.0;
     private static final double ARROWHEAD_LENGTH = 7.5;
     private static final double TEXT_GAP = 10.0;
+    private static final double TEXT_EPSILON = 4.0;
+
+    enum TextDisplayMode {TOP, MIDDLE, BOTTOM}
+    private TextDisplayMode textDisplayMode = TextDisplayMode.MIDDLE;
 
     public Vertex startVertex;
     public Vertex endVertex;
@@ -97,7 +101,7 @@ public class Edge extends GraphElement {
                         new LineTo(h2X, h2Y));
             }
 
-            label_displayed.setLayoutX(LINE_LENGTH / Math.cos(LOOP_SPAN_ANGLE / 2) + VERTEX_RADIUS + TEXT_GAP);
+            label_displayed.setLayoutX(LINE_LENGTH / Math.cos(LOOP_SPAN_ANGLE / 2) + r + TEXT_GAP);
             label_displayed.setRotate(90.0);
         }
     }
@@ -193,13 +197,44 @@ public class Edge extends GraphElement {
                 aX = d / 2 - VERTEX_RADIUS;
                 aY = 0.0;
 
-                curve.getElements().addAll(
-                        new MoveTo(-aX, 0.0),
-                        new LineTo(aX, 0.0));
+                switch (textDisplayMode) {
+                    case TOP -> {
+                        curve.getElements().addAll(
+                                new MoveTo(-aX, 0.0),
+                                new LineTo(aX, 0.0));
 
-                label_displayed.setLayoutY(Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP);
+                        label_displayed.setLayoutY(Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP);
+                    }
+                    case MIDDLE -> {
+                        if (label_displayed.getText() == null || label_displayed.getText().equals(""))
+                            curve.getElements().addAll(
+                                    new MoveTo(-aX, 0.0),
+                                    new LineTo(aX, 0.0));
+                        else {
+                            double tX = label_displayed.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
+                            if (tX > d / 2)
+                                tX = d / 2;
+
+                            curve.getElements().addAll(
+                                    new MoveTo(-aX, 0.0),
+                                    new LineTo(-tX, 0.0),
+                                    new MoveTo(tX, 0.0),
+                                    new LineTo(aX, 0.0));
+
+                            label_displayed.setLayoutY(0.0);
+                        }
+                    }
+                    case BOTTOM -> {
+                        curve.getElements().addAll(
+                                new MoveTo(-aX, 0.0),
+                                new LineTo(aX, 0.0));
+
+                        label_displayed.setLayoutY(Math.cos(baseAngle) < 0 ? -TEXT_GAP : TEXT_GAP);
+                    }
+                }
             }
             else {
+                boolean lowerHalf = edgeIdx < numEdges / 2;
                 offsetAngle = (edgeIdx - (numEdges - 1) / 2.0) * GAP_ANGLE;
 
                 double cos = Math.cos(offsetAngle);
@@ -208,14 +243,47 @@ public class Edge extends GraphElement {
                 aY = VERTEX_RADIUS * sin;
 
                 double r = aX / Math.abs(sin);
-                double f = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d / 2, 2));
+                double fY = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d / 2, 2));
 
-                curve.getElements().addAll(
-                        new MoveTo(-aX, aY),
-                        new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, edgeIdx < numEdges / 2));
+                switch (textDisplayMode) {
+                    case TOP -> {
+                        curve.getElements().addAll(
+                                new MoveTo(-aX, aY),
+                                new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
 
-                label_displayed.setLayoutY((edgeIdx < numEdges / 2 ? -f : f) +
-                                           (Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP));
+                        label_displayed.setLayoutY((lowerHalf ? -fY : fY) +
+                                                   (Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP));
+                    }
+                    case MIDDLE -> {
+                        if (label_displayed.getText() == null || label_displayed.getText().equals(""))
+                            curve.getElements().addAll(
+                                    new MoveTo(-aX, aY),
+                                    new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
+                        else {
+                            double tX = label_displayed.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
+                            if (tX > d / 2)
+                                tX = d / 2;
+                            double offY = r - Math.sqrt(Math.pow(r, 2) - Math.pow(tX, 2));
+                            double tY = lowerHalf ? -fY + offY : fY - offY;
+
+                            curve.getElements().addAll(
+                                    new MoveTo(-aX, aY),
+                                    new ArcTo(r, r, 0.0, -tX, tY, cos < 0.0, lowerHalf),
+                                    new MoveTo(tX, tY),
+                                    new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
+
+                            label_displayed.setLayoutY(tY);
+                        }
+                    }
+                    case BOTTOM -> {
+                        curve.getElements().addAll(
+                                new MoveTo(-aX, aY),
+                                new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
+
+                        label_displayed.setLayoutY((lowerHalf ? -fY : fY) +
+                                                   (Math.cos(baseAngle) < 0 ? -TEXT_GAP : TEXT_GAP));
+                    }
+                }
             }
 
             // TODO: Revert this
@@ -244,6 +312,12 @@ public class Edge extends GraphElement {
 
             label_displayed.setRotate(Math.cos(baseAngle) > 0.0 ? 0.0 : 180.0);
         }
+    }
+
+    @Override
+    public void addLabel(String new_label) {
+        super.addLabel(new_label);
+        update();
     }
 
     /**
