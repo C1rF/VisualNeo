@@ -23,10 +23,6 @@ abstract public class GraphElement extends Group {
     // Properties attached to the element(node/relation)
     HashMap<String, Value> properties;
 
-    // TODO: Remove these
-//    Rectangle textBound = new Rectangle();
-//    Circle textOrigin = new Circle();
-
     GraphElement() {
         // initialize the arraylist
         properties = new HashMap<>();
@@ -48,17 +44,6 @@ abstract public class GraphElement extends Group {
         label_displayed.setText(new_label);
         label_displayed.setTranslateX(-label_displayed.getLayoutBounds().getWidth() / 2);
         label_displayed.setTranslateY(label_displayed.getLayoutBounds().getHeight() / 2);
-
-//        textBound.setWidth(label_displayed.getLayoutBounds().getWidth());
-//        textBound.setHeight(label_displayed.getLayoutBounds().getHeight());
-//        textBound.setTranslateX(-label_displayed.getLayoutBounds().getWidth() / 2);
-//        textBound.setTranslateY(-label_displayed.getLayoutBounds().getHeight() / 2);
-//        textBound.setLayoutX(label_displayed.getLayoutX());
-//        textBound.setLayoutY(label_displayed.getLayoutY());
-//        textOrigin.setLayoutX(label_displayed.getLayoutX());
-//        textOrigin.setLayoutY(label_displayed.getLayoutY());
-//        textBound.toFront();
-//        textOrigin.toFront();
     }
 
     public String getLabel() {
@@ -72,12 +57,6 @@ abstract public class GraphElement extends Group {
     protected void initializeShape() {
         getChildren().add(label_displayed);
         label_displayed.setBoundsType(TextBoundsType.VISUAL);
-
-//        getChildren().addAll(textBound, textOrigin);
-//        textBound.setFill(null);
-//        textBound.setStroke(Color.BLUE);
-//        textOrigin.setRadius(2.5);
-//        textOrigin.setFill(Color.RED);
     }
 
     abstract public void becomeHighlight();
