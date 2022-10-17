@@ -165,7 +165,7 @@ public class Edge extends GraphElement {
             setLayoutX(sX);
             setLayoutY(sY);
 
-            double baseAngle = sX == eX ? PI / 2 : Math.atan2(eY - sY, eX - sX);
+            double baseAngle = sX == eX ? sY < eY ? PI / 2 : -PI / 2 : Math.atan2(eY - sY, eX - sX);
 
             ((Rotate) getTransforms().get(0)).setAngle(Math.toDegrees(baseAngle));
 
