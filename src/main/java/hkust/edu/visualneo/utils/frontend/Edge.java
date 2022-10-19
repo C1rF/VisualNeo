@@ -166,18 +166,18 @@ public class Edge extends GraphElement {
             curve.getElements().clear();
 
             double sX, sY, eX, eY;
-            boolean reverted = System.identityHashCode(startVertex) < System.identityHashCode(endVertex);
+            boolean reverted = System.identityHashCode(startVertex) > System.identityHashCode(endVertex);
             if (reverted) {
-                sX = startVertex.x;
-                sY = startVertex.y;
-                eX = endVertex.x;
-                eY = endVertex.y;
-            }
-            else {
                 sX = endVertex.x;
                 sY = endVertex.y;
                 eX = startVertex.x;
                 eY = startVertex.y;
+            }
+            else {
+                sX = startVertex.x;
+                sY = startVertex.y;
+                eX = endVertex.x;
+                eY = endVertex.y;
             }
 
             setLayoutX((sX + eX) / 2);
@@ -299,15 +299,15 @@ public class Edge extends GraphElement {
 
                 if (reverted)
                     curve.getElements().addAll(
-                            new LineTo(h1X, h1Y),
-                            new MoveTo(aX, aY),
-                            new LineTo(h2X, h2Y));
-                else
-                    curve.getElements().addAll(
                             new MoveTo(-aX, aY),
                             new LineTo(-h1X, h1Y),
                             new MoveTo(-aX, aY),
                             new LineTo(-h2X, h2Y));
+                else
+                    curve.getElements().addAll(
+                            new LineTo(h1X, h1Y),
+                            new MoveTo(aX, aY),
+                            new LineTo(h2X, h2Y));
             }
 
             label_displayed.setRotate(Math.cos(baseAngle) > 0.0 ? 0.0 : 180.0);
