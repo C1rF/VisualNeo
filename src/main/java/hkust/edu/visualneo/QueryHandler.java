@@ -25,7 +25,7 @@ public class QueryHandler {
         initDriver(uri, user, password);
         retrieveMetadata();
 
-        System.out.println(new Expander().expand(meta));
+        System.out.println(Expander.expand(meta));
     }
 
     private void initDriver(String uri, String user, String password) {
