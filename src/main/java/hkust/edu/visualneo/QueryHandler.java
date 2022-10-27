@@ -41,13 +41,13 @@ public class QueryHandler {
             Function<Record, String> mapper = record -> record.get(0).asString();
 
             Set<String> nodeLabels = session.readTransaction(tx -> tx
-                    .run(Consts.LABELS_QUERY)
+                    .run(Queries.LABELS_QUERY)
                     .stream()
                     .map(mapper)
                     .collect(Collectors.toCollection(TreeSet::new)));
 
             Set<String> relationLabels = session.readTransaction(tx -> tx
-                    .run(Consts.RELATIONSHIP_TYPES_QUERY)
+                    .run(Queries.RELATIONSHIP_TYPES_QUERY)
                     .stream()
                     .map(mapper)
                     .collect(Collectors.toCollection(TreeSet::new)));
@@ -57,7 +57,7 @@ public class QueryHandler {
                     .collect(Collectors.toMap(
                             Function.identity(),
                             label -> session.readTransaction(tx ->
-                                    tx.run(Consts.nodeCountByLabelQuery(label))
+                                    tx.run(Queries.nodeCountByLabelQuery(label))
                                       .single()
                                       .get(0)
                                       .asInt()),
@@ -69,7 +69,7 @@ public class QueryHandler {
                     .collect(Collectors.toMap(
                             Function.identity(),
                             type -> session.readTransaction(tx ->
-                                    tx.run(Consts.relationshipCountByTypeQuery(type))
+                                    tx.run(Queries.relationshipCountByTypeQuery(type))
                                       .single()
                                       .get(0)
                                       .asInt()),
@@ -79,7 +79,7 @@ public class QueryHandler {
             // Retrieve property keys and types
 
             Map<String, Map<String, String>> nodePropertiesByLabel = session.readTransaction(tx -> tx
-                    .run(Consts.NODE_TYPE_PROPERTIES_QUERY)
+                    .run(Queries.NODE_TYPE_PROPERTIES_QUERY)
                     .stream()
                     .collect(Collectors.toMap(
                             record -> {
@@ -96,7 +96,7 @@ public class QueryHandler {
                             })));
 
             Map<String, Map<String, String>> relationPropertiesByLabel = session.readTransaction(tx -> tx
-                    .run(Consts.REL_TYPE_PROPERTIES_QUERY)
+                    .run(Queries.REL_TYPE_PROPERTIES_QUERY)
                     .stream()
                     .collect(Collectors.toMap(
                             record -> {
@@ -114,7 +114,7 @@ public class QueryHandler {
 
             // Retrieve schema information
             Graph schemaGraph = session.readTransaction(tx -> {
-                Record rec = tx.run(Consts.SCHEMA_QUERY).single();
+                Record rec = tx.run(Queries.SCHEMA_QUERY).single();
 
                 Map<Long, Node> schemaNodes = rec
                         .get("nodes")

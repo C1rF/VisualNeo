@@ -12,8 +12,6 @@ import java.util.HashMap;
 
 abstract public class GraphElement extends Group {
 
-    // Radius of the Vertex
-    protected static final int VERTEX_RADIUS = 25;
     // A boolean variable indicates whether it can be selected and moved now
     public boolean canSelect = false;
     // Label shown on the GraphElement

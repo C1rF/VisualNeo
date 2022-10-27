@@ -6,14 +6,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static hkust.edu.visualneo.utils.backend.Consts.INITIAL_PRIME;
-import static hkust.edu.visualneo.utils.backend.Consts.MULTIPLIER_PRIME;
-
 abstract class Entity implements Comparable<Entity>, Expandable {
+
+    protected static final int INITIAL_PRIME = 17;
+    protected static final int MULTIPLIER_PRIME = 37;
 
     protected final long id;
     final String label;
-
     final Map<String, Value> properties;
 
     // Pass null for an unlabeled node/relationship
@@ -45,21 +44,6 @@ abstract class Entity implements Comparable<Entity>, Expandable {
 
         return true;
     }
-
-    //    public String elaborate() {
-    //        StringBuilder propertiesStr = new StringBuilder();
-    //        properties.forEach((key, value) ->
-    //                propertiesStr.append("| |-").append(key).append(':').append(value)
-    //                        .append(NEW_LINE));
-    //
-    //        return String.format("""
-    //                %1$s
-    //                |-Label: %2$s
-    //                |-Properties: %3$s""",
-    //                this,
-    //                label == null ? "None" : label,
-    //                properties.isEmpty() ? "None" : propertiesStr);
-    //    }
 
     @Override
     public int hashCode() {
