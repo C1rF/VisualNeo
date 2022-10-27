@@ -32,14 +32,11 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <Pane fx:id="Drawboard" disable="true" onMousePressed="#handleClickOnBoard" prefHeight="698.5" prefWidth="700.0" style="-fx-background-color: white;" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
-                           <children>
-                              <SubScene fx:id="subscene_drawboard" fill="WHITE" height="698.5" width="700.0">
-                                <root>
-                                  <Region />
-                                </root>
-                              </SubScene>
-                           </children></Pane>
+                        <SubScene fx:id="subscene_drawboard" fill="WHITE" height="698.5" width="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+                          <root>
+                            <Region />
+                          </root>
+                        </SubScene>
                         <Button fx:id="btn_zoom_in" mnemonicParsing="false" onAction="#handleZoomOut" prefHeight="40.0" prefWidth="40.0" text="-" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="10.0">
                            <font>
                               <Font name="Arial Black" size="18.0" />

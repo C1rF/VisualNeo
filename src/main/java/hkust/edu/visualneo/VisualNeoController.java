@@ -1,6 +1,7 @@
 package hkust.edu.visualneo;
 
 import hkust.edu.visualneo.utils.backend.DbMetadata;
+import hkust.edu.visualneo.utils.frontend.Constant;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.GraphElement;
 import hkust.edu.visualneo.utils.frontend.Vertex;
@@ -10,16 +11,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Cursor;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.Scene;
-import javafx.scene.SubScene;
+import javafx.geometry.Insets;
+import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -102,8 +100,13 @@ public class VisualNeoController {
     /**
      * Drawing Space
      */
-    @FXML
     private Pane Drawboard;
+    // Variables to move the pane
+    private double pane_x;
+    private double pane_y;
+    private double offset_x;
+    private double offset_y;
+    private Camera camera;
     @FXML
     private SubScene subscene_drawboard;
 
@@ -112,7 +115,6 @@ public class VisualNeoController {
      */
     @FXML
     private Button btn_zoom_in;
-
     @FXML
     private Button btn_zoom_out;
 
@@ -149,7 +151,6 @@ public class VisualNeoController {
     // ALL Status
     public enum Status {EMPTY, VERTEX, EDGE_1, EDGE_2, ERASE, SELECT}
 
-    ;
     // Current Status
     public static Status s;
 
@@ -159,9 +160,6 @@ public class VisualNeoController {
 
     // A temperate startVertex
     Vertex startVertex;
-
-    // Camera for zoom in/out and move DrawBoard
-    PerspectiveCamera camera = new PerspectiveCamera();
 
     /**
      * The constructor.
@@ -177,6 +175,7 @@ public class VisualNeoController {
     @FXML
     private void initialize() {
         s = Status.EMPTY;
+        // Set the behavior when highlight_element changes
         highlight_element.addListener((observableValue, oldHighlight, newHighlight) -> {
                     // First we need to remove the highlight from the previous GraphElement
                     if (oldHighlight != null) oldHighlight.removeHighlight();
@@ -194,6 +193,62 @@ public class VisualNeoController {
                     }
                 }
         );
+        // Create the DrawBoard for constructing the query
+        // Initialize the DrawBoard
+        Drawboard = new Pane();
+        Drawboard.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        Drawboard.setPrefWidth(Constant.BOARD_SIZE);
+        Drawboard.setPrefHeight(Constant.BOARD_SIZE);
+        Drawboard.setLayoutX(Constant.BOARD_INIT_LAYOUT);
+        Drawboard.setLayoutY(Constant.BOARD_INIT_LAYOUT);
+        pane_x = Constant.BOARD_INIT_LAYOUT;
+        pane_y = Constant.BOARD_INIT_LAYOUT;
+        // Initialize the Group
+        Group Drawboard_wrapper = new Group();
+        Drawboard_wrapper.getChildren().add(Drawboard);
+        // Initialize the camera
+        camera = new PerspectiveCamera();
+        camera.setTranslateZ(0);
+        // Set the SubScene
+        subscene_drawboard.setRoot(Drawboard_wrapper);
+        subscene_drawboard.setCamera(camera);
+        subscene_drawboard.setFill(Color.BLUE);
+        // Set the handler of DrawBoard
+        Drawboard.setOnMouseClicked((e) -> {
+            handleClickOnBoard(e);
+        });
+        Drawboard.setOnScroll((e) -> {
+            double deltaY = e.getDeltaY();
+            if (camera.getTranslateZ() + deltaY > Constant.TranslateZ_UPPER_BOUND)
+                camera.setTranslateZ(Constant.TranslateZ_UPPER_BOUND);
+            else if (camera.getTranslateZ() + deltaY < Constant.TranslateZ_LOWER_BOUND)
+                camera.setTranslateZ(Constant.TranslateZ_LOWER_BOUND);
+            else
+                camera.setTranslateZ(camera.getTranslateZ() + deltaY);
+            System.out.println(camera.getTranslateZ());
+        });
+        Drawboard.setOnMousePressed((e) -> {
+            MouseButton button = e.getButton();
+            if (button == MouseButton.PRIMARY) {
+                System.out.println("PRESSED LEFT");
+                offset_x = e.getX();
+                offset_y = e.getY();
+            }
+        });
+        Drawboard.setOnMouseDragged((e) -> {
+            MouseButton button = e.getButton();
+            if (button == MouseButton.SECONDARY) return;
+            System.out.println("DRAGGED");
+            pane_x += e.getX() - offset_x;
+            pane_y += e.getY() - offset_y;
+            if (pane_x > Constant.PANE_X_LEFT_BOUND) pane_x = Constant.PANE_X_LEFT_BOUND;
+            if (pane_x < Constant.PANE_X_RIGHT_BOUND) pane_x = Constant.PANE_X_RIGHT_BOUND;
+            if (pane_y > Constant.PANE_Y_TOP_BOUND) pane_y = Constant.PANE_Y_TOP_BOUND;
+            if (pane_y < Constant.PANE_Y_BOTTOM_BOUND) pane_y = Constant.PANE_Y_BOTTOM_BOUND;
+            System.out.println(pane_x + " " + pane_y);
+            Drawboard.setLayoutX(pane_x);
+            Drawboard.setLayoutY(pane_y);
+        });
     }
 
     public void setApp(VisualNeoApp app) {
@@ -226,24 +281,6 @@ public class VisualNeoController {
                     }
                 }
         );
-
-        subscene_drawboard.setRoot(Drawboard);
-        subscene_drawboard.setCamera(camera);
-        subscene_drawboard.setFill(Color.BLUE);
-        camera.translateZProperty().set(-100);
-        app.stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-            switch (event.getCode()) {
-                case W:
-                    camera.setTranslateZ(camera.getTranslateZ() + 150);
-                    break;
-                case S:
-                    camera.setTranslateZ(camera.getTranslateZ() - 150);
-                    break;
-            }
-        });
-        Drawboard.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-            handleClickOnBoard(e);
-        });
 
     }
 
@@ -327,7 +364,6 @@ public class VisualNeoController {
     /**
      * Called when the user clicks the drawing board
      */
-    @FXML
     private void handleClickOnBoard(MouseEvent m) {
         // If the status is VERTEX, we need to create the vertex
         if (s == Status.VERTEX) {
@@ -628,11 +664,22 @@ public class VisualNeoController {
 
     @FXML
     void handleZoomIn() {
+        // Increase the TranslateZ value
+        if (camera.getTranslateZ() + Constant.UNIT_Z_CHANGE > Constant.TranslateZ_UPPER_BOUND)
+            camera.setTranslateZ(Constant.TranslateZ_UPPER_BOUND);
+        else
+            camera.setTranslateZ(camera.getTranslateZ() + Constant.UNIT_Z_CHANGE);
+        System.out.println(camera.getTranslateZ());
     }
 
     @FXML
     void handleZoomOut() {
-
+        // Decrease the TranslateZ value
+        if (camera.getTranslateZ() - Constant.UNIT_Z_CHANGE < Constant.TranslateZ_LOWER_BOUND)
+            camera.setTranslateZ(Constant.TranslateZ_LOWER_BOUND);
+        else
+            camera.setTranslateZ(camera.getTranslateZ() - Constant.UNIT_Z_CHANGE);
+        System.out.println(camera.getTranslateZ());
     }
 
 }
