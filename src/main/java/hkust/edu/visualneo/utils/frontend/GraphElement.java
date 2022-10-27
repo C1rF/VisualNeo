@@ -1,7 +1,6 @@
 package hkust.edu.visualneo.utils.frontend;
 
 import hkust.edu.visualneo.VisualNeoController;
-import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
@@ -12,27 +11,19 @@ import java.util.HashMap;
 
 abstract public class GraphElement extends Group {
 
-    // A boolean variable indicates whether it can be selected and moved now
-    public boolean canSelect = false;
     // Label shown on the GraphElement
     protected final Text label_displayed = new Text();
     // String of the label
     String label;
     // Properties attached to the element(node/relation)
     HashMap<String, Value> properties;
+    // Controller
+    VisualNeoController controller;
 
-    GraphElement() {
+    GraphElement(VisualNeoController controller) {
+        this.controller = controller;
         // initialize the arraylist
         properties = new HashMap<>();
-    }
-
-    void mouseExited(MouseEvent m) {
-        getScene().setCursor(Cursor.DEFAULT);
-    }
-
-    void mouseReleased(MouseEvent m) {
-        if (VisualNeoController.getStatus() == VisualNeoController.Status.SELECT)
-            mouseEntered(m);
     }
 
     public void addLabel(String new_label) {
@@ -65,11 +56,9 @@ abstract public class GraphElement extends Group {
 
     abstract public void removeHighlight();
 
-    abstract public void eraseFrom(VisualNeoController controller);
+    abstract public void erase();
 
     abstract protected void pressed(MouseEvent m);
-
-    abstract protected void mouseEntered(MouseEvent m);
 
     abstract public String toText();
 

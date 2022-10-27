@@ -1,7 +1,7 @@
 package hkust.edu.visualneo;
 
 import hkust.edu.visualneo.utils.backend.DbMetadata;
-import hkust.edu.visualneo.utils.frontend.Constant;
+import hkust.edu.visualneo.utils.frontend.Constants;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.GraphElement;
 import hkust.edu.visualneo.utils.frontend.Vertex;
@@ -9,12 +9,15 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
@@ -31,24 +34,14 @@ import java.util.Set;
 
 public class VisualNeoController {
     /**
-     * 7 Buttons in the toolbox and 1 Label indicating the current tool
+     * Functions in the MenuBar
      */
     @FXML
-    private Button btn_clear;
+    private MenuItem menu_item_save;
     @FXML
-    private Button btn_select;
+    private MenuItem menu_item_load;
     @FXML
-    private Button btn_vertex;
-    @FXML
-    private Button btn_edge;
-    @FXML
-    private Button btn_erase;
-    @FXML
-    private Button btn_save;
-    @FXML
-    private Button btn_load;
-    @FXML
-    private Label label_current_state;
+    private MenuItem menu_item_clear;
     /**
      * 4 Buttons controlling the core operations
      */
@@ -148,18 +141,9 @@ public class VisualNeoController {
     // The current focused element
     private ObjectProperty<GraphElement> highlight_element = new SimpleObjectProperty<>();
 
-    // ALL Status
-    public enum Status {EMPTY, VERTEX, EDGE_1, EDGE_2, ERASE, SELECT}
-
-    // Current Status
-    public static Status s;
-
     // A list that stores all the Vertex objects and Edges objects
     public ArrayList<Vertex> listOfVertices = new ArrayList<Vertex>();
     public ArrayList<Edge> listOfEdges = new ArrayList<Edge>();
-
-    // A temperate startVertex
-    Vertex startVertex;
 
     /**
      * The constructor.
@@ -174,7 +158,6 @@ public class VisualNeoController {
      */
     @FXML
     private void initialize() {
-        s = Status.EMPTY;
         // Set the behavior when highlight_element changes
         highlight_element.addListener((observableValue, oldHighlight, newHighlight) -> {
                     // First we need to remove the highlight from the previous GraphElement
@@ -197,58 +180,40 @@ public class VisualNeoController {
         // Initialize the DrawBoard
         Drawboard = new Pane();
         Drawboard.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-        Drawboard.setPrefWidth(Constant.BOARD_SIZE);
-        Drawboard.setPrefHeight(Constant.BOARD_SIZE);
-        Drawboard.setLayoutX(Constant.BOARD_INIT_LAYOUT);
-        Drawboard.setLayoutY(Constant.BOARD_INIT_LAYOUT);
-        pane_x = Constant.BOARD_INIT_LAYOUT;
-        pane_y = Constant.BOARD_INIT_LAYOUT;
+        Drawboard.setPrefWidth(Constants.BOARD_SIZE);
+        Drawboard.setPrefHeight(Constants.BOARD_SIZE);
+        Drawboard.setLayoutX(Constants.BOARD_INIT_LAYOUT);
+        Drawboard.setLayoutY(Constants.BOARD_INIT_LAYOUT);
+        pane_x = Constants.BOARD_INIT_LAYOUT;
+        pane_y = Constants.BOARD_INIT_LAYOUT;
         // Initialize the Group
-        Group Drawboard_wrapper = new Group();
-        Drawboard_wrapper.getChildren().add(Drawboard);
+        Group DrawBoard_wrapper = new Group();
+        DrawBoard_wrapper.getChildren().add(Drawboard);
         // Initialize the camera
         camera = new PerspectiveCamera();
         camera.setTranslateZ(0);
         // Set the SubScene
-        subscene_drawboard.setRoot(Drawboard_wrapper);
+        subscene_drawboard.setRoot(DrawBoard_wrapper);
         subscene_drawboard.setCamera(camera);
         subscene_drawboard.setFill(Color.BLUE);
-        // Set the handler of DrawBoard
-        Drawboard.setOnMouseClicked((e) -> {
-            handleClickOnBoard(e);
-        });
+
+        // Scroll Effect
         Drawboard.setOnScroll((e) -> {
             double deltaY = e.getDeltaY();
-            if (camera.getTranslateZ() + deltaY > Constant.TranslateZ_UPPER_BOUND)
-                camera.setTranslateZ(Constant.TranslateZ_UPPER_BOUND);
-            else if (camera.getTranslateZ() + deltaY < Constant.TranslateZ_LOWER_BOUND)
-                camera.setTranslateZ(Constant.TranslateZ_LOWER_BOUND);
+            if (camera.getTranslateZ() + deltaY > Constants.TranslateZ_UPPER_BOUND)
+                camera.setTranslateZ(Constants.TranslateZ_UPPER_BOUND);
+            else if (camera.getTranslateZ() + deltaY < Constants.TranslateZ_LOWER_BOUND)
+                camera.setTranslateZ(Constants.TranslateZ_LOWER_BOUND);
             else
                 camera.setTranslateZ(camera.getTranslateZ() + deltaY);
             System.out.println(camera.getTranslateZ());
         });
-        Drawboard.setOnMousePressed((e) -> {
-            MouseButton button = e.getButton();
-            if (button == MouseButton.PRIMARY) {
-                System.out.println("PRESSED LEFT");
-                offset_x = e.getX();
-                offset_y = e.getY();
-            }
-        });
-        Drawboard.setOnMouseDragged((e) -> {
-            MouseButton button = e.getButton();
-            if (button == MouseButton.SECONDARY) return;
-            System.out.println("DRAGGED");
-            pane_x += e.getX() - offset_x;
-            pane_y += e.getY() - offset_y;
-            if (pane_x > Constant.PANE_X_LEFT_BOUND) pane_x = Constant.PANE_X_LEFT_BOUND;
-            if (pane_x < Constant.PANE_X_RIGHT_BOUND) pane_x = Constant.PANE_X_RIGHT_BOUND;
-            if (pane_y > Constant.PANE_Y_TOP_BOUND) pane_y = Constant.PANE_Y_TOP_BOUND;
-            if (pane_y < Constant.PANE_Y_BOTTOM_BOUND) pane_y = Constant.PANE_Y_BOTTOM_BOUND;
-            System.out.println(pane_x + " " + pane_y);
-            Drawboard.setLayoutX(pane_x);
-            Drawboard.setLayoutY(pane_y);
-        });
+        // MouseEvent
+        MouseEventHandler mouseHandler = new MouseEventHandler();
+        Drawboard.addEventHandler(MouseEvent.ANY, mouseHandler);
+        // KeyEvent
+        KeyEventHandler keyHandler = new KeyEventHandler();
+        Drawboard.addEventHandler(KeyEvent.ANY, keyHandler);
     }
 
     public void setApp(VisualNeoApp app) {
@@ -269,15 +234,7 @@ public class VisualNeoController {
                         System.out.println("A non-GraphElement got focused!");
                         // If the focused item becomes the DrawBoard or buttons on the toolbox, set the highlight to null
                         // Otherwise, do nothing
-                        Button[] draw_btns = {btn_clear, btn_select, btn_vertex, btn_edge, btn_erase, btn_save, btn_load};
-                        boolean is_btn = false;
-                        for (Button btn : draw_btns) {
-                            if (btn == newNode) {
-                                is_btn = true;
-                                break;
-                            }
-                        }
-                        if (newNode == Drawboard || is_btn) highlight_element.set(null);
+                        if (newNode == Drawboard) highlight_element.set(null);
                     }
                 }
         );
@@ -285,7 +242,6 @@ public class VisualNeoController {
     }
 
     /**
-     * Called when the user clicks on the clear button.
      * Clear the drawing board
      */
     @FXML
@@ -297,55 +253,6 @@ public class VisualNeoController {
     }
 
     /**
-     * Called when the user clicks the select button.
-     * Select a vertex
-     */
-    @FXML
-    private void handleSelect() {
-        s = Status.SELECT;
-        label_current_state.setText("Current Tool: Select");
-        unlockAllVertices();
-        unlockAllEdges();
-    }
-
-    /**
-     * Called when the user clicks the vertex button.
-     * Create a vertex
-     */
-    @FXML
-    private void handleVertex() {
-        s = Status.VERTEX;
-        label_current_state.setText("Current Tool: Vertex");
-        lockAllVertices();
-        lockAllEdges();
-    }
-
-    /**
-     * Called when the user clicks the Edge button.
-     * Create an edge
-     */
-    @FXML
-    private void handleEdge() {
-        s = Status.EDGE_1;
-        label_current_state.setText("Current Tool: Edge");
-        unlockAllVertices();
-        lockAllEdges();
-    }
-
-    /**
-     * Called when the user clicks the Erase button.
-     * Erase a vertex and all connected edges
-     */
-    @FXML
-    private void handleErase() {
-        s = Status.ERASE;
-        label_current_state.setText("Current Tool: Erase");
-        unlockAllVertices();
-        unlockAllEdges();
-    }
-
-    /**
-     * Called when the user clicks the Save button.
      * Save the drawing pattern
      */
     @FXML
@@ -353,7 +260,6 @@ public class VisualNeoController {
     }
 
     /**
-     * Called when the user clicks the Load button.
      * Load the drawing pattern
      */
     @FXML
@@ -362,75 +268,70 @@ public class VisualNeoController {
     }
 
     /**
-     * Called when the user clicks the drawing board
+     * Event handler to handle all the MouseEvents on the DrawBoard
      */
-    private void handleClickOnBoard(MouseEvent m) {
-        // If the status is VERTEX, we need to create the vertex
-        if (s == Status.VERTEX) {
-            Vertex temp_vertex = new Vertex(m.getX(), m.getY());
-            Drawboard.getChildren().add(temp_vertex);
-            listOfVertices.add(temp_vertex);
-            temp_vertex.requestFocus();
-        }
-
-        // If the status is ERASE, we need to erase the focused Vertex/Edge
-        if (s == Status.ERASE) {
-            GraphElement current_highlight = highlight_element.get();
-            // Check whether it is a Vertex
-            if (current_highlight instanceof Vertex focused_vertex) {
-                // Remove the vertex
-                highlight_element.set(null);
-                focused_vertex.eraseFrom(this);
-                // For testing
-                System.out.println("Successfully removed a vertex");
-            }
-            // Check whether it is an Edge
-            if (current_highlight instanceof Edge focused_edge) {
-                // Remove the edge
-                highlight_element.set(null);
-                focused_edge.eraseFrom(this);
-                // For testing
-                System.out.println("Successfully removed an edge");
-            }
-        }
-
-        // If the status is EDGE_1/EDGE_2, meaning that we are forming the EDGE
-        if (s == Status.EDGE_1 || s == Status.EDGE_2) {
-
-            GraphElement current_highlight = highlight_element.get();
-            if (!(current_highlight instanceof Vertex)) return;
-
-            Vertex focused_vertex = (Vertex) current_highlight;
-            // If the status is EDGE_2, meaning that we are choosing the second Vertex
-            if (s == Status.EDGE_2) {
-                /** Case 1: User clicks the white space, we do nothing but remove the highlight */
-                if (startVertex == focused_vertex && Drawboard.getScene().getCursor() != Cursor.HAND) {
+    public class MouseEventHandler implements EventHandler<MouseEvent> {
+        @Override
+        public void handle(MouseEvent e) {
+            // If the element cannot be selected, do nothing
+            if (e.getEventType() == MouseEvent.MOUSE_PRESSED) {
+                // check whether it is the left key
+                MouseButton button = e.getButton();
+                if (button != MouseButton.PRIMARY) return;
+                if (!e.isShiftDown()) {
+                    System.out.println("NO SHIFT + LEFT PRESSED!");
+                    // If left key is pressed, record the position
+                    offset_x = e.getX();
+                    offset_y = e.getY();
+                    // Then remove the highlight
                     Drawboard.requestFocus();
+                } else {
+                    System.out.println("SHIFT + LEFT PRESSED!");
+                    // Create new Vertex on the pane
+                    Vertex temp_vertex = new Vertex(VisualNeoController.this, e.getX(), e.getY());
+                    Drawboard.getChildren().add(temp_vertex);
+                    listOfVertices.add(temp_vertex);
+                    temp_vertex.requestFocus();
                 }
-                /** Case 2: User does want to create an edge between node(s) */
-                else {
-                    Edge temp_edge = new Edge(startVertex, focused_vertex, false);
-                    Drawboard.getChildren().add(temp_edge);
-                    temp_edge.toBack();
-                    listOfEdges.add(temp_edge);
-                    startVertex = null;
-                    temp_edge.requestFocus();
-                }
-                // No matter whether the edge is created or not, return to EDGE_1 state
-                s = Status.EDGE_1;
             }
-            // If the status is EDGE_1, meaning that we are choosing the first Vertex
-            else if (s == Status.EDGE_1) {
-                startVertex = focused_vertex;
-                s = Status.EDGE_2;
+
+            if (e.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+                MouseButton button = e.getButton();
+                if (button != MouseButton.PRIMARY) return;
+                if (e.isShiftDown()) return;
+                System.out.println("DRAGGED!");
+                System.out.println("DRAGGED");
+                pane_x += e.getX() - offset_x;
+                pane_y += e.getY() - offset_y;
+                if (pane_x > Constants.PANE_X_LEFT_BOUND) pane_x = Constants.PANE_X_LEFT_BOUND;
+                if (pane_x < Constants.PANE_X_RIGHT_BOUND) pane_x = Constants.PANE_X_RIGHT_BOUND;
+                if (pane_y > Constants.PANE_Y_TOP_BOUND) pane_y = Constants.PANE_Y_TOP_BOUND;
+                if (pane_y < Constants.PANE_Y_BOTTOM_BOUND) pane_y = Constants.PANE_Y_BOTTOM_BOUND;
+                System.out.println(pane_x + " " + pane_y);
+                Drawboard.setLayoutX(pane_x);
+                Drawboard.setLayoutY(pane_y);
             }
         }
-        // If the current state is SELECT, we move the focus to the drawing board.
-        // Note that here we already exclude the case when user clicks a vertex or an edge
-        // Because in that case, the mouse event will be consumed in the Vertex/Edge object
-        // and will not be passed to drawing board
-        if (s == Status.SELECT) {
-            Drawboard.requestFocus();
+    }
+
+    /**
+     * Event handler to handle all the MouseEvents on the DrawBoard
+     */
+    public class KeyEventHandler implements EventHandler<KeyEvent> {
+        @Override
+        public void handle(KeyEvent e) {
+            KeyCode key = e.getCode();
+            switch (key) {
+                case DELETE:
+                case BACK_SPACE:
+                    // Delete highlighted GraphElement(if there is any)
+                    System.out.println("DELETE Pressed!");
+                    GraphElement current_highlight = highlight_element.get();
+                    if (current_highlight != null)
+                        current_highlight.erase();
+                    highlight_element.set(null);
+                    break;
+            }
         }
     }
 
@@ -571,30 +472,6 @@ public class VisualNeoController {
         Drawboard.getScene().setCursor(Cursor.DEFAULT);
     }
 
-    private void lockAllVertices() {
-        for (Vertex v : listOfVertices)
-            v.canSelect = false;
-    }
-
-    private void lockAllEdges() {
-        for (Edge e : listOfEdges)
-            e.canSelect = false;
-    }
-
-    private void unlockAllVertices() {
-        for (Vertex v : listOfVertices)
-            v.canSelect = true;
-    }
-
-    private void unlockAllEdges() {
-        for (Edge e : listOfEdges)
-            e.canSelect = true;
-    }
-
-    public static Status getStatus() {
-        return s;
-    }
-
     private void UpdateNodeTable(DbMetadata metadata) {
         node_name_col.setCellValueFactory(new MapValueFactory("Label"));
         node_count_col.setCellValueFactory(new MapValueFactory("Count"));
@@ -665,21 +542,32 @@ public class VisualNeoController {
     @FXML
     void handleZoomIn() {
         // Increase the TranslateZ value
-        if (camera.getTranslateZ() + Constant.UNIT_Z_CHANGE > Constant.TranslateZ_UPPER_BOUND)
-            camera.setTranslateZ(Constant.TranslateZ_UPPER_BOUND);
+        if (camera.getTranslateZ() + Constants.UNIT_Z_CHANGE > Constants.TranslateZ_UPPER_BOUND)
+            camera.setTranslateZ(Constants.TranslateZ_UPPER_BOUND);
         else
-            camera.setTranslateZ(camera.getTranslateZ() + Constant.UNIT_Z_CHANGE);
+            camera.setTranslateZ(camera.getTranslateZ() + Constants.UNIT_Z_CHANGE);
         System.out.println(camera.getTranslateZ());
     }
 
     @FXML
     void handleZoomOut() {
         // Decrease the TranslateZ value
-        if (camera.getTranslateZ() - Constant.UNIT_Z_CHANGE < Constant.TranslateZ_LOWER_BOUND)
-            camera.setTranslateZ(Constant.TranslateZ_LOWER_BOUND);
+        if (camera.getTranslateZ() - Constants.UNIT_Z_CHANGE < Constants.TranslateZ_LOWER_BOUND)
+            camera.setTranslateZ(Constants.TranslateZ_LOWER_BOUND);
         else
-            camera.setTranslateZ(camera.getTranslateZ() - Constant.UNIT_Z_CHANGE);
+            camera.setTranslateZ(camera.getTranslateZ() - Constants.UNIT_Z_CHANGE);
         System.out.println(camera.getTranslateZ());
     }
 
+    public GraphElement getHighlight() {
+        return highlight_element.get();
+    }
+
+    public void createEdgeBetween(Vertex start, Vertex end) {
+        Edge temp_edge = new Edge(this, start, end, false);
+        Drawboard.getChildren().add(temp_edge);
+        temp_edge.toBack();
+        listOfEdges.add(temp_edge);
+        temp_edge.requestFocus();
+    }
 }
