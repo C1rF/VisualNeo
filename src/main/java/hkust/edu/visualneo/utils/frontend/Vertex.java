@@ -28,15 +28,15 @@ public class Vertex extends GraphElement {
     private final Set<Edge> edges = new LinkedHashSet<>();
 
     // Constructor
-    public Vertex(double x, double y) {
-        super();
+    public Vertex(VisualNeoController controller, double x, double y) {
+        super(controller);
         this.x = x;
         this.y = y;
         // Initialize the shape
         initializeShape();
         setPos();
         // Set event handler
-        mouseEventHandler handler = new mouseEventHandler();
+        MouseEventHandler handler = new MouseEventHandler();
         addEventHandler(MouseEvent.ANY, handler);
         // For Testing
         System.out.println("A new Vertex is created.");
@@ -70,34 +70,32 @@ public class Vertex extends GraphElement {
      */
     @Override
     protected void pressed(MouseEvent m) {
-        offX = m.getX();
-        offY = m.getY();
-        requestFocus();
-        if (VisualNeoController.getStatus() == VisualNeoController.Status.SELECT) m.consume();
+        GraphElement current_highlight = controller.getHighlight();
+        if (m.isShiftDown() && current_highlight instanceof Vertex last_vertex) {
+            // Meaning that we need to create an edge from current_highlight to this
+            controller.createEdgeBetween(last_vertex, this);
+            System.out.println("Edge CREATED");
+        } else {
+            // We simply select the vertex
+            System.out.println("Vertex SELECTED");
+            offX = m.getX();
+            offY = m.getY();
+            requestFocus();
+        }
     }
 
     /**
      * Move the Vertex when dragged
      */
     public void dragged(MouseEvent m) {
-        if (VisualNeoController.getStatus() != VisualNeoController.Status.SELECT)
-            return;
+        if (m.isShiftDown()) return;
+        System.out.println("Vertex Dragged");
         getScene().setCursor(Cursor.CLOSED_HAND);
         // (m.getX() - offX) contains the minor changes of x coordinate
         // (m.getY() - offY) contains the minor changes of y coordinate
         x += m.getX() - offX; // keep updating the coordinate
         y += m.getY() - offY; // keep updating the coordinate
         setPos();
-    }
-
-    @Override
-    protected void mouseEntered(MouseEvent m) {
-        if (VisualNeoController.getStatus() == VisualNeoController.Status.SELECT ||
-                VisualNeoController.getStatus() == VisualNeoController.Status.EDGE_1 ||
-                VisualNeoController.getStatus() == VisualNeoController.Status.EDGE_2)
-            getScene().setCursor(Cursor.HAND);
-        else if (VisualNeoController.getStatus() == VisualNeoController.Status.ERASE)
-            getScene().setCursor(Cursor.DISAPPEAR);
     }
 
     /**
@@ -118,21 +116,20 @@ public class Vertex extends GraphElement {
     /**
      * Event handler to handle all the MouseEvents
      */
-    public class mouseEventHandler implements EventHandler<MouseEvent> {
+    public class MouseEventHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent event) {
-            // If the element cannot be selected, do nothing
-            if (!canSelect) return;
+            event.consume();
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
                 pressed(event);
             else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED)
                 dragged(event);
             else if (event.getEventType() == MouseEvent.MOUSE_ENTERED)
-                mouseEntered(event);
+                getScene().setCursor(Cursor.HAND);
             else if (event.getEventType() == MouseEvent.MOUSE_EXITED)
-                mouseExited(event);
+                getScene().setCursor(Cursor.DEFAULT);
             else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
-                mouseReleased(event);
+                getScene().setCursor(Cursor.HAND);
         }
     }
 
@@ -162,10 +159,10 @@ public class Vertex extends GraphElement {
 
     public double angleBetween(Vertex other) {
         return x == other.x ?
-               y <= other.y ?
-               Math.PI / 2 :
-               3 * Math.PI / 2 :
-               Math.atan2(other.y - y, other.x - x);
+                y <= other.y ?
+                        Math.PI / 2 :
+                        3 * Math.PI / 2 :
+                Math.atan2(other.y - y, other.x - x);
     }
 
     public void updateLoops() {
@@ -215,9 +212,9 @@ public class Vertex extends GraphElement {
     }
 
     @Override
-    public void eraseFrom(VisualNeoController controller) {
+    public void erase() {
         Set<Edge> edges_copy = new HashSet<>(edges);
-        edges_copy.forEach(edge -> edge.eraseFrom(controller));
+        edges_copy.forEach(edge -> edge.erase());
         ((Pane) getParent()).getChildren().remove(this);
         controller.listOfVertices.remove(this);
     }
