@@ -6,6 +6,7 @@ import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.Vertex;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,12 +15,30 @@ public class Graph implements Expandable {
     final Set<Node> nodes;
     final Set<Relation> relations;
 
+    private final Map<Long, Node> nodesById;
+    private final Map<Long, Relation> relationsById;
+
     public Graph(Set<Node> nodes,
                  Set<Relation> relations) {
         this.nodes = nodes;
         this.relations = relations;
 
         validate();
+        
+        nodesById = nodes
+                .stream()
+                .collect(Collectors.toMap(
+                        Node::getId,
+                        Function.identity(),
+                        (e1, e2) -> e2,
+                        HashMap::new));
+        relationsById = relations
+                .stream()
+                .collect(Collectors.toMap(
+                        Relation::getId,
+                        Function.identity(),
+                        (e1, e2) -> e2,
+                        HashMap::new));
     }
 
     // Construct a graph from vertices and edges, generated nodes and relations are sorted
@@ -118,6 +137,14 @@ public class Graph implements Expandable {
             if (!colorMap.get(other))
                 color(colorMap, other);
         });
+    }
+
+    Node getNode(long id) {
+        return nodesById.get(id);
+    }
+
+    Relation getRelation(long id) {
+        return relationsById.get(id);
     }
 
     //    // Generate all duplicate/indistinguishable node pairs, used for inequality constraints
