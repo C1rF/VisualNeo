@@ -31,6 +31,7 @@ public class Edge extends GraphElement {
     private static final double TEXT_EPSILON = 4.0;
 
     enum TextDisplayMode {TOP, MIDDLE, BOTTOM}
+
     private TextDisplayMode textDisplayMode = TextDisplayMode.MIDDLE;
 
     public Vertex startVertex;
@@ -40,8 +41,8 @@ public class Edge extends GraphElement {
     private int edgeIdx;
     private int numEdges;
 
-    public Edge(Vertex startVertex, Vertex endVertex, boolean directed) {
-        super();
+    public Edge(VisualNeoController controller, Vertex startVertex, Vertex endVertex, boolean directed) {
+        super(controller);
         this.startVertex = startVertex;
         this.endVertex = endVertex;
         this.directed = directed;
@@ -123,16 +124,9 @@ public class Edge extends GraphElement {
      */
     @Override
     protected void pressed(MouseEvent m) {
-        this.requestFocus();
-        if (VisualNeoController.getStatus() == VisualNeoController.Status.SELECT) m.consume();
-    }
-
-    @Override
-    protected void mouseEntered(MouseEvent m) {
-        if (VisualNeoController.getStatus() == VisualNeoController.Status.SELECT)
-            getScene().setCursor(Cursor.HAND);
-        else if (VisualNeoController.getStatus() == VisualNeoController.Status.ERASE)
-            getScene().setCursor(Cursor.DISAPPEAR);
+        if (m.isShiftDown()) return;
+        System.out.println("Edge Pressed");
+        requestFocus();
     }
 
     public void update() {
@@ -161,8 +155,7 @@ public class Edge extends GraphElement {
             ((Rotate) getTransforms().get(0)).setAngle(Math.toDegrees(baseAngle + offsetAngle));
 
             label_displayed.setRotate(Math.sin(baseAngle + offsetAngle) < 0.0 ? 90.0 : -90.0);
-        }
-        else {
+        } else {
             curve.getElements().clear();
 
             double sX, sY, eX, eY;
@@ -232,8 +225,7 @@ public class Edge extends GraphElement {
                         label_displayed.setLayoutY(Math.cos(baseAngle) < 0 ? -TEXT_GAP : TEXT_GAP);
                     }
                 }
-            }
-            else {
+            } else {
                 boolean lowerHalf = edgeIdx < numEdges / 2;
                 offsetAngle = (edgeIdx - (numEdges - 1) / 2.0) * GAP_ANGLE;
 
@@ -252,7 +244,7 @@ public class Edge extends GraphElement {
                                 new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
 
                         label_displayed.setLayoutY((lowerHalf ? -fY : fY) +
-                                                   (Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP));
+                                (Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP));
                     }
                     case MIDDLE -> {
                         if (label_displayed.getText() == null || label_displayed.getText().equals(""))
@@ -281,7 +273,7 @@ public class Edge extends GraphElement {
                                 new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
 
                         label_displayed.setLayoutY((lowerHalf ? -fY : fY) +
-                                                   (Math.cos(baseAngle) < 0 ? -TEXT_GAP : TEXT_GAP));
+                                (Math.cos(baseAngle) < 0 ? -TEXT_GAP : TEXT_GAP));
                     }
                 }
             }
@@ -323,7 +315,7 @@ public class Edge extends GraphElement {
     /**
      * Given the num_curves and curve_index, determine the offset of that edge
      *
-     * @param edgeIdx the index of this edge among all edges between startVertex and endVertex
+     * @param edgeIdx  the index of this edge among all edges between startVertex and endVertex
      * @param numEdges number of edges between startVertex and endVertex (including itself)
      */
     public void updateIdx(int edgeIdx, int numEdges) {
@@ -337,14 +329,13 @@ public class Edge extends GraphElement {
     public class mouseEventHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent event) {
-            // If the element cannot be selected, do nothing
-            if (!canSelect) return;
+            event.consume();
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
                 pressed(event);
             else if (event.getEventType() == MouseEvent.MOUSE_ENTERED)
-                mouseEntered(event);
+                getScene().setCursor(Cursor.HAND);
             else if (event.getEventType() == MouseEvent.MOUSE_EXITED)
-                mouseExited(event);
+                getScene().setCursor(Cursor.DEFAULT);
         }
     }
 
@@ -354,7 +345,7 @@ public class Edge extends GraphElement {
     }
 
     @Override
-    public void eraseFrom(VisualNeoController controller) {
+    public void erase() {
         startVertex.detach(this);
         endVertex.detach(this);
         ((Pane) getParent()).getChildren().remove(this);

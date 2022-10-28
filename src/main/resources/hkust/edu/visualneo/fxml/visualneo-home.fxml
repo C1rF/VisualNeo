@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.Cursor?>
+<?import javafx.scene.SubScene?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
@@ -14,10 +15,10 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
@@ -30,19 +31,21 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <ToolBar prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <items>
-                              <Button fx:id="btn_clear" mnemonicParsing="false" onAction="#handleClear" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefWidth="70.0" text="Clear" textAlignment="CENTER" />
-                              <Button fx:id="btn_select" mnemonicParsing="false" onAction="#handleSelect" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefWidth="70.0" text="Select" textAlignment="CENTER" />
-                              <Button fx:id="btn_vertex" mnemonicParsing="false" onAction="#handleVertex" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefWidth="70.0" text="Vertex" textAlignment="CENTER" />
-                              <Button fx:id="btn_edge" mnemonicParsing="false" onAction="#handleEdge" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefWidth="70.0" text="Edge" textAlignment="CENTER" />
-                              <Button fx:id="btn_erase" mnemonicParsing="false" onAction="#handleErase" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefWidth="70.0" text="Erase" textAlignment="CENTER" />
-                              <Button fx:id="btn_save" mnemonicParsing="false" onAction="#handleSave" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefWidth="70.0" text="Save" textAlignment="CENTER" />
-                              <Button fx:id="btn_load" mnemonicParsing="false" onAction="#handleLoad" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefWidth="70.0" text="Load" textAlignment="CENTER" />
-                              <Label fx:id="label_current_state" text="Current Tool: None" />
-                           </items>
-                        </ToolBar>
-                        <Pane fx:id="Drawboard" onMouseDragged="#handleDragOnBoard" onMousePressed="#handleClickOnBoard" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
+                        <SubScene fx:id="subscene_drawboard" fill="WHITE" height="738.0" width="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <root>
+                            <Region />
+                          </root>
+                        </SubScene>
+                        <Button fx:id="btn_zoom_in" mnemonicParsing="false" onAction="#handleZoomOut" prefHeight="40.0" prefWidth="40.0" text="-" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="10.0">
+                           <font>
+                              <Font name="Arial Black" size="18.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btn_zoom_out" mnemonicParsing="false" onAction="#handleZoomIn" prefHeight="40.0" prefWidth="40.0" text="+" AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="10.0">
+                           <font>
+                              <Font name="Arial Black" size="18.0" />
+                           </font>
+                        </Button>
                      </children>
                   </AnchorPane>
             </content>
@@ -63,7 +66,7 @@
                         </Label>
                         <AnchorPane fx:id="pane_no_database" layoutX="139.0" layoutY="196.0" prefHeight="76.0" prefWidth="650.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
                            <children>
-                              <Text layoutX="25.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="No databasel loaded" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="10.0">
+                              <Text layoutX="25.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="No database loaded" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="10.0">
                                  <font>
                                     <Font name="Arial" size="16.0" />
                                  </font>
@@ -98,25 +101,6 @@
             </Tab>
         </tabs>
       </TabPane>
-      <MenuBar layoutX="87.0" layoutY="23.0" prefHeight="30.0" prefWidth="1200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
       <VBox layoutX="24.0" layoutY="62.0" minWidth="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0">
          <children>
             <Button fx:id="btn_load_db" mnemonicParsing="false" onAction="#handleLoadDB" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Load Database">
@@ -211,23 +195,13 @@
                                                 <Cursor fx:constant="HAND" />
                                              </cursor>
                                           </ChoiceBox>
-                                          <Text layoutX="14.0" layoutY="95.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Value:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="130.0">
+                                          <Text layoutX="14.0" layoutY="95.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Value:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="70.0">
                                              <font>
                                                 <Font size="14.0" />
                                              </font>
                                           </Text>
-                                          <TextField fx:id="textfield_property_value" layoutX="10.0" layoutY="99.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="150.0" />
-                                          <Button fx:id="btn_add_property" disable="true" layoutX="115.0" layoutY="152.0" mnemonicParsing="false" onAction="#handleAddProperty" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Property" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="200.0" />
-                                          <Text layoutX="24.0" layoutY="200.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Type:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="70.0">
-                                             <font>
-                                                <Font size="14.0" />
-                                             </font>
-                                          </Text>
-                                          <ChoiceBox fx:id="choicebox_property_type" layoutX="26.0" layoutY="103.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="90.0">
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </ChoiceBox>
+                                          <TextField fx:id="textfield_property_value" layoutX="10.0" layoutY="99.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="90.0" />
+                                          <Button fx:id="btn_add_property" disable="true" layoutX="115.0" layoutY="152.0" mnemonicParsing="false" onAction="#handleAddProperty" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Property" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="140.0" />
                                        </children>
                                     </AnchorPane>
                                  </content></ScrollPane>
@@ -312,5 +286,25 @@
             </AnchorPane>
          </children>
       </VBox>
+      <MenuBar layoutX="87.0" layoutY="23.0" prefHeight="30.0" prefWidth="1200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem fx:id="menu_item_save" mnemonicParsing="false" onAction="#handleSave" text="Save" />
+                  <MenuItem fx:id="menu_item_load" mnemonicParsing="false" onAction="#handleLoad" text="Load" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem fx:id="menu_item_clear" mnemonicParsing="false" onAction="#handleClear" text="Clear" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
    </children>
 </AnchorPane>

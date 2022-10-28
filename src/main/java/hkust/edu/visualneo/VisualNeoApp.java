@@ -10,6 +10,7 @@ import java.io.IOException;
 public class VisualNeoApp extends Application {
 
     final QueryHandler queryHandler;
+    Stage stage;
 
     public VisualNeoApp() {
         super();
@@ -22,6 +23,7 @@ public class VisualNeoApp extends Application {
         Scene scene = new Scene(fxmlLoader.load(), 1200, 800);
         VisualNeoController controller = fxmlLoader.<VisualNeoController>getController();
         controller.setApp(this);
+        this.stage = stage;
         controller.setScene(scene);
         stage.setTitle("VisualNeo");
         stage.setScene(scene);
