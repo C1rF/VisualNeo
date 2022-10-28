@@ -82,7 +82,7 @@ public class QueryBuilder {
         builder.append(nodes.get(0));
         decreaseIndent();
 
-        System.out.println(new Expander().expand(graph));
+        System.out.println(Expander.expand(graph));
 
         return builder.toString();
     }

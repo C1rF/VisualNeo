@@ -16,11 +16,11 @@ public class Expander {
     private static final String FOCUS = "|-";
     private static final String EMPTY = "None";
 
-    private final StringBuilder builder = new StringBuilder();
+    private static final StringBuilder builder = new StringBuilder();
 
-    private int indent;
+    private static int indent;
 
-    public String expand(Expandable expandable) {
+    public static String expand(Expandable expandable) {
         builder.append(expandable);
         elaborate(expandable);
         String expansion = builder.toString();
@@ -28,11 +28,11 @@ public class Expander {
         return expansion;
     }
 
-    private void elaborate(Expandable expandable) {
+    private static void elaborate(Expandable expandable) {
         elaborate(expandable.expand());
     }
 
-    private void elaborate(Map<?, ?> map) {
+    private static void elaborate(Map<?, ?> map) {
         if (map.isEmpty())
             builder.append(COLON).append(EMPTY);
 
@@ -89,27 +89,27 @@ public class Expander {
         }
     }
 
-    private void increaseIndent() {
+    private static void increaseIndent() {
         if (++indent > MAX_INDENT)
             indent = MAX_INDENT;
     }
 
-    private void decreaseIndent() {
+    private static void decreaseIndent() {
         if (--indent < 0)
             indent = 0;
     }
 
-    private void increaseIndent(int delta) {
+    private static void increaseIndent(int delta) {
         if ((indent += delta) > MAX_INDENT)
             indent = MAX_INDENT;
     }
 
-    private void decreaseIndent(int delta) {
+    private static void decreaseIndent(int delta) {
         if ((indent -= delta) < 0)
             indent = 0;
     }
 
-    private void newLine() {
+    private static void newLine() {
         builder.append(NEW_LINE);
         if (indent > 0) {
             builder.append(STACK.repeat(indent - 1));
@@ -117,7 +117,7 @@ public class Expander {
         }
     }
 
-    private void clear() {
+    private static void clear() {
         builder.setLength(0);
         indent = 0;
     }
