@@ -1,10 +1,12 @@
 package hkust.edu.visualneo.utils.frontend;
 
-import hkust.edu.visualneo.VisualNeoController;
-import javafx.event.EventHandler;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
@@ -12,128 +14,129 @@ import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.PI;
+
 public class Vertex extends GraphElement {
 
     // Radius of the Vertex
     static final double VERTEX_RADIUS = 25.0;
-
-    // record the position of center of the circle
-    double x, y;
+    private static final double DEFAULT_STROKE_WIDTH = 1.0;
+    private static final double HIGHLIGHT_STROKE_WIDTH = 2.0;
+    private static final Color DEFAULT_COLOR = Color.DARKGREY;
+    private static final Color HIGHLIGHT_COLOR = Color.BLACK;
     private static final Color CIRCLE_COLOR = Color.LIGHTGRAY;
     // record the offset (only used for move the object)
-    double offX, offY;
+    double anchorX, anchorY;
     // The shape contains a circle and a text(not necessary) on top of it
-    private Circle circle;
 
     private final Set<Edge> edges = new LinkedHashSet<>();
 
+    private final DoubleProperty selfLoopAngle =
+            new SimpleDoubleProperty(this, "selfLoopAngle", 0.0);
+
     // Constructor
-    public Vertex(VisualNeoController controller, double x, double y) {
-        super(controller);
-        this.x = x;
-        this.y = y;
-        // Initialize the shape
-        initializeShape();
-        setPos();
-        // Set event handler
-        MouseEventHandler handler = new MouseEventHandler();
-        addEventHandler(MouseEvent.ANY, handler);
-        // For Testing
+    public Vertex(Canvas canvas, double x, double y) {
+        super(canvas);
+        setPosition(x, y);
+
+        initializeGraphics();
+//        // Set event handler
+//        MouseEventHandler handler = new MouseEventHandler();
+//        addEventHandler(MouseEvent.ANY, handler);
+        // For debugging
         System.out.println("A new Vertex is created.");
     }
 
     @Override
-    protected void initializeShape() {
-        super.initializeShape();
-        // Initialize the circle
-        circle = new Circle(VERTEX_RADIUS, CIRCLE_COLOR);
-        circle.setStrokeWidth(0.5);
-        // Add circle and label to Vertex Group (Display)
-        getChildren().add(circle);
-        circle.toFront();
-        label_displayed.toFront();
+    protected void initializeGraphics() {
+        super.initializeGraphics();
+
+        shape = new Circle(VERTEX_RADIUS, CIRCLE_COLOR);
+        getChildren().add(shape);
+
+        highlightProperty().addListener((observable, oldValue, newValue) -> {
+            shape.setStrokeWidth(newValue ? HIGHLIGHT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH);
+            shape.setStroke(newValue ? HIGHLIGHT_COLOR : DEFAULT_COLOR);
+        });
+
+        selfLoopAngleProperty().bind(Bindings.createDoubleBinding(
+                () -> {
+                    if (hasSelfLoop()) {
+                        List<Double> angles = computeAngles();
+                        if (!angles.isEmpty()) {
+                            angles.add(angles.get(0) + 2 * PI);
+                            double maxSpan = Double.NEGATIVE_INFINITY;
+                            int idx = 0;
+                            for (int i = 1; i < angles.size(); ++i) {
+                                double span = angles.get(i) - angles.get(i - 1);
+                                if (span > maxSpan) {
+                                    maxSpan = span;
+                                    idx = i;
+                                }
+                            }
+                            return (angles.get(idx) + angles.get(idx - 1)) / 2;
+                        }
+                    }
+                    return -PI / 2;
+                },
+                neighbors()
+                        .stream()
+                        .map(GraphElement::positionProperty).toList().toArray(new ObjectProperty[0])));  // TODO: ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
     }
 
     @Override
-    public void becomeHighlight() {
-        circle.setStrokeWidth(2);
-        circle.setStroke(new Color(0, 0, 0, 1));
-    }
-
-    @Override
-    public void removeHighlight() {
-        circle.setStrokeWidth(0.5);
+    protected void initializeHandlers() {
+        super.initializeHandlers();
+//        setOnMousePressed(this::pressed);
+        setOnMouseDragged(this::dragged);
+        setOnMouseReleased(this::released);
     }
 
     /**
      * Request focus when pressed
      */
-    @Override
-    protected void pressed(MouseEvent m) {
-        GraphElement current_highlight = controller.getHighlight();
-        if (m.isShiftDown() && current_highlight instanceof Vertex last_vertex) {
-            // Meaning that we need to create an edge from current_highlight to this
-            controller.createEdgeBetween(last_vertex, this);
-            System.out.println("Edge CREATED");
-        } else {
-            // We simply select the vertex
-            System.out.println("Vertex SELECTED");
-            offX = m.getX();
-            offY = m.getY();
-            requestFocus();
-        }
+    private void pressed(MouseEvent e) {
+        anchorX = e.getX();
+        anchorY = e.getY();
     }
 
     /**
      * Move the Vertex when dragged
      */
-    public void dragged(MouseEvent m) {
-        if (m.isShiftDown()) return;
+    private void dragged(MouseEvent e) {
+//        if (e.isShiftDown()) return;
         System.out.println("Vertex Dragged");
         getScene().setCursor(Cursor.CLOSED_HAND);
-        // (m.getX() - offX) contains the minor changes of x coordinate
-        // (m.getY() - offY) contains the minor changes of y coordinate
-        x += m.getX() - offX; // keep updating the coordinate
-        y += m.getY() - offY; // keep updating the coordinate
-        setPos();
+//        translate(e.getX() - anchorX, e.getY() - anchorY);
+//        anchorX = e.getX();
+//        anchorY = e.getY();
+    }
+    
+    private void released(MouseEvent e) {
+        getScene().setCursor(Cursor.HAND);
     }
 
-    /**
-     * Set the position of the group
-     */
-    public void setPos() {
-        setLayoutX(x);
-        setLayoutY(y);
+//    /**
+//     * Event handler to handle all the MouseEvents
+//     */
+//    public class MouseEventHandler implements EventHandler<MouseEvent> {
+//        @Override
+//        public void handle(MouseEvent event) {
+//            event.consume();
+//            if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
+//                pressed(event);
+//            else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+//                dragged(event);
+//            else if (event.getEventType() == MouseEvent.MOUSE_ENTERED)
+//                getScene().setCursor(Cursor.HAND);
+//            else if (event.getEventType() == MouseEvent.MOUSE_EXITED)
+//                getScene().setCursor(Cursor.DEFAULT);
+//            else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
+//                getScene().setCursor(Cursor.HAND);
+//        }
+//    }
 
-        updateAllEdges();
-        edges.forEach(edge -> {
-            Vertex other = edge.other(this);
-            if (!equals(other))
-                other.updateLoops();
-        });
-    }
-
-    /**
-     * Event handler to handle all the MouseEvents
-     */
-    public class MouseEventHandler implements EventHandler<MouseEvent> {
-        @Override
-        public void handle(MouseEvent event) {
-            event.consume();
-            if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
-                pressed(event);
-            else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED)
-                dragged(event);
-            else if (event.getEventType() == MouseEvent.MOUSE_ENTERED)
-                getScene().setCursor(Cursor.HAND);
-            else if (event.getEventType() == MouseEvent.MOUSE_EXITED)
-                getScene().setCursor(Cursor.DEFAULT);
-            else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
-                getScene().setCursor(Cursor.HAND);
-        }
-    }
-
-    public boolean hasLoop() {
+    public boolean hasSelfLoop() {
         for (Edge edge : edges)
             if (equals(edge.other(this)))
                 return true;
@@ -155,14 +158,6 @@ public class Vertex extends GraphElement {
                 .stream()
                 .filter(edge -> other.equals(edge.other(this)))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    public double angleBetween(Vertex other) {
-        return x == other.x ?
-                y <= other.y ?
-                        Math.PI / 2 :
-                        3 * Math.PI / 2 :
-                Math.atan2(other.y - y, other.x - x);
     }
 
     public void updateLoops() {
@@ -188,7 +183,7 @@ public class Vertex extends GraphElement {
         return neighbors()
                 .stream()
                 .filter(other -> !other.equals(this))
-                .map(this::angleBetween)
+                .map(other -> Point2D.ZERO.angle(other.getPosition().subtract(getPosition())))
                 .sorted()
                 .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -211,12 +206,17 @@ public class Vertex extends GraphElement {
         updateLoops();
     }
 
+    public DoubleProperty selfLoopAngleProperty() {
+        return selfLoopAngle;
+    }
+    public double getSelfLoopAngle() {
+        return selfLoopAngleProperty().get();
+    }
+
     @Override
     public void erase() {
-        Set<Edge> edges_copy = new HashSet<>(edges);
-        edges_copy.forEach(edge -> edge.erase());
-        ((Pane) getParent()).getChildren().remove(this);
-        controller.listOfVertices.remove(this);
+        Set<Edge> edgesCopy = new HashSet<>(edges);
+        edgesCopy.forEach(Edge::erase);
     }
 
     public Set<Edge> getAllEdges() {
@@ -228,11 +228,33 @@ public class Vertex extends GraphElement {
      */
     @Override
     public String toText() {
-        String[] temp = new String[]{String.valueOf(x),
-                String.valueOf(y),
-                label_displayed.getText(),
-                label_displayed.getText()};
+        String[] temp = new String[]{positionProperty().toString(),
+                                     getLabel()};
         return (String) StringUtil.join(" ", Arrays.asList(temp));
     }
 
+
+//    public class VertexEvent extends Event {
+//
+//        @Serial
+//        private static final long serialVersionUID = 1L;
+//
+//        public static final EventType<VertexEvent> ANY = new EventType<>("ANY");
+//        public static final EventType<VertexEvent> MOVED = new EventType<>(ANY, "MOVED");
+//        public static final EventType<VertexEvent> NEIGHBOR_MOVED = new EventType<>(ANY, "NEIGHBOR_MOVED");
+//
+//        public VertexEvent(Object source, EventTarget target, EventType<? extends VertexEvent> eventType) {
+//            super(Objects.requireNonNull(source), Objects.requireNonNull(target), eventType);
+//        }
+//
+//        @Override
+//        public VertexEvent copyFor(Object newSource, EventTarget newTarget) {
+//            return (VertexEvent) super.copyFor(newSource, newTarget);
+//        }
+//
+//        @Override
+//        public EventType<? extends VertexEvent> getEventType() {
+//            return (EventType<? extends VertexEvent>) super.getEventType();
+//        }
+//    }
 }
