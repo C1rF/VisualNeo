@@ -1,11 +1,13 @@
 package hkust.edu.visualneo.utils.frontend;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.*;
+import javafx.scene.shape.ArcTo;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
 import java.util.Arrays;
@@ -133,169 +135,169 @@ public class Edge extends GraphElement {
         });
 
         if (isSelfLoop()) {
-            double sCos = Math.cos(LOOP_SPAN_ANGLE / 2);
-            double sSin = Math.sin(LOOP_SPAN_ANGLE / 2);
-            double lNX = VERTEX_RADIUS * sCos;
-            double lNY = VERTEX_RADIUS * sSin;
-            double lFX = LINE_LENGTH * sCos;
-            double lFY = LINE_LENGTH * sSin;
-
-            curve().getElements().addAll(
-                    new MoveTo(lNX, lNY),
-                    new LineTo(lFX, lFY),
-                    new ArcTo(r, r, 0.0, lFX, -lFY, true, false),
-                    new LineTo(lNX, -lNY));
-
-            // TODO: Revert this
-            if (!directed) {
-                double h1Cos = Math.cos((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
-                double h1Sin = Math.sin((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
-                double h1X = lNX + ARROWHEAD_LENGTH * h1Cos;
-                double h1Y = -lNY + ARROWHEAD_LENGTH * h1Sin;
-                double h2Cos = Math.cos((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) / 2);
-                double h2Sin = Math.sin((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) / 2);
-                double h2X = lNX + ARROWHEAD_LENGTH * h2Cos;
-                double h2Y = -lNY + ARROWHEAD_LENGTH * h2Sin;
-
-                curve().getElements().addAll(
-                        new LineTo(h1X, h1Y),
-                        new MoveTo(lNX, -lNY),
-                        new LineTo(h2X, h2Y));
-            }
+//            double sCos = Math.cos(LOOP_SPAN_ANGLE / 2);
+//            double sSin = Math.sin(LOOP_SPAN_ANGLE / 2);
+//            double lNX = VERTEX_RADIUS * sCos;
+//            double lNY = VERTEX_RADIUS * sSin;
+//            double lFX = LINE_LENGTH * sCos;
+//            double lFY = LINE_LENGTH * sSin;
+//
+//            curve().getElements().addAll(
+//                    new MoveTo(lNX, lNY),
+//                    new LineTo(lFX, lFY),
+//                    new ArcTo(r, r, 0.0, lFX, -lFY, true, false),
+//                    new LineTo(lNX, -lNY));
+//
+//            // TODO: Revert this
+//            if (!directed) {
+//                double h1Cos = Math.cos((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
+//                double h1Sin = Math.sin((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
+//                double h1X = lNX + ARROWHEAD_LENGTH * h1Cos;
+//                double h1Y = -lNY + ARROWHEAD_LENGTH * h1Sin;
+//                double h2Cos = Math.cos((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) / 2);
+//                double h2Sin = Math.sin((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) / 2);
+//                double h2X = lNX + ARROWHEAD_LENGTH * h2Cos;
+//                double h2Y = -lNY + ARROWHEAD_LENGTH * h2Sin;
+//
+//                curve().getElements().addAll(
+//                        new LineTo(h1X, h1Y),
+//                        new MoveTo(lNX, -lNY),
+//                        new LineTo(h2X, h2Y));
+//            }
         }
         else {
-            positionProperty().bind(Bindings.createObjectBinding(
-                    () -> startVertex.getPosition().midpoint(endVertex.getPosition()),
-                    startVertex.positionProperty(), endVertex.positionProperty()));
-
-            rotateProperty().bind(Bindings.createDoubleBinding(
-                    () -> X_AXIS.angle(endVertex.getPosition().subtract(startVertex.getPosition())),
-                    startVertex.positionProperty(), endVertex.positionProperty()));
-
-            double d = startVertex.getPosition().distance(endVertex.getPosition());
-
-            double offsetAngle;
-            double aX, aY;
-
-            if (2 * idx + 1 == num) {
-                offsetAngle = 0.0;
-
-                aX = d / 2 - VERTEX_RADIUS;
-                aY = 0.0;
-
-                switch (textDisplayMode) {
-                    case TOP -> {
-                        curve().getElements().addAll(
-                                new MoveTo(-aX, 0.0),
-                                new LineTo(aX, 0.0));
-
-                        text.setLayoutY(Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP);
-                    }
-                    case MIDDLE -> {
-                        if (text.getText() == null || text.getText().equals(""))
-                            curve().getElements().addAll(
-                                    new MoveTo(-aX, 0.0),
-                                    new LineTo(aX, 0.0));
-                        else {
-                            double tX = text.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
-                            if (tX > d / 2)
-                                tX = d / 2;
-
-                            curve().getElements().addAll(
-                                    new MoveTo(-aX, 0.0),
-                                    new LineTo(-tX, 0.0),
-                                    new MoveTo(tX, 0.0),
-                                    new LineTo(aX, 0.0));
-
-                            text.setLayoutY(0.0);
-                        }
-                    }
-                    case BOTTOM -> {
-                        curve().getElements().addAll(
-                                new MoveTo(-aX, 0.0),
-                                new LineTo(aX, 0.0));
-
-                        text.setLayoutY(Math.cos(baseAngle) < 0 ? -TEXT_GAP : TEXT_GAP);
-                    }
-                }
-            } else {
-                boolean lowerHalf = idx < num / 2;
-                offsetAngle = (idx - (num - 1) / 2.0) * GAP_ANGLE;
-
-                double cos = Math.cos(offsetAngle);
-                double sin = Math.sin(offsetAngle);
-                aX = d / 2 - VERTEX_RADIUS * cos;
-                aY = VERTEX_RADIUS * sin;
-
-                double r = aX / Math.abs(sin);
-                double fY = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d / 2, 2));
-
-                switch (textDisplayMode) {
-                    case TOP -> {
-                        curve().getElements().addAll(
-                                new MoveTo(-aX, aY),
-                                new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
-
-                        text.setLayoutY((lowerHalf ? -fY : fY) +
-                                        (Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP));
-                    }
-                    case MIDDLE -> {
-                        if (text.getText() == null || text.getText().equals(""))
-                            curve().getElements().addAll(
-                                    new MoveTo(-aX, aY),
-                                    new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
-                        else {
-                            double tX = text.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
-                            if (tX > d / 2)
-                                tX = d / 2;
-                            double offY = r - Math.sqrt(Math.pow(r, 2) - Math.pow(tX, 2));
-                            double tY = lowerHalf ? -fY + offY : fY - offY;
-
-                            curve().getElements().addAll(
-                                    new MoveTo(-aX, aY),
-                                    new ArcTo(r, r, 0.0, -tX, tY, cos < 0.0, lowerHalf),
-                                    new MoveTo(tX, tY),
-                                    new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
-
-                            text.setLayoutY(tY);
-                        }
-                    }
-                    case BOTTOM -> {
-                        curve().getElements().addAll(
-                                new MoveTo(-aX, aY),
-                                new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
-
-                        text.setLayoutY((lowerHalf ? -fY : fY) +
-                                        (Math.cos(baseAngle) < 0 ? -TEXT_GAP : TEXT_GAP));
-                    }
-                }
-            }
-
-            // TODO: Revert this
-            if (!directed) {
-                double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE / 2);
-                double h1Sin = Math.sin(offsetAngle + ARROWHEAD_ANGLE / 2);
-                double h1X = aX - ARROWHEAD_LENGTH * h1Cos;
-                double h1Y = aY + ARROWHEAD_LENGTH * h1Sin;
-                double h2Cos = Math.cos(offsetAngle - ARROWHEAD_ANGLE / 2);
-                double h2Sin = Math.sin(offsetAngle - ARROWHEAD_ANGLE / 2);
-                double h2X = aX - ARROWHEAD_LENGTH * h2Cos;
-                double h2Y = aY + ARROWHEAD_LENGTH * h2Sin;
-
-                if (reverted)
-                    curve().getElements().addAll(
-                            new MoveTo(-aX, aY),
-                            new LineTo(-h1X, h1Y),
-                            new MoveTo(-aX, aY),
-                            new LineTo(-h2X, h2Y));
-                else
-                    curve().getElements().addAll(
-                            new LineTo(h1X, h1Y),
-                            new MoveTo(aX, aY),
-                            new LineTo(h2X, h2Y));
-            }
-
-            text.setRotate(Math.cos(baseAngle) > 0.0 ? 0.0 : 180.0);
+//            positionProperty().bind(Bindings.createObjectBinding(
+//                    () -> startVertex.getPosition().midpoint(endVertex.getPosition()),
+//                    startVertex.positionProperty(), endVertex.positionProperty()));
+//
+//            rotateProperty().bind(Bindings.createDoubleBinding(
+//                    () -> X_AXIS.angle(endVertex.getPosition().subtract(startVertex.getPosition())),
+//                    startVertex.positionProperty(), endVertex.positionProperty()));
+//
+//            double d = startVertex.getPosition().distance(endVertex.getPosition());
+//
+//            double offsetAngle;
+//            double aX, aY;
+//
+//            if (2 * idx + 1 == num) {
+//                offsetAngle = 0.0;
+//
+//                aX = d / 2 - VERTEX_RADIUS;
+//                aY = 0.0;
+//
+//                switch (textDisplayMode) {
+//                    case TOP -> {
+//                        curve().getElements().addAll(
+//                                new MoveTo(-aX, 0.0),
+//                                new LineTo(aX, 0.0));
+//
+//                        text.setLayoutY(Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP);
+//                    }
+//                    case MIDDLE -> {
+//                        if (text.getText() == null || text.getText().equals(""))
+//                            curve().getElements().addAll(
+//                                    new MoveTo(-aX, 0.0),
+//                                    new LineTo(aX, 0.0));
+//                        else {
+//                            double tX = text.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
+//                            if (tX > d / 2)
+//                                tX = d / 2;
+//
+//                            curve().getElements().addAll(
+//                                    new MoveTo(-aX, 0.0),
+//                                    new LineTo(-tX, 0.0),
+//                                    new MoveTo(tX, 0.0),
+//                                    new LineTo(aX, 0.0));
+//
+//                            text.setLayoutY(0.0);
+//                        }
+//                    }
+//                    case BOTTOM -> {
+//                        curve().getElements().addAll(
+//                                new MoveTo(-aX, 0.0),
+//                                new LineTo(aX, 0.0));
+//
+//                        text.setLayoutY(Math.cos(baseAngle) < 0 ? -TEXT_GAP : TEXT_GAP);
+//                    }
+//                }
+//            } else {
+//                boolean lowerHalf = idx < num / 2;
+//                offsetAngle = (idx - (num - 1) / 2.0) * GAP_ANGLE;
+//
+//                double cos = Math.cos(offsetAngle);
+//                double sin = Math.sin(offsetAngle);
+//                aX = d / 2 - VERTEX_RADIUS * cos;
+//                aY = VERTEX_RADIUS * sin;
+//
+//                double r = aX / Math.abs(sin);
+//                double fY = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d / 2, 2));
+//
+//                switch (textDisplayMode) {
+//                    case TOP -> {
+//                        curve().getElements().addAll(
+//                                new MoveTo(-aX, aY),
+//                                new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
+//
+//                        text.setLayoutY((lowerHalf ? -fY : fY) +
+//                                        (Math.cos(baseAngle) < 0 ? TEXT_GAP : -TEXT_GAP));
+//                    }
+//                    case MIDDLE -> {
+//                        if (text.getText() == null || text.getText().equals(""))
+//                            curve().getElements().addAll(
+//                                    new MoveTo(-aX, aY),
+//                                    new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
+//                        else {
+//                            double tX = text.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
+//                            if (tX > d / 2)
+//                                tX = d / 2;
+//                            double offY = r - Math.sqrt(Math.pow(r, 2) - Math.pow(tX, 2));
+//                            double tY = lowerHalf ? -fY + offY : fY - offY;
+//
+//                            curve().getElements().addAll(
+//                                    new MoveTo(-aX, aY),
+//                                    new ArcTo(r, r, 0.0, -tX, tY, cos < 0.0, lowerHalf),
+//                                    new MoveTo(tX, tY),
+//                                    new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
+//
+//                            text.setLayoutY(tY);
+//                        }
+//                    }
+//                    case BOTTOM -> {
+//                        curve().getElements().addAll(
+//                                new MoveTo(-aX, aY),
+//                                new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
+//
+//                        text.setLayoutY((lowerHalf ? -fY : fY) +
+//                                        (Math.cos(baseAngle) < 0 ? -TEXT_GAP : TEXT_GAP));
+//                    }
+//                }
+//            }
+//
+//            // TODO: Revert this
+//            if (!directed) {
+//                double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE / 2);
+//                double h1Sin = Math.sin(offsetAngle + ARROWHEAD_ANGLE / 2);
+//                double h1X = aX - ARROWHEAD_LENGTH * h1Cos;
+//                double h1Y = aY + ARROWHEAD_LENGTH * h1Sin;
+//                double h2Cos = Math.cos(offsetAngle - ARROWHEAD_ANGLE / 2);
+//                double h2Sin = Math.sin(offsetAngle - ARROWHEAD_ANGLE / 2);
+//                double h2X = aX - ARROWHEAD_LENGTH * h2Cos;
+//                double h2Y = aY + ARROWHEAD_LENGTH * h2Sin;
+//
+//                if (reverted)
+//                    curve().getElements().addAll(
+//                            new MoveTo(-aX, aY),
+//                            new LineTo(-h1X, h1Y),
+//                            new MoveTo(-aX, aY),
+//                            new LineTo(-h2X, h2Y));
+//                else
+//                    curve().getElements().addAll(
+//                            new LineTo(h1X, h1Y),
+//                            new MoveTo(aX, aY),
+//                            new LineTo(h2X, h2Y));
+//            }
+//
+//            text.setRotate(Math.cos(baseAngle) > 0.0 ? 0.0 : 180.0);
 
         }
     }
