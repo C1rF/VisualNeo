@@ -157,7 +157,7 @@ public class VisualNeoController {
 //     * after the fxml file has been loaded.
 //     */
     @FXML
-    private void initialize() {
+    private void initialize() {  // TODO: Make this decent
         AnchorPane aba = (AnchorPane) subscene_drawboard.getParent();
         aba.getChildren().remove(subscene_drawboard);
         Canvas.buildCanvas(aba);

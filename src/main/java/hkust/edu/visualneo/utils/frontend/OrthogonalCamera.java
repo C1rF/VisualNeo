@@ -25,9 +25,9 @@ public class OrthogonalCamera {
             new SimpleDoubleProperty(this, "inverseRatio", 1 / DEFAULT_RATIO);
 
     private final DoubleProperty viewWidth =
-            new SimpleDoubleProperty(this, "viewWidth");
+            new SimpleDoubleProperty(this, "viewWidth", 0.0);
     private final DoubleProperty viewHeight =
-            new SimpleDoubleProperty(this, "viewHeight");
+            new SimpleDoubleProperty(this, "viewHeight", 0.0);
 
     private final ObjectProperty<Point2D> position =
             new SimpleObjectProperty<>(this, "position", Point2D.ZERO);

@@ -1,12 +1,12 @@
 package hkust.edu.visualneo.utils.frontend;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
@@ -22,27 +22,57 @@ public class Vertex extends GraphElement {
     static final double VERTEX_RADIUS = 25.0;
     private static final double DEFAULT_STROKE_WIDTH = 1.0;
     private static final double HIGHLIGHT_STROKE_WIDTH = 2.0;
+    private static final double DEFAULT_ANGLE = -PI / 2;
     private static final Color DEFAULT_COLOR = Color.DARKGREY;
     private static final Color HIGHLIGHT_COLOR = Color.BLACK;
     private static final Color CIRCLE_COLOR = Color.LIGHTGRAY;
-    // record the offset (only used for move the object)
-    double anchorX, anchorY;
     // The shape contains a circle and a text(not necessary) on top of it
 
-    private final Set<Edge> edges = new LinkedHashSet<>();
-
     private final DoubleProperty selfLoopAngle =
-            new SimpleDoubleProperty(this, "selfLoopAngle", 0.0);
+            new SimpleDoubleProperty(this, "selfLoopAngle", DEFAULT_ANGLE);
+
+    private final MapProperty<Vertex, SetProperty<Edge>> neighborhood =
+            new SimpleMapProperty<>(this, "neighborhood", FXCollections.observableHashMap());
+
+    private final ChangeListener<Point2D> positionListener =  // For re-usability
+            (observable, oldValue, newValue) -> updateSelfLoopAngle();
+
+    private final SetChangeListener<Edge> neighborEdgesListener = c -> {  // For re-usability
+        if (c.getSet().size() == 0) {
+            getNeighborhood().remove(c.getElementRemoved().other(Vertex.this));
+            return;
+        }
+        if (Vertex.this == c.getSet().iterator().next().primaryVertex) {
+            int idx = 0;
+            for (Edge edge : c.getSet()) {
+                edge.setIdx(idx);
+                ++idx;
+            }
+        }
+    };
+
+    private final MapChangeListener<Vertex, SetProperty<Edge>> neighborhoodListener = c -> {  // For clarity
+        if (c.wasAdded()) {
+            c.getKey().positionProperty().addListener(positionListener);
+            c.getValueAdded().addListener(neighborEdgesListener);
+        }
+        else if (c.wasRemoved()) {
+            c.getKey().positionProperty().removeListener(positionListener);
+            c.getValueRemoved().removeListener(neighborEdgesListener);
+        }
+        updateSelfLoopAngle();
+    };
 
     // Constructor
     public Vertex(Canvas canvas, double x, double y) {
         super(canvas);
-        setPosition(x, y);
 
+        setPosition(x, y);
         initializeGraphics();
-//        // Set event handler
-//        MouseEventHandler handler = new MouseEventHandler();
-//        addEventHandler(MouseEvent.ANY, handler);
+
+        positionProperty().addListener(positionListener);
+        neighborhoodProperty().addListener(neighborhoodListener);
+
         // For debugging
         System.out.println("A new Vertex is created.");
     }
@@ -53,157 +83,106 @@ public class Vertex extends GraphElement {
 
         shape = new Circle(VERTEX_RADIUS, CIRCLE_COLOR);
         getChildren().add(shape);
+        shape.toBack();
 
         highlightProperty().addListener((observable, oldValue, newValue) -> {
             shape.setStrokeWidth(newValue ? HIGHLIGHT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH);
             shape.setStroke(newValue ? HIGHLIGHT_COLOR : DEFAULT_COLOR);
         });
-
-        selfLoopAngleProperty().bind(Bindings.createDoubleBinding(
-                () -> {
-                    if (hasSelfLoop()) {
-                        List<Double> angles = computeAngles();
-                        if (!angles.isEmpty()) {
-                            angles.add(angles.get(0) + 2 * PI);
-                            double maxSpan = Double.NEGATIVE_INFINITY;
-                            int idx = 0;
-                            for (int i = 1; i < angles.size(); ++i) {
-                                double span = angles.get(i) - angles.get(i - 1);
-                                if (span > maxSpan) {
-                                    maxSpan = span;
-                                    idx = i;
-                                }
-                            }
-                            return (angles.get(idx) + angles.get(idx - 1)) / 2;
-                        }
-                    }
-                    return -PI / 2;
-                },
-                neighbors()
-                        .stream()
-                        .map(GraphElement::positionProperty).toList().toArray(new ObjectProperty[0])));  // TODO: ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
     }
 
     @Override
     protected void initializeHandlers() {
         super.initializeHandlers();
-//        setOnMousePressed(this::pressed);
-        setOnMouseDragged(this::dragged);
-        setOnMouseReleased(this::released);
+        setOnMouseDragged(e -> getScene().setCursor(Cursor.CLOSED_HAND));
+        setOnMouseReleased(e -> getScene().setCursor(Cursor.HAND));
     }
-
-    /**
-     * Request focus when pressed
-     */
-    private void pressed(MouseEvent e) {
-        anchorX = e.getX();
-        anchorY = e.getY();
-    }
-
-    /**
-     * Move the Vertex when dragged
-     */
-    private void dragged(MouseEvent e) {
-//        if (e.isShiftDown()) return;
-        System.out.println("Vertex Dragged");
-        getScene().setCursor(Cursor.CLOSED_HAND);
-//        translate(e.getX() - anchorX, e.getY() - anchorY);
-//        anchorX = e.getX();
-//        anchorY = e.getY();
-    }
-    
-    private void released(MouseEvent e) {
-        getScene().setCursor(Cursor.HAND);
-    }
-
-//    /**
-//     * Event handler to handle all the MouseEvents
-//     */
-//    public class MouseEventHandler implements EventHandler<MouseEvent> {
-//        @Override
-//        public void handle(MouseEvent event) {
-//            event.consume();
-//            if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
-//                pressed(event);
-//            else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED)
-//                dragged(event);
-//            else if (event.getEventType() == MouseEvent.MOUSE_ENTERED)
-//                getScene().setCursor(Cursor.HAND);
-//            else if (event.getEventType() == MouseEvent.MOUSE_EXITED)
-//                getScene().setCursor(Cursor.DEFAULT);
-//            else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
-//                getScene().setCursor(Cursor.HAND);
-//        }
-//    }
 
     public boolean hasSelfLoop() {
-        for (Edge edge : edges)
-            if (equals(edge.other(this)))
-                return true;
-        return false;
+        return hasNeighbor(this);
     }
 
-    public Set<Vertex> neighbors() {
-        return edges
-                .stream()
-                .map(edge -> edge.other(this))
-                .collect(Collectors.toSet());
-    }
-
-    public Set<Edge> edgesBetween(Vertex other) {
-        if (other == null)
-            return Collections.emptySet();
-
-        return edges
-                .stream()
-                .filter(edge -> other.equals(edge.other(this)))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    public void updateLoops() {
-        updateEdgesBetween(this);
-    }
-
-    public void updateEdgesBetween(Vertex other) {
-        Set<Edge> edges = edgesBetween(other);
-        int numEdges = edges.size();
-        int edgeIdx = 0;
-        for (Edge edge : edges) {
-            edge.updateIdx(edgeIdx, numEdges);
-            edge.update();
-            ++edgeIdx;
+    private void updateSelfLoopAngle() {
+        if (hasSelfLoop()) {
+            List<Double> angles = computeAngles();
+            if (!angles.isEmpty()) {
+                angles.add(angles.get(0) + 2 * PI);
+                double maxSpan = Double.NEGATIVE_INFINITY;
+                int idx = 0;
+                for (int i = 1; i < angles.size(); ++i) {
+                    double span = angles.get(i) - angles.get(i - 1);
+                    if (span > maxSpan) {
+                        maxSpan = span;
+                        idx = i;
+                    }
+                }
+                setSelfLoopAngle((angles.get(idx) + angles.get(idx - 1)) / 2);
+                return;
+            }
         }
-    }
-
-    public void updateAllEdges() {
-        edges.forEach(Edge::update);
+        setSelfLoopAngle(DEFAULT_ANGLE);
     }
 
     public List<Double> computeAngles() {
-        return neighbors()
+        return getNeighbors()
                 .stream()
                 .filter(other -> !other.equals(this))
-                .map(other -> Point2D.ZERO.angle(other.getPosition().subtract(getPosition())))
+                .map(other -> angle(this, other))
                 .sorted()
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public void attach(Edge new_edge) {
-        edges.add(new_edge);
-
-        if (equals(new_edge.startVertex))
-            updateEdgesBetween(new_edge.endVertex);
-
-        updateLoops();
+    public void attach(Edge edge) {
+        Vertex neighbor = edge.other(this);
+        SetProperty<Edge> neighborEdgesProperty = edgesPropertyBetween(neighbor);
+        if (neighborEdgesProperty == null) {
+            neighborEdgesProperty =
+                    new SimpleSetProperty<>(FXCollections.observableSet(new LinkedHashSet<>()));
+            neighborhood.put(neighbor, neighborEdgesProperty);
+        }
+        neighborEdgesProperty.add(edge);
     }
 
-    public void detach(Edge edge_to_detach) {
-        edges.remove(edge_to_detach);
+    public void detach(Edge edge) {
+        getEdgesBetween(edge.other(this)).remove(edge);
+    }
 
-        if (equals(edge_to_detach.startVertex))
-            updateEdgesBetween(edge_to_detach.endVertex);
-
-        updateLoops();
+    public MapProperty<Vertex, SetProperty<Edge>> neighborhoodProperty() {
+        return neighborhood;
+    }
+    public Map<Vertex, SetProperty<Edge>> getNeighborhood() {
+        return neighborhood.get();
+    }
+    public boolean hasNeighbor(Vertex neighbor) {
+        return getNeighborhood().containsKey(neighbor);
+    }
+    public Set<Vertex> getNeighbors() {
+        return getNeighborhood().keySet();
+    }
+    public SetProperty<Edge> edgesPropertyBetween(Vertex neighbor) {
+        return getNeighborhood().get(neighbor);
+    }
+    public Set<Edge> getEdgesBetween(Vertex neighbor) {
+        SetProperty<Edge> neighborEdgesProperty = edgesPropertyBetween(neighbor);
+        return neighborEdgesProperty == null ?
+               null : neighborEdgesProperty.get();
+    }
+    public Set<Edge> getEdges() {
+        return getNeighborhood()
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+    public ReadOnlyIntegerProperty numEdgesPropertyBetween(Vertex neighbor) {
+        SetProperty<Edge> neighborEdgesProperty = edgesPropertyBetween(neighbor);
+        return neighborEdgesProperty == null ?
+               null : neighborEdgesProperty.sizeProperty();
+    }
+    public int getNumEdgesBetween(Vertex neighbor) {
+        SetProperty<Edge> neighborEdgesProperty = edgesPropertyBetween(neighbor);
+        return neighborEdgesProperty == null ?
+               0 : neighborEdgesProperty.getSize();
     }
 
     public DoubleProperty selfLoopAngleProperty() {
@@ -212,15 +191,13 @@ public class Vertex extends GraphElement {
     public double getSelfLoopAngle() {
         return selfLoopAngleProperty().get();
     }
+    public void setSelfLoopAngle(double angle) {
+        selfLoopAngleProperty().set(angle);
+    }
 
     @Override
     public void erase() {
-        Set<Edge> edgesCopy = new HashSet<>(edges);
-        edgesCopy.forEach(Edge::erase);
-    }
-
-    public Set<Edge> getAllEdges() {
-        return edges;
+        getEdges().forEach(Edge::erase);
     }
 
     /**
@@ -232,29 +209,4 @@ public class Vertex extends GraphElement {
                                      getLabel()};
         return (String) StringUtil.join(" ", Arrays.asList(temp));
     }
-
-
-//    public class VertexEvent extends Event {
-//
-//        @Serial
-//        private static final long serialVersionUID = 1L;
-//
-//        public static final EventType<VertexEvent> ANY = new EventType<>("ANY");
-//        public static final EventType<VertexEvent> MOVED = new EventType<>(ANY, "MOVED");
-//        public static final EventType<VertexEvent> NEIGHBOR_MOVED = new EventType<>(ANY, "NEIGHBOR_MOVED");
-//
-//        public VertexEvent(Object source, EventTarget target, EventType<? extends VertexEvent> eventType) {
-//            super(Objects.requireNonNull(source), Objects.requireNonNull(target), eventType);
-//        }
-//
-//        @Override
-//        public VertexEvent copyFor(Object newSource, EventTarget newTarget) {
-//            return (VertexEvent) super.copyFor(newSource, newTarget);
-//        }
-//
-//        @Override
-//        public EventType<? extends VertexEvent> getEventType() {
-//            return (EventType<? extends VertexEvent>) super.getEventType();
-//        }
-//    }
 }
