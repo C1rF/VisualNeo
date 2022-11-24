@@ -3,14 +3,12 @@ package hkust.edu.visualneo.utils.frontend;
 import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.event.EventTarget;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
 import java.util.Collection;
@@ -37,15 +35,6 @@ public class Canvas extends Pane {
     public Canvas() {
         super();
 
-        requestFocus();
-
-        getChildren().addListener((ListChangeListener<Node>) c -> {
-            while (c.next()) {
-                if (c.wasRemoved())
-                    c.getRemoved().forEach(element -> ((GraphElement) element).erase());
-            }
-        });
-
         highlightElements.addListener((SetChangeListener<GraphElement>) c -> {
             if (c.wasAdded())
                 c.getElementAdded().setHighlight(true);
@@ -62,33 +51,6 @@ public class Canvas extends Pane {
                 if (e.getCode() == KeyCode.DELETE || e.getCode() == KeyCode.BACK_SPACE)
                     removeElements(getHighlights());
             }
-        });
-
-        addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-//            EventTarget target = e.getTarget();
-//
-//            if (target == this) {  // Clicked on Canvas
-//                if (e.isShiftDown())
-//                    createVertex(e.getX(), e.getY());
-//                else
-//                    clearHighlights();
-//            }
-//            else {  // Clicked on a GraphElement
-//                GraphElement currentElement = (GraphElement) ((Node) target).getParent();
-//                Vertex lastVertex = nominalVertex();
-//                if (e.isShiftDown() && lastVertex != null && currentElement instanceof Vertex currentVertex)
-//                    createEdge(lastVertex, currentVertex);
-//                else if (e.isControlDown()) {
-//                    if (currentElement.isHighlighted())
-//                        removeHighlight(currentElement);
-//                    else
-//                        addHighlight(currentElement);
-//                }
-//                else {
-//                    clearHighlights();
-//                    addHighlight(currentElement);
-//                }
-//            }
         });
 
         setOnMousePressed(e -> {
@@ -178,11 +140,14 @@ public class Canvas extends Pane {
     }
 
     private void createVertex(double x, double y) {
-        addElement(new Vertex(this, x, y));
+        Vertex vertex = new Vertex(this, x, y);
+        addElement(vertex);
     }
 
     private void createEdge(Vertex start, Vertex end) {
-        addElement(new Edge(this, start, end, false));  // TODO: Modify this
+        Edge edge = new Edge(this, start, end, false);  // TODO: Modify this
+        addElement(edge);
+        edge.toBack();
     }
 
     private Vertex nominalVertex() {
@@ -212,11 +177,13 @@ public class Canvas extends Pane {
 
     public void removeElement(GraphElement element) {
         getChildren().remove(element);
+        element.erase();
         clearHighlights();
     }
 
     public void removeElements(Collection<GraphElement> elements) {
         getChildren().removeAll(elements);
+        elements.forEach(GraphElement::erase);
         clearHighlights();
     }
 

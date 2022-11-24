@@ -10,12 +10,22 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
+import javafx.scene.transform.Scale;
 import org.neo4j.driver.Value;
 
 import java.util.Map;
 import java.util.TreeMap;
 
+import static java.lang.Math.PI;
+
 public abstract class GraphElement extends Group {
+
+    public static double angle(Vertex start, Vertex end) {
+        Point2D delta = end.getPosition().subtract(start.getPosition());
+        return delta.getX() == 0.0 ?
+               delta.getY() < 0.0 ? -PI / 2 : PI / 2 :
+               Math.atan2(delta.getY(), delta.getX());
+    }
 
     protected final Canvas canvas;
 
@@ -123,8 +133,10 @@ public abstract class GraphElement extends Group {
                 () -> (getY() - camera().getY()) * camera().getRatio(),
                 positionProperty(), camera().positionProperty(), camera().ratioProperty()));
 
-        scaleXProperty().bind(camera().ratioProperty());
-        scaleYProperty().bind(camera().ratioProperty());
+        Scale scale = new Scale();
+        scale.xProperty().bind(camera().ratioProperty());
+        scale.yProperty().bind(camera().ratioProperty());
+        getTransforms().add(scale);
 
         text = new Text();
         text.setBoundsType(TextBoundsType.VISUAL);
