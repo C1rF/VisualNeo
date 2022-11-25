@@ -13,8 +13,6 @@ import static hkust.edu.visualneo.utils.backend.Queries.NEW_LINE;
 // Class representing a Cypher query statement
 public class QueryBuilder {
 
-    private static final char SPACE = ' ';
-
     private static final StringBuilder builder = new StringBuilder();
 
     private static int indent;
@@ -50,7 +48,7 @@ public class QueryBuilder {
         //        ArrayList<Pair<Node>> dupPairs = graph.getDuplicateNodePairs();
         // TODO: Modify this naive approach
         List<Pair<Node>> dupPairs = new ArrayList<>();
-        ArrayList<Node> nodes = new ArrayList<>(graph.nodes);
+        List<Node> nodes = new ArrayList<>(graph.nodes);
         for (int i = 0; i < nodes.size(); ++i) {
             for (int j = i + 1; j < nodes.size(); ++j) {
                 dupPairs.add(Pair.ordered(nodes.get(i), nodes.get(j)));
@@ -82,7 +80,7 @@ public class QueryBuilder {
         builder.append(nodes.get(0));
         decreaseIndent();
 
-        System.out.println(new Expander().expand(graph));
+        System.out.println(Expander.expand(graph));
 
         return builder.toString();
     }
@@ -99,7 +97,7 @@ public class QueryBuilder {
     private static void newLine() {
         builder.append(NEW_LINE);
         char[] tabs = new char[2 * indent];
-        Arrays.fill(tabs, SPACE);
+        Arrays.fill(tabs, ' ');
         builder.append(tabs);
     }
 
@@ -115,7 +113,7 @@ public class QueryBuilder {
             builder.append("--");
         else {
             builder.append("-[");
-            //            builder.append(relation.name());
+            builder.append(relation);
             translateEntity(relation);
             builder.append("]-");
         }

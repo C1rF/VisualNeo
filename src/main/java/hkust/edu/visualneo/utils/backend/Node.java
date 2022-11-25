@@ -100,15 +100,6 @@ public class Node extends Entity {
         return 'n' + super.toString();
     }
 
-    //    @Override
-    //    public String elaborate() {
-    //        return String.format("""
-    //                %1$s
-    //                |-Relations: %2$s""",
-    //                super.elaborate(),
-    //                relations.isEmpty() ? "None" : relations.stream().map(Relation::toString).toList());
-    //    }
-
     @Override
     public Map<Object, Object> expand() {
         Map<Object, Object> expansion = super.expand();

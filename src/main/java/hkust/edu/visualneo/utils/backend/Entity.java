@@ -45,6 +45,10 @@ abstract class Entity implements Comparable<Entity>, Expandable {
         return true;
     }
 
+    public long getId() {
+        return id;
+    }
+
     @Override
     public int hashCode() {
         int hash = INITIAL_PRIME;

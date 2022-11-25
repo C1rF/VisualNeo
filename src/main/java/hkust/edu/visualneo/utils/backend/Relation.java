@@ -85,17 +85,6 @@ public class Relation extends Entity {
         return 'r' + super.toString();
     }
 
-    //    @Override
-    //    public String elaborate() {
-    //        return String.format("""
-    //                %1$s
-    //                |-Start Node: %2$s
-    //                |-End Node: %3$s""",
-    //                super.elaborate(),
-    //                start.toString(),
-    //                end.toString());
-    //    }
-
     @Override
     public Map<Object, Object> expand() {
         Map<Object, Object> expansion = super.expand();

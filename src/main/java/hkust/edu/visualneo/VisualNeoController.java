@@ -1,7 +1,7 @@
 package hkust.edu.visualneo;
 
 import hkust.edu.visualneo.utils.backend.DbMetadata;
-import hkust.edu.visualneo.utils.frontend.Constants;
+import hkust.edu.visualneo.utils.frontend.Canvas;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.GraphElement;
 import hkust.edu.visualneo.utils.frontend.Vertex;
@@ -9,19 +9,17 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.scene.*;
+import javafx.scene.Cursor;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.Scene;
+import javafx.scene.SubScene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.neo4j.driver.Value;
@@ -97,9 +95,9 @@ public class VisualNeoController {
     // Variables to move the pane
     private double pane_x;
     private double pane_y;
-    private double offset_x;
-    private double offset_y;
-    private Camera camera;
+    private double anchorX;
+    private double anchorY;
+    private PerspectiveCamera camera;
     @FXML
     private SubScene subscene_drawboard;
 
@@ -145,8 +143,7 @@ public class VisualNeoController {
     public ArrayList<Vertex> listOfVertices = new ArrayList<Vertex>();
     public ArrayList<Edge> listOfEdges = new ArrayList<Edge>();
 
-    // A boolean variable indicating whether shift is down
-    boolean shift_down = false;
+//    private double baseZ;
 
     /**
      * The constructor.
@@ -155,70 +152,216 @@ public class VisualNeoController {
     public VisualNeoController() {
     }
 
-    /**
-     * Initializes the controller class. This method is automatically called
-     * after the fxml file has been loaded.
-     */
+//    /**
+//     * Initializes the controller class. This method is automatically called
+//     * after the fxml file has been loaded.
+//     */
     @FXML
-    private void initialize() {
-        // Set the behavior when highlight_element changes
-        highlight_element.addListener((observableValue, oldHighlight, newHighlight) -> {
-                    // First we need to remove the highlight from the previous GraphElement
-                    if (oldHighlight != null) oldHighlight.removeHighlight();
-                    // Then depends on the new Highlight, we determine the display
-                    if (newHighlight == null) {
-                        // newHighlight is NOT a GraphElement, hide all panes
-                        info_pane.setVisible(false);
-                        pane_node_label.setVisible(false);
-                        pane_relation_label.setVisible(false);
-                        pane_property.setVisible(false);
-                    } else {
-                        // newHighlight is a GraphElement, show the corresponding panes
-                        newHighlight.becomeHighlight();
-                        refreshAllPane(newHighlight);
-                    }
-                }
-        );
-        // Create the DrawBoard for constructing the query
-        // Initialize the DrawBoard
-        Drawboard = new Pane();
-        Drawboard.setBackground(new Background(new BackgroundFill(Color.LIGHTCORAL, CornerRadii.EMPTY, Insets.EMPTY)));
-        Drawboard.setPrefWidth(Constants.BOARD_WIDTH);
-        Drawboard.setPrefHeight(Constants.BOARD_HEIGHT);
-        Drawboard.setLayoutX(Constants.BOARD_INIT_LAYOUT);
-        Drawboard.setLayoutY(Constants.BOARD_INIT_LAYOUT);
-        pane_x = Constants.BOARD_INIT_LAYOUT;
-        pane_y = Constants.BOARD_INIT_LAYOUT;
-        // Initialize the Group
-        Group DrawBoard_wrapper = new Group();
-        DrawBoard_wrapper.setAutoSizeChildren(true);
-        DrawBoard_wrapper.setAutoSizeChildren(true);
-        DrawBoard_wrapper.getChildren().add(Drawboard);
-        // Initialize the camera
-        camera = new PerspectiveCamera();
-        camera.setTranslateZ(500);
-        // Set the SubScene
-        subscene_drawboard.setRoot(DrawBoard_wrapper);
-        subscene_drawboard.setCamera(camera);
-        subscene_drawboard.setFill(Color.BLUE);
+    private void initialize() {  // TODO: Make this decent
+        AnchorPane aba = (AnchorPane) subscene_drawboard.getParent();
+        aba.getChildren().remove(subscene_drawboard);
+        Canvas.buildCanvas(aba);
+//        // Set the behavior when highlight_element changes
+//        highlight_element.addListener((observableValue, oldHighlight, newHighlight) -> {
+//                    // First we need to remove the highlight from the previous GraphElement
+//                    if (oldHighlight != null) oldHighlight.removeHighlight();
+//                    // Then depends on the new Highlight, we determine the display+
+//                    if (newHighlight == null) {
+//                        // newHighlight is NOT a GraphElement, hide all panes
+//                        info_pane.setVisible(false);
+//                        pane_node_label.setVisible(false);
+//                        pane_relation_label.setVisible(false);
+//                        pane_property.setVisible(false);
+//                    } else {
+//                        // newHighlight is a GraphElement, show the corresponding panes
+//                        newHighlight.becomeHighlight();
+//                        refreshAllPane(newHighlight);
+//                    }
+//                }
+//        );
+//        // Create the DrawBoard for constructing the query
+//        // Initialize the DrawBoard
+//        Drawboard = new Pane();
+//        Drawboard.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+////        Drawboard.setLayoutX(Constants.BOARD_INIT_LAYOUT);
+////        Drawboard.setLayoutY(Constants.BOARD_INIT_LAYOUT);
+////        pane_x = Constants.BOARD_INIT_LAYOUT;
+////        pane_y = Constants.BOARD_INIT_LAYOUT;
+//        // Initialize the Group
+////        Group DrawBoard_wrapper = new Group();
+////        DrawBoard_wrapper.getChildren().add(Drawboard);
+//        // Initialize the camera
+//        camera = new PerspectiveCamera();
+//        camera.setTranslateZ(Constants.INIT_Z);
+////        camera.setTranslateX(Constants.BOARD_WIDTH / 2);
+////        camera.setTranslateY(Constants.BOARD_HEIGHT / 2);
+//        // Set the SubScene
+//        AnchorPane query_constructor = (AnchorPane) subscene_drawboard.getParent();
+//        subscene_drawboard.widthProperty().bind(query_constructor.widthProperty());
+//        subscene_drawboard.heightProperty().bind(query_constructor.heightProperty());
+////        subscene_drawboard.setRoot(DrawBoard_wrapper);
+//        subscene_drawboard.setRoot(Drawboard);
+//        subscene_drawboard.setCamera(camera);
+//        subscene_drawboard.setFill(Color.GREY);
 
         // Scroll Effect
-        Drawboard.setOnScroll((e) -> {
-            double deltaY = e.getDeltaY();
-            if (camera.getTranslateZ() + deltaY > Constants.TranslateZ_UPPER_BOUND)
-                camera.setTranslateZ(Constants.TranslateZ_UPPER_BOUND);
-            else if (camera.getTranslateZ() + deltaY < Constants.TranslateZ_LOWER_BOUND)
-                camera.setTranslateZ(Constants.TranslateZ_LOWER_BOUND);
-            else
-                camera.setTranslateZ(camera.getTranslateZ() + deltaY);
-            System.out.println(camera.getTranslateZ());
-        });
-        // MouseEvent
-        MouseEventHandler mouseHandler = new MouseEventHandler();
-        Drawboard.addEventHandler(MouseEvent.ANY, mouseHandler);
-        // KeyEvent
-        KeyEventHandler keyHandler = new KeyEventHandler();
-        Drawboard.addEventHandler(KeyEvent.ANY, keyHandler);
+//        Drawboard.setOnScroll((e) -> {
+//            double deltaY = e.getDeltaY();
+//            if (camera.getTranslateZ() + deltaY > Constants.MAX_Z)
+//                camera.setTranslateZ(Constants.MAX_Z);
+//            else if (camera.getTranslateZ() + deltaY < Constants.MIN_Z)
+//                camera.setTranslateZ(Constants.MIN_Z);
+//            else
+//                camera.setTranslateZ(camera.getTranslateZ() + deltaY);
+//            System.out.println(camera.getTranslateZ());
+//        });
+
+        // Camera
+//        // Separated
+//        Drawboard.setOnMousePressed(e -> {
+//            // check whether it is the left key
+//            MouseButton button = e.getButton();
+//            if (button != MouseButton.PRIMARY) return;
+//            if (!e.isShiftDown()) {
+////                System.out.println("NO SHIFT + LEFT PRESSED!");
+//                // If left key is pressed, record the position
+//                anchor_x = e.getSceneX();
+//                anchor_y = e.getSceneY();
+//                // Then remove the highlight
+//                Drawboard.requestFocus();
+//            } else {
+////                System.out.println("SHIFT + LEFT PRESSED!");
+//                // Create new Vertex on the pane
+//                Vertex temp_vertex = new Vertex(VisualNeoController.this, e.getX(), e.getY());
+//                Drawboard.getChildren().add(temp_vertex);
+//                listOfVertices.add(temp_vertex);
+//                temp_vertex.requestFocus();
+//            }
+//        });
+//        Drawboard.setOnMouseDragged(e -> {
+//            MouseButton button = e.getButton();
+//            if (button != MouseButton.PRIMARY) return;
+//            if (e.isShiftDown()) return;
+////            System.out.println("DRAGGED!");
+////            System.out.println("DRAGGED");
+////            pane_x += e.getX() - offset_x;
+////            pane_y += e.getY() - offset_y;
+////            if (pane_x > Constants.PANE_X_LEFT_BOUND) pane_x = Constants.PANE_X_LEFT_BOUND;
+////            if (pane_x < Constants.PANE_X_RIGHT_BOUND) pane_x = Constants.PANE_X_RIGHT_BOUND;
+////            if (pane_y > Constants.PANE_Y_TOP_BOUND) pane_y = Constants.PANE_Y_TOP_BOUND;
+////            if (pane_y < Constants.PANE_Y_BOTTOM_BOUND) pane_y = Constants.PANE_Y_BOTTOM_BOUND;
+////            System.out.println(pane_x + " " + pane_y);
+////            Drawboard.setLayoutX(pane_x);
+////            Drawboard.setLayoutY(pane_y);
+//
+//            double viewPortSize = Math.max(subscene_drawboard.getWidth(), subscene_drawboard.getHeight());
+//            baseZ = -viewPortSize / Math.tan(Math.toRadians(camera.getFieldOfView() / 2));
+//            double sceneToLocalRatio = 1 + camera.getTranslateZ() / baseZ;
+//            camera.setTranslateX(camera.getTranslateX() - (e.getSceneX() - anchor_x) * sceneToLocalRatio);
+//            camera.setTranslateY(camera.getTranslateY() - (e.getSceneY() - anchor_y) * sceneToLocalRatio);
+//            anchor_x = e.getSceneX();
+//            anchor_y = e.getSceneY();
+//        });
+//        //  Debugging
+//        Drawboard.addEventHandler(MouseEvent.ANY, e -> {
+//            if (e.isForwardButtonDown()) {
+//                Point2D sceneToLocal = camera.sceneToLocal(e.getX(), e.getY());
+//                System.out.printf(
+//                        "Cursor at (%f, %f) local, (%f, %f) in scene, (%f, %f) transformed%n",
+//                        e.getX(), e.getY(),
+//                        e.getSceneX(), e.getSceneY(),
+//                        sceneToLocal.getX(), sceneToLocal.getY());
+//            }
+//        });
+
+
+//        Drawboard.setOnScroll(e -> {
+//            double delta = e.getDeltaY() / 160;
+//            double pivotX = e.getX();
+//            double pivotY = e.getY();
+//            for (Node node : Drawboard.getChildren()) {
+//                GraphElement element = (GraphElement) node;
+//                Scale scale = new Scale();
+//                scale.setPivotX(pivotX - element.getLayoutX());
+//                scale.setPivotY(pivotY - element.getLayoutY());
+//                scale.setX(scale.getX() + delta);
+//                scale.setY(scale.getY() + delta);
+//                element.getTransforms().remove(element.transform);
+//                element.transform = element.transform.createConcatenation(scale);
+//                element.getTransforms().add(element.transform);
+//            }
+//        });
+//
+//        // Transform
+//        // Separated
+//        Drawboard.setOnMousePressed(e -> {
+//            // check whether it is the left key
+//            MouseButton button = e.getButton();
+//            if (button != MouseButton.PRIMARY) return;
+//            if (!e.isShiftDown()) {
+//                //                System.out.println("NO SHIFT + LEFT PRESSED!");
+//                // If left key is pressed, record the position
+//                anchorX = e.getX();
+//                anchorY = e.getY();
+//                // Then remove the highlight
+//                Drawboard.requestFocus();
+//            } else {
+//                //                System.out.println("SHIFT + LEFT PRESSED!");
+//                // Create new Vertex on the pane
+//                Vertex temp_vertex = new Vertex(VisualNeoController.this, e.getX(), e.getY());
+//                Drawboard.getChildren().add(temp_vertex);
+//                listOfVertices.add(temp_vertex);
+//                temp_vertex.requestFocus();
+//            }
+//        });
+//        Drawboard.setOnMouseDragged(e -> {
+//            MouseButton button = e.getButton();
+//            if (button != MouseButton.PRIMARY) return;
+//            if (e.isShiftDown()) return;
+//            //            System.out.println("DRAGGED!");
+//            //            System.out.println("DRAGGED");
+//            //            pane_x += e.getX() - offset_x;
+//            //            pane_y += e.getY() - offset_y;
+//            //            if (pane_x > Constants.PANE_X_LEFT_BOUND) pane_x = Constants.PANE_X_LEFT_BOUND;
+//            //            if (pane_x < Constants.PANE_X_RIGHT_BOUND) pane_x = Constants.PANE_X_RIGHT_BOUND;
+//            //            if (pane_y > Constants.PANE_Y_TOP_BOUND) pane_y = Constants.PANE_Y_TOP_BOUND;
+//            //            if (pane_y < Constants.PANE_Y_BOTTOM_BOUND) pane_y = Constants.PANE_Y_BOTTOM_BOUND;
+//            //            System.out.println(pane_x + " " + pane_y);
+//            //            Drawboard.setLayoutX(pane_x);
+//            //            Drawboard.setLayoutY(pane_y);
+//
+//            double deltaX = e.getX() - anchorX;
+//            double deltaY = e.getY() - anchorY;
+//            for (Node node : Drawboard.getChildren()) {
+//                GraphElement element = (GraphElement) node;
+//                Translate translate = new Translate();
+//                translate.setX(translate.getX() + deltaX);
+//                translate.setY(translate.getY() + deltaY);
+//                element.getTransforms().remove(element.transform);
+//                element.transform = element.transform.createConcatenation(translate);
+//                element.getTransforms().add(element.transform);
+//                anchorX = e.getX();
+//                anchorY = e.getY();
+//            }
+//        });
+//        //  Debugging
+//        Drawboard.addEventHandler(MouseEvent.ANY, e -> {
+//            if (e.isForwardButtonDown()) {
+//                Point2D sceneToLocal = camera.sceneToLocal(e.getX(), e.getY());
+//                System.out.printf(
+//                        "Cursor at (%f, %f) local, (%f, %f) in scene, (%f, %f) transformed%n",
+//                        e.getX(), e.getY(),
+//                        e.getSceneX(), e.getSceneY(),
+//                        sceneToLocal.getX(), sceneToLocal.getY());
+//            }
+//        });
+//
+////        // MouseEvent
+////        MouseEventHandler mouseHandler = new MouseEventHandler();
+////        Drawboard.addEventHandler(MouseEvent.ANY, mouseHandler);
+//        // KeyEvent
+//        KeyEventHandler keyHandler = new KeyEventHandler();
+//        Drawboard.addEventHandler(KeyEvent.ANY, keyHandler);
     }
 
     public void setApp(VisualNeoApp app) {
@@ -243,13 +386,7 @@ public class VisualNeoController {
                     }
                 }
         );
-        // SHIFT Press Listener(Global)
-        scene.setOnKeyPressed((e) -> {
-            if (e.getCode() == KeyCode.SHIFT) shift_down = true;
-        });
-        scene.setOnKeyReleased((e) -> {
-            if (e.getCode() == KeyCode.SHIFT) shift_down = false;
-        });
+
     }
 
     /**
@@ -278,72 +415,90 @@ public class VisualNeoController {
         // Load the new data
     }
 
-    /**
-     * Event handler to handle all the MouseEvents on the DrawBoard
-     */
-    public class MouseEventHandler implements EventHandler<MouseEvent> {
-        @Override
-        public void handle(MouseEvent e) {
-            // If the element cannot be selected, do nothing
-            if (e.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                // check whether it is the left key
-                MouseButton button = e.getButton();
-                if (button != MouseButton.PRIMARY) return;
-                if (!e.isShiftDown()) {
-                    System.out.println("NO SHIFT + LEFT PRESSED!");
-                    // If left key is pressed, record the position
-                    offset_x = e.getX();
-                    offset_y = e.getY();
-                    // Then remove the highlight
-                    Drawboard.requestFocus();
-                } else {
-                    System.out.println("SHIFT + LEFT PRESSED!");
-                    // Create new Vertex on the pane
-                    Vertex temp_vertex = new Vertex(VisualNeoController.this, e.getX(), e.getY());
-                    Drawboard.getChildren().add(temp_vertex);
-                    listOfVertices.add(temp_vertex);
-                    temp_vertex.requestFocus();
-                }
-            }
+//    /**
+//     * Event handler to handle all the MouseEvents on the DrawBoard
+//     */
+//    public class MouseEventHandler implements EventHandler<MouseEvent> {
+//        @Override
+//        public void handle(MouseEvent e) {
+//            // If the element cannot be selected, do nothing
+//            if (e.getEventType() == MouseEvent.MOUSE_PRESSED) {
+//                // check whether it is the left key
+//                MouseButton button = e.getButton();
+//                if (button != MouseButton.PRIMARY) return;
+//                if (!e.isShiftDown()) {
+//                    System.out.println("NO SHIFT + LEFT PRESSED!");
+//                    // If left key is pressed, record the position
+//                    anchorX = e.getX();
+//                    anchorY = e.getY();
+//                    // Then remove the highlight
+//                    Drawboard.requestFocus();
+//                } else {
+//                    System.out.println("SHIFT + LEFT PRESSED!");
+//                    // Create new Vertex on the pane
+//                    Vertex temp_vertex = new Vertex(VisualNeoController.this, e.getX(), e.getY());
+//                    Drawboard.getChildren().add(temp_vertex);
+//                    listOfVertices.add(temp_vertex);
+//                    temp_vertex.requestFocus();
+//                }
+//            }
+//            else if (e.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+//                MouseButton button = e.getButton();
+//                if (button != MouseButton.PRIMARY) return;
+//                if (e.isShiftDown()) return;
+//                System.out.println("DRAGGED!");
+//                System.out.println("DRAGGED");
+//                pane_x += e.getX() - anchorX;
+//                pane_y += e.getY() - anchorY;
+//                if (pane_x > Constants.PANE_X_LEFT_BOUND) pane_x = Constants.PANE_X_LEFT_BOUND;
+//                if (pane_x < Constants.PANE_X_RIGHT_BOUND) pane_x = Constants.PANE_X_RIGHT_BOUND;
+//                if (pane_y > Constants.PANE_Y_TOP_BOUND) pane_y = Constants.PANE_Y_TOP_BOUND;
+//                if (pane_y < Constants.PANE_Y_BOTTOM_BOUND) pane_y = Constants.PANE_Y_BOTTOM_BOUND;
+//                System.out.println(pane_x + " " + pane_y);
+////                Drawboard.setLayoutX(pane_x);
+////                Drawboard.setLayoutY(pane_y);
+//                camera.setTranslateX(camera.getTranslateX() - (e.getX() - anchorX));
+//                camera.setTranslateY(camera.getTranslateY() - (e.getY() - anchorY));
+//            }
+//
+//            // Debugging
+//            if (e.isForwardButtonDown()) {
+//                Point global = MouseInfo.getPointerInfo().getLocation();
+//                System.out.printf("Cursor at (%f, %f) local, (%d, %d) global%n", e.getX(), e.getY(), global.x, global.y);
+//                int x = 0;
+//            }
+//        }
+//    }
 
-            if (e.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                MouseButton button = e.getButton();
-                if (button != MouseButton.PRIMARY) return;
-                if (e.isShiftDown()) return;
-                System.out.println("Pane DRAGGED!");
-                pane_x += e.getX() - offset_x;
-                pane_y += e.getY() - offset_y;
-                if (pane_x > Constants.PANE_X_LEFT_BOUND) pane_x = Constants.PANE_X_LEFT_BOUND;
-                if (pane_x < Constants.PANE_X_RIGHT_BOUND) pane_x = Constants.PANE_X_RIGHT_BOUND;
-                if (pane_y > Constants.PANE_Y_TOP_BOUND) pane_y = Constants.PANE_Y_TOP_BOUND;
-                if (pane_y < Constants.PANE_Y_BOTTOM_BOUND) pane_y = Constants.PANE_Y_BOTTOM_BOUND;
-                System.out.println(pane_x + " " + pane_y);
-                Drawboard.setLayoutX(pane_x);
-                Drawboard.setLayoutY(pane_y);
-            }
-        }
-    }
-
-    /**
-     * Event handler to handle all the MouseEvents on the DrawBoard
-     */
-    public class KeyEventHandler implements EventHandler<KeyEvent> {
-        @Override
-        public void handle(KeyEvent e) {
-            KeyCode key = e.getCode();
-            switch (key) {
-                case DELETE:
-                case BACK_SPACE:
-                    // Delete highlighted GraphElement(if there is any)
-                    System.out.println("DELETE Pressed!");
-                    GraphElement current_highlight = highlight_element.get();
-                    if (current_highlight != null)
-                        current_highlight.erase();
-                    highlight_element.set(null);
-                    break;
-            }
-        }
-    }
+//    /**
+//     * Event handler to handle all the MouseEvents on the DrawBoard
+//     */
+//    public class KeyEventHandler implements EventHandler<KeyEvent> {
+//        @Override
+//        public void handle(KeyEvent e) {
+//            KeyCode key = e.getCode();
+//            switch (key) {
+//                case DELETE, BACK_SPACE -> {
+//                    // Delete highlighted GraphElement(if there is any)
+//                    System.out.println("DELETE Pressed!");
+//                    GraphElement current_highlight = highlight_element.get();
+//                    if (current_highlight != null)
+//                        current_highlight.erase();
+//                    highlight_element.set(null);
+//                }
+//                // Debugging
+//                case P -> {
+//                    Pane drawBoard = VisualNeoController.this.Drawboard;
+//                    Point global = MouseInfo.getPointerInfo().getLocation();
+//                    Point2D local = drawBoard.sceneToLocal(global.getX(), global.getY());
+//                    System.out.printf(
+//                            "Cursor at (%f, %f)%n",
+//                            local.getX(),
+//                            local.getY());
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Called when the user click on Load Database button
@@ -415,7 +570,7 @@ public class VisualNeoController {
         GraphElement current_highlight = highlight_element.get();
         // Add Node labels to the Vertex
         if (current_highlight instanceof Vertex) {
-            current_highlight.addLabel(choicebox_node_label.getValue());
+            current_highlight.setLabel(choicebox_node_label.getValue());
             refreshAllPane(current_highlight);
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -431,7 +586,7 @@ public class VisualNeoController {
         GraphElement current_highlight = highlight_element.get();
         // Add Relation labels to the Edge
         if (current_highlight instanceof Edge) {
-            current_highlight.addLabel(choicebox_relation_label.getValue());
+            current_highlight.setLabel(choicebox_relation_label.getValue());
             refreshAllPane(current_highlight);
         } else {
             throw new RuntimeException("Bug Found!");
@@ -542,7 +697,7 @@ public class VisualNeoController {
         // Display the information on the information pane
         StringBuilder builder = new StringBuilder();
         text_label_info.setText(current_highlight.getLabel());
-        HashMap<String, Value> properties = current_highlight.getProp();
+        Map<String, Value> properties = current_highlight.getProp();
         for (String propertyKey : properties.keySet()) {
             builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
         }
@@ -551,37 +706,33 @@ public class VisualNeoController {
 
     @FXML
     void handleZoomIn() {
-        // Increase the TranslateZ value
-        if (camera.getTranslateZ() + Constants.UNIT_Z_CHANGE > Constants.TranslateZ_UPPER_BOUND)
-            camera.setTranslateZ(Constants.TranslateZ_UPPER_BOUND);
-        else
-            camera.setTranslateZ(camera.getTranslateZ() + Constants.UNIT_Z_CHANGE);
-        System.out.println(camera.getTranslateZ());
+//        // Increase the TranslateZ value
+//        if (camera.getTranslateZ() + Constants.DELTA_Z > Constants.MAX_Z)
+//            camera.setTranslateZ(Constants.MAX_Z);
+//        else
+//            camera.setTranslateZ(camera.getTranslateZ() + Constants.DELTA_Z);
+//        System.out.println(camera.getTranslateZ());
     }
 
     @FXML
     void handleZoomOut() {
-        // Decrease the TranslateZ value
-        if (camera.getTranslateZ() - Constants.UNIT_Z_CHANGE < Constants.TranslateZ_LOWER_BOUND)
-            camera.setTranslateZ(Constants.TranslateZ_LOWER_BOUND);
-        else
-            camera.setTranslateZ(camera.getTranslateZ() - Constants.UNIT_Z_CHANGE);
-        System.out.println(camera.getTranslateZ());
+//        // Decrease the TranslateZ value
+//        if (camera.getTranslateZ() - Constants.DELTA_Z < Constants.MIN_Z)
+//            camera.setTranslateZ(Constants.MIN_Z);
+//        else
+//            camera.setTranslateZ(camera.getTranslateZ() - Constants.DELTA_Z);
+//        System.out.println(camera.getTranslateZ());
     }
 
-    public GraphElement getHighlight() {
-        return highlight_element.get();
-    }
-
-    public boolean isShift_down() {
-        return shift_down;
-    }
-
-    public void createEdgeBetween(Vertex start, Vertex end) {
-        Edge temp_edge = new Edge(this, start, end, false);
-        Drawboard.getChildren().add(temp_edge);
-        temp_edge.toBack();
-        listOfEdges.add(temp_edge);
-        temp_edge.requestFocus();
-    }
+//    public GraphElement getHighlight() {
+//        return highlight_element.get();
+//    }
+//
+//    public void createEdgeBetween(Vertex start, Vertex end) {
+//        Edge temp_edge = new Edge(this, start, end, false);
+//        Drawboard.getChildren().add(temp_edge);
+//        temp_edge.toBack();
+//        listOfEdges.add(temp_edge);
+//        temp_edge.requestFocus();
+//    }
 }

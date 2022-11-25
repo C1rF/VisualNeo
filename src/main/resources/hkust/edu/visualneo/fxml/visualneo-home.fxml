@@ -9,7 +9,6 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
@@ -17,294 +16,304 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400.0" minWidth="500.0" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hkust.edu.visualneo.VisualNeoController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400.0" minWidth="500.0" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hkust.edu.visualneo.VisualNeoController">
    <children>
-      <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="30.0">
-        <tabs>
-          <Tab text="Query Constructor">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="740.0" prefWidth="700.0">
-                     <children>
-                        <SubScene fx:id="subscene_drawboard" fill="WHITE" height="738.0" width="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <root>
-                            <Region />
-                          </root>
-                        </SubScene>
-                        <Button fx:id="btn_zoom_in" mnemonicParsing="false" onAction="#handleZoomOut" prefHeight="40.0" prefWidth="40.0" text="-" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="10.0">
-                           <font>
-                              <Font name="Arial Black" size="18.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="btn_zoom_out" mnemonicParsing="false" onAction="#handleZoomIn" prefHeight="40.0" prefWidth="40.0" text="+" AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="10.0">
-                           <font>
-                              <Font name="Arial Black" size="18.0" />
-                           </font>
-                        </Button>
-                     </children>
-                  </AnchorPane>
-            </content>
-          </Tab>
-          <Tab text="Query Result">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </Tab>
-            <Tab text="Database Info">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: white;">
-                     <children>
-                        <Label layoutX="45.0" layoutY="52.0" text="Database Information" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="10.0">
-                           <font>
-                              <Font name="Arial Black" size="26.0" />
-                           </font>
-                        </Label>
-                        <AnchorPane fx:id="pane_no_database" layoutX="139.0" layoutY="196.0" prefHeight="76.0" prefWidth="650.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
-                           <children>
-                              <Text layoutX="25.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="No database loaded" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="10.0">
-                                 <font>
-                                    <Font name="Arial" size="16.0" />
-                                 </font>
-                              </Text>
-                           </children>
-                        </AnchorPane>
-                        <AnchorPane fx:id="pane_with_database" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
-                           <children>
-                              <TableView fx:id="tableview_node" focusTraversable="false" layoutX="-22.0" layoutY="-2.0" prefHeight="300.0" prefWidth="250.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <columns>
-                                  <TableColumn fx:id="node_name_col" prefWidth="170.0" resizable="false" text="Node" />
-                                  <TableColumn fx:id="node_count_col" resizable="false" text="Count" />
-                                </columns>
-                                 <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                 </columnResizePolicy>
-                              </TableView>
-                              <TableView fx:id="tableview_relation" prefHeight="300.0" prefWidth="250.0" AnchorPane.leftAnchor="300.0" AnchorPane.topAnchor="0.0">
-                                <columns>
-                                  <TableColumn fx:id="relation_name_col" prefWidth="170.0" resizable="false" text="Relation" />
-                                  <TableColumn fx:id="relation_count_col" resizable="false" text="Count" />
-                                </columns>
-                                 <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                 </columnResizePolicy>
-                              </TableView>
-                           </children>
-                        </AnchorPane>
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-        </tabs>
-      </TabPane>
-      <VBox prefHeight="200.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+      <VBox prefHeight="800.0" prefWidth="1200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <TabPane minWidth="100.0" prefHeight="600.0" prefWidth="300.0" tabClosingPolicy="UNAVAILABLE">
-              <tabs>
-                <Tab text="Basic Patterns">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="200.0">
-                           <children>
-                              <ScrollPane prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                           </children>
-                        </AnchorPane>
-                  </content>
-                </Tab>
-                <Tab text="Canned Patterns">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                              <ScrollPane layoutX="39.0" layoutY="140.0" prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                           </children>
-                        </AnchorPane>
-                  </content>
-                </Tab>
-              </tabs>
-            </TabPane>
-            <AnchorPane prefHeight="290.0" prefWidth="300.0">
+            <MenuBar maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="1200.0">
+              <menus>
+                <Menu mnemonicParsing="false" text="File">
+                  <items>
+                    <MenuItem fx:id="menu_item_save" mnemonicParsing="false" onAction="#handleSave" text="Save" />
+                        <MenuItem fx:id="menu_item_load" mnemonicParsing="false" onAction="#handleLoad" text="Load" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                  <items>
+                    <MenuItem fx:id="menu_item_clear" mnemonicParsing="false" onAction="#handleClear" text="Clear" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="About" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <HBox>
                <children>
-                  <Pane layoutX="-20.0" layoutY="-10.0" prefHeight="230.0" prefWidth="300.0" style="-fx-background-color: #f4f4f4;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                  <Separator halignment="LEFT" orientation="VERTICAL" prefHeight="200.0" translateX="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                  <ScrollPane fx:id="info_pane" prefHeight="280.0" prefWidth="300.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <content>
-                        <AnchorPane prefHeight="228.0" prefWidth="298.0">
-                           <children>
-                              <Text fx:id="text_node_or_relation" layoutX="32.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Node Information" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
-                                 <font>
-                                    <Font size="16.0" />
-                                 </font>
-                              </Text>
-                              <HBox layoutX="10.0" layoutY="50.0" spacing="60.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="50.0">
-                                 <children>
-                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Text>
-                                    <Text fx:id="text_label_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Text>
-                                 </children>
-                              </HBox>
-                              <HBox layoutX="10.0" layoutY="106.431640625" spacing="32.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="110.0">
-                                 <children>
-                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Properties:">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Text>
-                                    <Text fx:id="text_property_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Text>
-                                 </children>
-                              </HBox>
-                           </children>
-                        </AnchorPane>
-                     </content>
-                  </ScrollPane>
-               </children>
-            </AnchorPane>
-         </children>
-      </VBox>
-      <VBox layoutX="24.0" layoutY="62.0" minWidth="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0">
-         <children>
-            <Button fx:id="btn_load_db" mnemonicParsing="false" onAction="#handleLoadDB" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Load Database">
-               <font>
-                  <Font name="Arial Black" size="14.0" />
-               </font></Button>
-            <Button fx:id="btn_generate_p" mnemonicParsing="false" onAction="#handleGeneratePatterns" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Generate Patterns">
-               <font>
-                  <Font name="Arial Black" size="14.0" />
-               </font></Button>
-            <Button fx:id="btn_exact_search" mnemonicParsing="false" onAction="#handleExactSearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Exact Search">
-               <font>
-                  <Font name="Arial Black" size="14.0" />
-               </font></Button>
-            <Button fx:id="btn_similarity_search" mnemonicParsing="false" onAction="#handleSimilaritySearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Similarity Search">
-               <font>
-                  <Font name="Arial Black" size="14.0" />
-               </font></Button>
-            <TabPane prefHeight="530.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
-              <tabs>
-                <Tab text="Labels">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="499.0" prefWidth="164.0">
-                           <children>
-                              <ScrollPane layoutX="-6.0" layoutY="49.0" prefHeight="498.5" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <content>
-                                    <AnchorPane prefHeight="496.0" prefWidth="198.0">
+                  <VBox maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="200.0" style="-fx-border-style: hidden solid hidden hidden; -fx-border-color: lightgrey; -fx-background-color: lightgrey;">
+                     <children>
+                        <Button fx:id="btn_load_db" mnemonicParsing="false" onAction="#handleLoadDB" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Load Database" textAlignment="CENTER">
+                           <font>
+                              <Font name="Arial Black" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btn_generate_p" mnemonicParsing="false" onAction="#handleGeneratePatterns" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Generate Patterns" textAlignment="CENTER">
+                           <font>
+                              <Font name="Arial Black" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btn_exact_search" mnemonicParsing="false" onAction="#handleExactSearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Exact Search" textAlignment="CENTER">
+                           <font>
+                              <Font name="Arial Black" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btn_similarity_search" mnemonicParsing="false" onAction="#handleSimilaritySearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Similarity Search" textAlignment="CENTER">
+                           <font>
+                              <Font name="Arial Black" size="14.0" />
+                           </font>
+                        </Button>
+                        <TabPane prefHeight="530.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+                          <tabs>
+                            <Tab text="Labels">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="499.0" prefWidth="164.0">
                                        <children>
-                                          <AnchorPane fx:id="pane_node_label" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <ScrollPane layoutX="-6.0" layoutY="49.0" prefHeight="498.5" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <content>
+                                                <AnchorPane prefHeight="496.0" prefWidth="198.0">
+                                                   <children>
+                                                      <AnchorPane fx:id="pane_node_label" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Node:" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                            </Text>
+                                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="40.0">
+                                                               <font>
+                                                                  <Font size="14.0" />
+                                                               </font>
+                                                            </Text>
+                                                            <ChoiceBox fx:id="choicebox_node_label" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+                                                               <cursor>
+                                                                  <Cursor fx:constant="HAND" />
+                                                               </cursor>
+                                                            </ChoiceBox>
+                                                            <Button fx:id="btn_add_node_label" disable="true" mnemonicParsing="false" onAction="#handleAddNodeLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                      <AnchorPane fx:id="pane_relation_label" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Relation:" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                            </Text>
+                                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="40.0">
+                                                               <font>
+                                                                  <Font size="14.0" />
+                                                               </font>
+                                                            </Text>
+                                                            <ChoiceBox fx:id="choicebox_relation_label" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+                                                               <cursor>
+                                                                  <Cursor fx:constant="HAND" />
+                                                               </cursor>
+                                                            </ChoiceBox>
+                                                            <Button fx:id="btn_add_relation_label" disable="true" mnemonicParsing="false" onAction="#handleAddRelationLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </children>
+                                                </AnchorPane>
+                                             </content>
+                                          </ScrollPane>
+                                       </children>
+                                    </AnchorPane>
+                              </content>
+                            </Tab>
+                            <Tab text="Properties">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <ScrollPane layoutX="-20.0" layoutY="169.0" prefHeight="498.5" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <content>
+                                                <AnchorPane fx:id="pane_property" prefHeight="496.0" prefWidth="198.0" visible="false">
+                                                   <children>
+                                                      <Text layoutX="33.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Name:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                                         <font>
+                                                            <Font size="14.0" />
+                                                         </font>
+                                                      </Text>
+                                                      <ChoiceBox fx:id="choicebox_property_name" layoutX="14.0" layoutY="39.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
+                                                         <cursor>
+                                                            <Cursor fx:constant="HAND" />
+                                                         </cursor>
+                                                      </ChoiceBox>
+                                                      <Text layoutX="14.0" layoutY="95.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Value:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="70.0">
+                                                         <font>
+                                                            <Font size="14.0" />
+                                                         </font>
+                                                      </Text>
+                                                      <TextField fx:id="textfield_property_value" layoutX="10.0" layoutY="99.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="90.0" />
+                                                      <Button fx:id="btn_add_property" disable="true" layoutX="115.0" layoutY="152.0" mnemonicParsing="false" onAction="#handleAddProperty" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Property" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="140.0" />
+                                                   </children>
+                                                </AnchorPane>
+                                             </content>
+                                          </ScrollPane>
+                                       </children>
+                                    </AnchorPane>
+                              </content>
+                            </Tab>
+                          </tabs>
+                        </TabPane>
+                     </children>
+                  </VBox>
+                  <TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
+                    <tabs>
+                      <Tab text="Query Constructor">
+                        <content>
+                          <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                                 <children>
+                                    <SubScene fx:id="subscene_drawboard" fill="WHITE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <root>
+                                        <Region />
+                                      </root>
+                                    </SubScene>
+                                    <Button fx:id="btn_zoom_in" mnemonicParsing="false" onAction="#handleZoomOut" prefHeight="40.0" prefWidth="40.0" text="-" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="10.0">
+                                       <font>
+                                          <Font name="Arial Black" size="18.0" />
+                                       </font>
+                                    </Button>
+                                    <Button fx:id="btn_zoom_out" mnemonicParsing="false" onAction="#handleZoomIn" prefHeight="40.0" prefWidth="40.0" text="+" AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="10.0">
+                                       <font>
+                                          <Font name="Arial Black" size="18.0" />
+                                       </font>
+                                    </Button>
+                                 </children>
+                              </AnchorPane>
+                        </content>
+                      </Tab>
+                      <Tab text="Query Result">
+                        <content>
+                          <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
+                        </content>
+                      </Tab>
+                        <Tab text="Database Info">
+                           <content>
+                              <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: white;">
+                                 <children>
+                                    <Label layoutX="45.0" layoutY="52.0" text="Database Information" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="10.0">
+                                       <font>
+                                          <Font name="Arial Black" size="26.0" />
+                                       </font>
+                                    </Label>
+                                    <AnchorPane fx:id="pane_no_database" layoutX="139.0" layoutY="196.0" prefHeight="76.0" prefWidth="650.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+                                       <children>
+                                          <Text layoutX="25.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="No database loaded" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="10.0">
+                                             <font>
+                                                <Font name="Arial" size="16.0" />
+                                             </font>
+                                          </Text>
+                                       </children>
+                                    </AnchorPane>
+                                    <AnchorPane fx:id="pane_with_database" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+                                       <children>
+                                          <TableView fx:id="tableview_node" focusTraversable="false" layoutX="-22.0" layoutY="-2.0" prefHeight="300.0" prefWidth="250.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <columns>
+                                              <TableColumn fx:id="node_name_col" prefWidth="170.0" resizable="false" text="Node" />
+                                              <TableColumn fx:id="node_count_col" resizable="false" text="Count" />
+                                            </columns>
+                                             <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                             </columnResizePolicy>
+                                          </TableView>
+                                          <TableView fx:id="tableview_relation" prefHeight="300.0" prefWidth="250.0" AnchorPane.leftAnchor="300.0" AnchorPane.topAnchor="0.0">
+                                            <columns>
+                                              <TableColumn fx:id="relation_name_col" prefWidth="170.0" resizable="false" text="Relation" />
+                                              <TableColumn fx:id="relation_count_col" resizable="false" text="Count" />
+                                            </columns>
+                                             <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                             </columnResizePolicy>
+                                          </TableView>
+                                       </children>
+                                    </AnchorPane>
+                                 </children>
+                              </AnchorPane>
+                           </content>
+                        </Tab>
+                    </tabs>
+                  </TabPane>
+                  <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="300.0">
+                     <children>
+                        <TabPane minWidth="100.0" prefHeight="600.0" prefWidth="300.0" tabClosingPolicy="UNAVAILABLE">
+                          <tabs>
+                            <Tab text="Basic Patterns">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="200.0">
+                                       <children>
+                                          <ScrollPane prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                       </children>
+                                    </AnchorPane>
+                              </content>
+                            </Tab>
+                            <Tab text="Canned Patterns">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <ScrollPane layoutX="39.0" layoutY="140.0" prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                       </children>
+                                    </AnchorPane>
+                              </content>
+                            </Tab>
+                          </tabs>
+                        </TabPane>
+                        <AnchorPane prefHeight="290.0" prefWidth="300.0" style="-fx-border-style: solid hidden hidden solid; -fx-border-color: lightgrey;">
+                           <children>
+                              <ScrollPane fx:id="info_pane" prefHeight="280.0" prefWidth="300.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <content>
+                                    <AnchorPane prefHeight="228.0" prefWidth="298.0">
+                                       <children>
+                                          <Text fx:id="text_node_or_relation" layoutX="32.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Node Information" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                             <font>
+                                                <Font size="16.0" />
+                                             </font>
+                                          </Text>
+                                          <HBox layoutX="10.0" layoutY="50.0" spacing="60.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="50.0">
                                              <children>
-                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Node:" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                </Text>
-                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="40.0">
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:">
                                                    <font>
                                                       <Font size="14.0" />
                                                    </font>
                                                 </Text>
-                                                <ChoiceBox fx:id="choicebox_node_label" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
-                                                   <cursor>
-                                                      <Cursor fx:constant="HAND" />
-                                                   </cursor>
-                                                </ChoiceBox>
-                                                <Button fx:id="btn_add_node_label" disable="true" mnemonicParsing="false" onAction="#handleAddNodeLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
-                                             </children>
-                                          </AnchorPane>
-                                          <AnchorPane fx:id="pane_relation_label" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                             <children>
-                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Relation:" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                </Text>
-                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="40.0">
+                                                <Text fx:id="text_label_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
                                                    <font>
                                                       <Font size="14.0" />
                                                    </font>
                                                 </Text>
-                                                <ChoiceBox fx:id="choicebox_relation_label" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
-                                                   <cursor>
-                                                      <Cursor fx:constant="HAND" />
-                                                   </cursor>
-                                                </ChoiceBox>
-                                                <Button fx:id="btn_add_relation_label" disable="true" mnemonicParsing="false" onAction="#handleAddRelationLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
                                              </children>
-                                          </AnchorPane>
+                                          </HBox>
+                                          <HBox layoutX="10.0" layoutY="106.431640625" spacing="32.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="110.0">
+                                             <children>
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Properties:">
+                                                   <font>
+                                                      <Font size="14.0" />
+                                                   </font>
+                                                </Text>
+                                                <Text fx:id="text_property_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
+                                                   <font>
+                                                      <Font size="14.0" />
+                                                   </font>
+                                                </Text>
+                                             </children>
+                                          </HBox>
                                        </children>
                                     </AnchorPane>
                                  </content>
                               </ScrollPane>
                            </children>
                         </AnchorPane>
-                  </content>
-                </Tab>
-                <Tab text="Properties">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                              <ScrollPane layoutX="-20.0" layoutY="169.0" prefHeight="498.5" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <content>
-                                    <AnchorPane fx:id="pane_property" prefHeight="496.0" prefWidth="198.0" visible="false">
-                                       <children>
-                                          <Text layoutX="33.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Name:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
-                                             <font>
-                                                <Font size="14.0" />
-                                             </font>
-                                          </Text>
-                                          <ChoiceBox fx:id="choicebox_property_name" layoutX="14.0" layoutY="39.0" prefWidth="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </ChoiceBox>
-                                          <Text layoutX="14.0" layoutY="95.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Property Value:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="70.0">
-                                             <font>
-                                                <Font size="14.0" />
-                                             </font>
-                                          </Text>
-                                          <TextField fx:id="textfield_property_value" layoutX="10.0" layoutY="99.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="90.0" />
-                                          <Button fx:id="btn_add_property" disable="true" layoutX="115.0" layoutY="152.0" mnemonicParsing="false" onAction="#handleAddProperty" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Property" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="140.0" />
-                                       </children>
-                                    </AnchorPane>
-                                 </content></ScrollPane>
-                           </children>
-                        </AnchorPane>
-                  </content>
-                </Tab>
-              </tabs>
-            </TabPane>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
          </children>
       </VBox>
-      <MenuBar layoutX="87.0" layoutY="23.0" prefHeight="30.0" prefWidth="1200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem fx:id="menu_item_save" mnemonicParsing="false" onAction="#handleSave" text="Save" />
-                  <MenuItem fx:id="menu_item_load" mnemonicParsing="false" onAction="#handleLoad" text="Load" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem fx:id="menu_item_clear" mnemonicParsing="false" onAction="#handleClear" text="Clear" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
    </children>
 </AnchorPane>
