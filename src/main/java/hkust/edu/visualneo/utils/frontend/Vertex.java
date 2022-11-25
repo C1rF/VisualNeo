@@ -55,8 +55,7 @@ public class Vertex extends GraphElement {
         if (c.wasAdded()) {
             c.getKey().positionProperty().addListener(positionListener);
             c.getValueAdded().addListener(neighborEdgesListener);
-        }
-        else if (c.wasRemoved()) {
+        } else if (c.wasRemoved()) {
             c.getKey().positionProperty().removeListener(positionListener);
             c.getValueRemoved().removeListener(neighborEdgesListener);
         }
@@ -150,23 +149,29 @@ public class Vertex extends GraphElement {
     public MapProperty<Vertex, SetProperty<Edge>> neighborhoodProperty() {
         return neighborhood;
     }
+
     public Map<Vertex, SetProperty<Edge>> getNeighborhood() {
         return neighborhood.get();
     }
+
     public boolean hasNeighbor(Vertex neighbor) {
         return getNeighborhood().containsKey(neighbor);
     }
+
     public Set<Vertex> getNeighbors() {
         return getNeighborhood().keySet();
     }
+
     public SetProperty<Edge> edgesPropertyBetween(Vertex neighbor) {
         return getNeighborhood().get(neighbor);
     }
+
     public Set<Edge> getEdgesBetween(Vertex neighbor) {
         SetProperty<Edge> neighborEdgesProperty = edgesPropertyBetween(neighbor);
         return neighborEdgesProperty == null ?
-               null : neighborEdgesProperty.get();
+                null : neighborEdgesProperty.get();
     }
+
     public Set<Edge> getEdges() {
         return getNeighborhood()
                 .values()
@@ -174,23 +179,27 @@ public class Vertex extends GraphElement {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
     public ReadOnlyIntegerProperty numEdgesPropertyBetween(Vertex neighbor) {
         SetProperty<Edge> neighborEdgesProperty = edgesPropertyBetween(neighbor);
         return neighborEdgesProperty == null ?
-               null : neighborEdgesProperty.sizeProperty();
+                null : neighborEdgesProperty.sizeProperty();
     }
+
     public int getNumEdgesBetween(Vertex neighbor) {
         SetProperty<Edge> neighborEdgesProperty = edgesPropertyBetween(neighbor);
         return neighborEdgesProperty == null ?
-               0 : neighborEdgesProperty.getSize();
+                0 : neighborEdgesProperty.getSize();
     }
 
     public DoubleProperty selfLoopAngleProperty() {
         return selfLoopAngle;
     }
+
     public double getSelfLoopAngle() {
         return selfLoopAngleProperty().get();
     }
+
     public void setSelfLoopAngle(double angle) {
         selfLoopAngleProperty().set(angle);
     }
@@ -206,7 +215,7 @@ public class Vertex extends GraphElement {
     @Override
     public String toText() {
         String[] temp = new String[]{positionProperty().toString(),
-                                     getLabel()};
+                getLabel()};
         return (String) StringUtil.join(" ", Arrays.asList(temp));
     }
 }

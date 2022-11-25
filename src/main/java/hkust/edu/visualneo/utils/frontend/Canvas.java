@@ -18,12 +18,6 @@ public class Canvas extends Pane {
 
     private static final double UNIT_SCROLL = 32.0;
 
-    private static final byte SHIFT       = 0b00000001;
-    private static final byte CTRL        = 0b00000010;
-    private static final byte WAITING_END = 0b00000100;
-
-    private byte stateFlag;
-
     public final OrthogonalCamera camera = new OrthogonalCamera(this);
 
     private final SetProperty<GraphElement> highlightElements =
@@ -46,8 +40,7 @@ public class Canvas extends Pane {
             if (e.isControlDown()) {
                 if (e.getCode() == KeyCode.A)
                     getChildren().forEach(node -> addHighlight((GraphElement) node));
-            }
-            else {
+            } else {
                 if (e.getCode() == KeyCode.DELETE || e.getCode() == KeyCode.BACK_SPACE)
                     removeElements(getHighlights());
             }
@@ -63,10 +56,9 @@ public class Canvas extends Pane {
                     clearHighlights();
                     cursor = new Point2D(e.getX(), e.getY());
                 }
-            }
-            else {  // Clicked on a GraphElement
+            } else {  // Clicked on a GraphElement
                 GraphElement currentElement = (GraphElement) ((Node) target).getParent();
-                Vertex lastVertex = nominalVertex();
+                Vertex lastVertex = nomineeVertex();
                 if (e.isShiftDown() && lastVertex != null && currentElement instanceof Vertex currentVertex)
                     createEdge(lastVertex, currentVertex);
                 else if (e.isControlDown()) {
@@ -74,8 +66,7 @@ public class Canvas extends Pane {
                         removeHighlight(currentElement);
                     else
                         addHighlight(currentElement);
-                }
-                else {
+                } else {
                     if (!currentElement.isHighlighted()) {
                         clearHighlights();
                         addHighlight(currentElement);
@@ -93,8 +84,7 @@ public class Canvas extends Pane {
 
             if (target == this) {
                 camera.translate(-(e.getX() - cursor.getX()), -(e.getY() - cursor.getY()));
-            }
-            else {
+            } else {
                 GraphElement currentElement = (GraphElement) ((Node) target).getParent();
                 if (currentElement.isHighlighted()) {
                     Point2D delta = camera.canvasToViewScale(e.getX() - cursor.getX(), e.getY() - cursor.getY());  // To avoid redundant calculations
@@ -102,8 +92,7 @@ public class Canvas extends Pane {
                         if (element instanceof Vertex)
                             element.translateInView(delta);
                     }
-                }
-                else if (currentElement instanceof Vertex)
+                } else if (currentElement instanceof Vertex)  // TODO: Check necessity
                     currentElement.translate(e.getX() - cursor.getX(), e.getY() - cursor.getY());
             }
 
@@ -150,17 +139,11 @@ public class Canvas extends Pane {
         edge.toBack();
     }
 
-    private Vertex nominalVertex() {
+    // Returns the awaiting vertex for edge formation, returns null if no or multiple vertices are highlighted
+    private Vertex nomineeVertex() {
         List<GraphElement> elements = getHighlights();
         return (elements.size() == 1 && elements.get(0) instanceof Vertex vertex) ?
-               vertex : null;
-    }
-
-    private boolean hasFlags(byte... flags) {
-        byte stateFlag = 0;
-        for (byte flag : flags)
-            stateFlag += flag;
-        return (this.stateFlag & stateFlag) == stateFlag;
+                vertex : null;
     }
 
     public List<GraphElement> getElements() {
@@ -169,6 +152,7 @@ public class Canvas extends Pane {
                 .map(element -> (GraphElement) element)
                 .toList();
     }
+
     public void addElement(GraphElement element) {
         getChildren().add(element);
         clearHighlights();
@@ -195,17 +179,15 @@ public class Canvas extends Pane {
     public List<GraphElement> getHighlights() {
         return highlightElements.stream().toList();
     }
-    public GraphElement singleHighlight() {
-        List<GraphElement> elements = getHighlights();
-        return elements.size() == 1 ?
-               elements.get(0) : null;
-    }
+
     public void addHighlight(GraphElement e) {
         highlightElements.add(e);
     }
+
     public void removeHighlight(GraphElement e) {
         highlightElements.remove(e);
     }
+
     public void clearHighlights() {
         highlightElements.clear();
     }
