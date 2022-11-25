@@ -152,7 +152,7 @@ public class QueryHandler {
         }
     }
 
-    void exactSearch(ArrayList<Vertex> vertices, ArrayList<Edge> edges) {
+    void exactSearch(List<Vertex> vertices, List<Edge> edges) {
         Graph queryPattern = Graph.fromDrawing(vertices, edges);
         String query = QueryBuilder.translate(queryPattern);
         System.out.println(query);

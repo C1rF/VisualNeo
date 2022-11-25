@@ -123,16 +123,6 @@ public class Canvas extends Pane {
         });
     }
 
-    public static Canvas buildCanvas(Pane parent) {
-        Canvas canvas = new Canvas();
-        parent.getChildren().add(canvas);
-
-        canvas.prefWidthProperty().bind(parent.widthProperty());
-        canvas.prefHeightProperty().bind(parent.heightProperty());
-        canvas.toBack();
-        return canvas;
-    }
-
     private void createVertex(double x, double y) {
         Vertex vertex = new Vertex(this, x, y);
         addElement(vertex);

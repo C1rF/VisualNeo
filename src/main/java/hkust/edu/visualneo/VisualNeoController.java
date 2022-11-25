@@ -119,6 +119,7 @@ public class VisualNeoController {
     // The system application
     private VisualNeoApp app;
     // The canvas
+    @FXML
     private Canvas canvas;
 
     /**
@@ -133,9 +134,7 @@ public class VisualNeoController {
      * after the fxml file has been loaded.
      */
     @FXML
-    private void initialize() {  // TODO: Make this decent
-        canvas = Canvas.buildCanvas(query_constructor_pane);
-    }
+    private void initialize() {}
 
     public void setApp(VisualNeoApp app) {
         this.app = app;
@@ -219,8 +218,9 @@ public class VisualNeoController {
      */
     @FXML
     private void handleExactSearch() {
-        List<GraphElement> graphElements = ;
-        app.queryHandler.exactSearch(, );
+        List<Vertex> listOfVertices = canvas.getVertices();
+        List<Edge> listOfEdges = canvas.getEdges();
+        app.queryHandler.exactSearch(listOfVertices,listOfEdges);
     }
 
     /**
@@ -232,7 +232,7 @@ public class VisualNeoController {
 
     @FXML
     void handleAddNodeLabel() {
-        GraphElement current_highlight =
+        GraphElement current_highlight = canvas.getSingleHighlight();
         // Add Node labels to the Vertex
         if (current_highlight instanceof Vertex) {
             current_highlight.setLabel(choicebox_node_label.getValue());
@@ -241,27 +241,31 @@ public class VisualNeoController {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Label Addition Error");
             alert.setHeaderText("Cannot add the label.");
-            alert.setContentText("Please select the correct element!");
+            alert.setContentText("Please select one node!");
             alert.showAndWait();
         }
     }
 
     @FXML
     void handleAddRelationLabel() {
-        GraphElement current_highlight =
+        GraphElement current_highlight = canvas.getSingleHighlight();
         // Add Relation labels to the Edge
         if (current_highlight instanceof Edge) {
             current_highlight.setLabel(choicebox_relation_label.getValue());
             refreshAllPane(current_highlight);
         } else {
-            throw new RuntimeException("Bug Found!");
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Label Addition Error");
+            alert.setHeaderText("Cannot add the label.");
+            alert.setContentText("Please select one edge!");
+            alert.showAndWait();
         }
     }
 
 
     @FXML
     void handleAddProperty() {
-        GraphElement current_highlight =
+        GraphElement current_highlight = canvas.getSingleHighlight();
         // Add Node/Relation properties to the Node/Relation
         if (current_highlight instanceof GraphElement) {
             String prop_name = choicebox_property_name.getValue();
@@ -371,10 +375,12 @@ public class VisualNeoController {
 
     @FXML
     void handleZoomIn() {
+        canvas.camera.zoomIn();
     }
 
     @FXML
     void handleZoomOut() {
+        canvas.camera.zoomOut();
     }
 
 }
