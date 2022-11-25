@@ -44,7 +44,7 @@ public class Canvas extends Pane {
         });
 
         addEventHandler(KeyEvent.KEY_PRESSED, e -> {
-            if (e.isControlDown()) {
+            if (e.isShortcutDown()) {
                 if (e.getCode() == KeyCode.A)
                     getChildren().forEach(node -> addHighlight((GraphElement) node));
             }
@@ -70,7 +70,7 @@ public class Canvas extends Pane {
                 Vertex lastVertex = nomineeVertex();
                 if (e.isShiftDown() && lastVertex != null && currentElement instanceof Vertex currentVertex)
                     createEdge(lastVertex, currentVertex);
-                else if (e.isControlDown()) {
+                else if (e.isShortcutDown()) {
                     if (currentElement.isHighlighted())
                         removeHighlight(currentElement);
                     else
@@ -123,7 +123,7 @@ public class Canvas extends Pane {
         });
 
         setOnScroll(e -> {
-            if (e.isControlDown())
+            if (e.isShortcutDown())
                 camera.zoom(e.getDeltaY() / UNIT_SCROLL, e.getX(), e.getY());
             else
                 camera.translate(-e.getDeltaX(), -e.getDeltaY());

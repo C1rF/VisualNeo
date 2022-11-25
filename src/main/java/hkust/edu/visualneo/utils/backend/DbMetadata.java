@@ -167,9 +167,4 @@ public record DbMetadata(
 
         return expansion;
     }
-
-    // TODO: Remove this
-    public Iterable<String> propertyKeys() {
-        return Collections.emptyList();
-    }
 }
