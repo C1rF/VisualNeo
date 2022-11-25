@@ -18,12 +18,6 @@ public class Canvas extends Pane {
 
     private static final double UNIT_SCROLL = 32.0;
 
-    private static final byte SHIFT       = 0b00000001;
-    private static final byte CTRL        = 0b00000010;
-    private static final byte WAITING_END = 0b00000100;
-
-    private byte stateFlag;
-
     public final OrthogonalCamera camera = new OrthogonalCamera(this);
 
     private final SetProperty<GraphElement> highlightElements =
@@ -66,7 +60,7 @@ public class Canvas extends Pane {
             }
             else {  // Clicked on a GraphElement
                 GraphElement currentElement = (GraphElement) ((Node) target).getParent();
-                Vertex lastVertex = nominalVertex();
+                Vertex lastVertex = nomineeVertex();
                 if (e.isShiftDown() && lastVertex != null && currentElement instanceof Vertex currentVertex)
                     createEdge(lastVertex, currentVertex);
                 else if (e.isControlDown()) {
@@ -129,16 +123,6 @@ public class Canvas extends Pane {
         });
     }
 
-    public static Canvas buildCanvas(Pane parent) {
-        Canvas canvas = new Canvas();
-        parent.getChildren().add(canvas);
-
-        canvas.prefWidthProperty().bind(parent.widthProperty());
-        canvas.prefHeightProperty().bind(parent.heightProperty());
-        canvas.toBack();
-        return canvas;
-    }
-
     private void createVertex(double x, double y) {
         Vertex vertex = new Vertex(this, x, y);
         addElement(vertex);
@@ -150,17 +134,11 @@ public class Canvas extends Pane {
         edge.toBack();
     }
 
-    private Vertex nominalVertex() {
+    // Returns the awaiting vertex for edge formation, returns null if no or multiple vertices are highlighted
+    private Vertex nomineeVertex() {
         List<GraphElement> elements = getHighlights();
         return (elements.size() == 1 && elements.get(0) instanceof Vertex vertex) ?
                vertex : null;
-    }
-
-    private boolean hasFlags(byte... flags) {
-        byte stateFlag = 0;
-        for (byte flag : flags)
-            stateFlag += flag;
-        return (this.stateFlag & stateFlag) == stateFlag;
     }
 
     public List<GraphElement> getElements() {

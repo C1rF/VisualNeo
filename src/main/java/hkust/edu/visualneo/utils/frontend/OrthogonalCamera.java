@@ -15,6 +15,7 @@ public class OrthogonalCamera {
     private static final double MIN_RATIO = 0.5;
     private static final double MAX_RATIO  = 1.5;
     private static final double UNIT_RATIO = 0.05;
+    private static final double ZOOM_UNITS = 2.5;
 
     private final Canvas canvas;
 
@@ -105,10 +106,10 @@ public class OrthogonalCamera {
         zoom(delta, viewToCanvas(getCenter()));
     }
     public void zoomIn() {
-        zoom(1.0);
+        zoom(ZOOM_UNITS);
     }
     public void zoomOut() {
-        zoom(-1.0);
+        zoom(-ZOOM_UNITS);
     }
 
     public DoubleProperty viewWidthProperty() {

@@ -24,7 +24,6 @@ public class VisualNeoApp extends Application {
         VisualNeoController controller = fxmlLoader.<VisualNeoController>getController();
         controller.setApp(this);
         this.stage = stage;
-        controller.setScene(scene);
         stage.setTitle("VisualNeo");
         stage.setScene(scene);
         stage.show();

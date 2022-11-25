@@ -12,4 +12,5 @@ module hkust.edu.visualneo {
 
     opens hkust.edu.visualneo to javafx.fxml;
     exports hkust.edu.visualneo;
+    exports hkust.edu.visualneo.utils.frontend;
 }
