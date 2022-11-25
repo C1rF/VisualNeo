@@ -40,7 +40,8 @@ public class Canvas extends Pane {
             if (e.isControlDown()) {
                 if (e.getCode() == KeyCode.A)
                     getChildren().forEach(node -> addHighlight((GraphElement) node));
-            } else {
+            }
+            else {
                 if (e.getCode() == KeyCode.DELETE || e.getCode() == KeyCode.BACK_SPACE)
                     removeElements(getHighlights());
             }
@@ -56,7 +57,8 @@ public class Canvas extends Pane {
                     clearHighlights();
                     cursor = new Point2D(e.getX(), e.getY());
                 }
-            } else {  // Clicked on a GraphElement
+            }
+            else {  // Clicked on a GraphElement
                 GraphElement currentElement = (GraphElement) ((Node) target).getParent();
                 Vertex lastVertex = nomineeVertex();
                 if (e.isShiftDown() && lastVertex != null && currentElement instanceof Vertex currentVertex)
@@ -66,7 +68,8 @@ public class Canvas extends Pane {
                         removeHighlight(currentElement);
                     else
                         addHighlight(currentElement);
-                } else {
+                }
+                else {
                     if (!currentElement.isHighlighted()) {
                         clearHighlights();
                         addHighlight(currentElement);
@@ -84,7 +87,8 @@ public class Canvas extends Pane {
 
             if (target == this) {
                 camera.translate(-(e.getX() - cursor.getX()), -(e.getY() - cursor.getY()));
-            } else {
+            }
+            else {
                 GraphElement currentElement = (GraphElement) ((Node) target).getParent();
                 if (currentElement.isHighlighted()) {
                     Point2D delta = camera.canvasToViewScale(e.getX() - cursor.getX(), e.getY() - cursor.getY());  // To avoid redundant calculations
@@ -92,7 +96,8 @@ public class Canvas extends Pane {
                         if (element instanceof Vertex)
                             element.translateInView(delta);
                     }
-                } else if (currentElement instanceof Vertex)  // TODO: Check necessity
+                }
+                else if (currentElement instanceof Vertex)
                     currentElement.translate(e.getX() - cursor.getX(), e.getY() - cursor.getY());
             }
 
@@ -143,7 +148,7 @@ public class Canvas extends Pane {
     private Vertex nomineeVertex() {
         List<GraphElement> elements = getHighlights();
         return (elements.size() == 1 && elements.get(0) instanceof Vertex vertex) ?
-                vertex : null;
+               vertex : null;
     }
 
     public List<GraphElement> getElements() {
@@ -152,7 +157,20 @@ public class Canvas extends Pane {
                 .map(element -> (GraphElement) element)
                 .toList();
     }
-
+    public List<Vertex> getVertices() {
+        return getChildren()
+                .stream()
+                .filter(element -> element instanceof Vertex)
+                .map(element -> (Vertex) element)
+                .toList();
+    }
+    public List<Edge> getEdges() {
+        return getChildren()
+                .stream()
+                .filter(element -> element instanceof Edge)
+                .map(element -> (Edge) element)
+                .toList();
+    }
     public void addElement(GraphElement element) {
         getChildren().add(element);
         clearHighlights();
@@ -179,15 +197,17 @@ public class Canvas extends Pane {
     public List<GraphElement> getHighlights() {
         return highlightElements.stream().toList();
     }
-
+    public GraphElement getSingleHighlight() {
+        List<GraphElement> elements = getHighlights();
+        return elements.size() == 1 ?
+               elements.get(0) : null;
+    }
     public void addHighlight(GraphElement e) {
         highlightElements.add(e);
     }
-
     public void removeHighlight(GraphElement e) {
         highlightElements.remove(e);
     }
-
     public void clearHighlights() {
         highlightElements.clear();
     }
