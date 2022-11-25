@@ -1,8 +1,8 @@
 package hkust.edu.visualneo.utils.frontend;
 
-import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.event.EventTarget;
 import javafx.geometry.Point2D;
@@ -13,6 +13,7 @@ import javafx.scene.layout.Pane;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public class Canvas extends Pane {
 
@@ -20,8 +21,11 @@ public class Canvas extends Pane {
 
     public final OrthogonalCamera camera = new OrthogonalCamera(this);
 
-    private final SetProperty<GraphElement> highlightElements =
+    private final ObservableSet<GraphElement> highlightElements =
             new SimpleSetProperty<>(FXCollections.observableSet());
+
+    private final ObservableSet<GraphElement> unmodifiableHighlightElements =
+            FXCollections.unmodifiableObservableSet(highlightElements);
 
     private Point2D cursor;
     private boolean dragged;
@@ -29,7 +33,7 @@ public class Canvas extends Pane {
     public Canvas() {
         super();
 
-        highlightElements.addListener((SetChangeListener<GraphElement>) c -> {
+        getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
             if (c.wasAdded())
                 c.getElementAdded().setHighlight(true);
             else
@@ -134,13 +138,6 @@ public class Canvas extends Pane {
         edge.toBack();
     }
 
-    // Returns the awaiting vertex for edge formation, returns null if no or multiple vertices are highlighted
-    private Vertex nomineeVertex() {
-        List<GraphElement> elements = getHighlights();
-        return (elements.size() == 1 && elements.get(0) instanceof Vertex vertex) ?
-               vertex : null;
-    }
-
     public List<GraphElement> getElements() {
         return getChildren()
                 .stream()
@@ -184,13 +181,18 @@ public class Canvas extends Pane {
         clearHighlights();
     }
 
-    public List<GraphElement> getHighlights() {
-        return highlightElements.stream().toList();
+    public ObservableSet<GraphElement> getHighlights() {
+        return unmodifiableHighlightElements;
     }
     public GraphElement getSingleHighlight() {
-        List<GraphElement> elements = getHighlights();
+        Set<GraphElement> elements = getHighlights();
         return elements.size() == 1 ?
-               elements.get(0) : null;
+               elements.iterator().next() : null;
+    }
+    // Returns the awaiting vertex for edge formation, returns null if no or multiple vertices are highlighted
+    private Vertex nomineeVertex() {
+        return (getSingleHighlight() instanceof Vertex vertex) ?
+               vertex : null;
     }
     public void addHighlight(GraphElement e) {
         highlightElements.add(e);
