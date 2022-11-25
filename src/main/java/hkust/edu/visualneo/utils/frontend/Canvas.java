@@ -21,11 +21,11 @@ public class Canvas extends Pane {
 
     public final OrthogonalCamera camera = new OrthogonalCamera(this);
 
-    private final ObservableSet<GraphElement> highlightElements =
-            new SimpleSetProperty<>(this, "highlightElements", FXCollections.observableSet());
+    private final ObservableSet<GraphElement> highlights =
+            new SimpleSetProperty<>(this, "highlights", FXCollections.observableSet());
 
-    private final ObservableSet<GraphElement> unmodifiableHighlightElements =
-            FXCollections.unmodifiableObservableSet(highlightElements);
+    private final ObservableSet<GraphElement> unmodifiableHighlights =
+            FXCollections.unmodifiableObservableSet(highlights);
 
     private Point2D cursor;
     private boolean dragged;
@@ -185,7 +185,7 @@ public class Canvas extends Pane {
     }
 
     public ObservableSet<GraphElement> getHighlights() {
-        return unmodifiableHighlightElements;
+        return unmodifiableHighlights;
     }
     public GraphElement getSingleHighlight() {
         Set<GraphElement> elements = getHighlights();
@@ -198,12 +198,12 @@ public class Canvas extends Pane {
                vertex : null;
     }
     public void addHighlight(GraphElement e) {
-        highlightElements.add(e);
+        highlights.add(e);
     }
     public void removeHighlight(GraphElement e) {
-        highlightElements.remove(e);
+        highlights.remove(e);
     }
     public void clearHighlights() {
-        highlightElements.clear();
+        highlights.clear();
     }
 }
