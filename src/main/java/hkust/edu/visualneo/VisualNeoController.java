@@ -145,6 +145,9 @@ public class VisualNeoController {
     public ArrayList<Vertex> listOfVertices = new ArrayList<Vertex>();
     public ArrayList<Edge> listOfEdges = new ArrayList<Edge>();
 
+    // A boolean variable indicating whether shift is down
+    boolean shift_down = false;
+
     /**
      * The constructor.
      * The constructor is called before initialize() method.
@@ -179,19 +182,21 @@ public class VisualNeoController {
         // Create the DrawBoard for constructing the query
         // Initialize the DrawBoard
         Drawboard = new Pane();
-        Drawboard.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-        Drawboard.setPrefWidth(Constants.BOARD_SIZE);
-        Drawboard.setPrefHeight(Constants.BOARD_SIZE);
+        Drawboard.setBackground(new Background(new BackgroundFill(Color.LIGHTCORAL, CornerRadii.EMPTY, Insets.EMPTY)));
+        Drawboard.setPrefWidth(Constants.BOARD_WIDTH);
+        Drawboard.setPrefHeight(Constants.BOARD_HEIGHT);
         Drawboard.setLayoutX(Constants.BOARD_INIT_LAYOUT);
         Drawboard.setLayoutY(Constants.BOARD_INIT_LAYOUT);
         pane_x = Constants.BOARD_INIT_LAYOUT;
         pane_y = Constants.BOARD_INIT_LAYOUT;
         // Initialize the Group
         Group DrawBoard_wrapper = new Group();
+        DrawBoard_wrapper.setAutoSizeChildren(true);
+        DrawBoard_wrapper.setAutoSizeChildren(true);
         DrawBoard_wrapper.getChildren().add(Drawboard);
         // Initialize the camera
         camera = new PerspectiveCamera();
-        camera.setTranslateZ(0);
+        camera.setTranslateZ(500);
         // Set the SubScene
         subscene_drawboard.setRoot(DrawBoard_wrapper);
         subscene_drawboard.setCamera(camera);
@@ -238,7 +243,13 @@ public class VisualNeoController {
                     }
                 }
         );
-
+        // SHIFT Press Listener(Global)
+        scene.setOnKeyPressed((e) -> {
+            if (e.getCode() == KeyCode.SHIFT) shift_down = true;
+        });
+        scene.setOnKeyReleased((e) -> {
+            if (e.getCode() == KeyCode.SHIFT) shift_down = false;
+        });
     }
 
     /**
@@ -299,8 +310,7 @@ public class VisualNeoController {
                 MouseButton button = e.getButton();
                 if (button != MouseButton.PRIMARY) return;
                 if (e.isShiftDown()) return;
-                System.out.println("DRAGGED!");
-                System.out.println("DRAGGED");
+                System.out.println("Pane DRAGGED!");
                 pane_x += e.getX() - offset_x;
                 pane_y += e.getY() - offset_y;
                 if (pane_x > Constants.PANE_X_LEFT_BOUND) pane_x = Constants.PANE_X_LEFT_BOUND;
@@ -561,6 +571,10 @@ public class VisualNeoController {
 
     public GraphElement getHighlight() {
         return highlight_element.get();
+    }
+
+    public boolean isShift_down() {
+        return shift_down;
     }
 
     public void createEdgeBetween(Vertex start, Vertex end) {

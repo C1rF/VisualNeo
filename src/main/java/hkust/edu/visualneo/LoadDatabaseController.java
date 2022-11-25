@@ -49,16 +49,16 @@ public class LoadDatabaseController {
         String password = textfield_password.getText();
 
         //worker thread for connecting the database
-        Thread worker = new Thread(new Runnable(){
-            public void run(){
-                try{
+        Thread worker = new Thread(new Runnable() {
+            public void run() {
+                try {
                     // Try to connect to the database
                     //controller.submitDBInfo(uri, user, password);
-                    controller.submitDBInfo("bolt://44.201.105.181:7687", "neo4j", "scissors-capstan-diseases");
+                    controller.submitDBInfo("bolt://3.87.231.206:7687", "neo4j", "hammers-deletion-detonations");
                     connect_success = true;
-                }catch (AuthenticationException e){
+                } catch (AuthenticationException e) {
                     connect_success = false;
-                    Platform.runLater(()->{
+                    Platform.runLater(() -> {
                         System.out.println(e.getMessage());
                         loadAnimation.cancelLoadAnimation();
                         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -76,17 +76,17 @@ public class LoadDatabaseController {
         loadAnimation.activateLoadAnimation();
 
         //observer thread for notifications
-        new Thread(new Runnable(){
-            public void run(){
-                try{
+        new Thread(new Runnable() {
+            public void run() {
+                try {
                     // Try to connect to the database
                     worker.join();
-                }
-                catch(Exception e){;}
-                finally{
-                    Platform.runLater(()->{
+                } catch (Exception e) {
+                    ;
+                } finally {
+                    Platform.runLater(() -> {
                         System.out.println("The load database thread ends");
-                        if(connect_success){
+                        if (connect_success) {
                             loadAnimation.cancelLoadAnimation();
                             // If the database is successfully connected, close the window
                             handleCancel();
@@ -100,7 +100,7 @@ public class LoadDatabaseController {
 
     }
 
-    public void setVisualNeoController(VisualNeoController controller){
+    public void setVisualNeoController(VisualNeoController controller) {
         this.controller = controller;
     }
 

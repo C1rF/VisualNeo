@@ -29,7 +29,7 @@
         <tabs>
           <Tab text="Query Constructor">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="740.0" prefWidth="700.0">
                      <children>
                         <SubScene fx:id="subscene_drawboard" fill="WHITE" height="738.0" width="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <root>
@@ -101,6 +101,79 @@
             </Tab>
         </tabs>
       </TabPane>
+      <VBox prefHeight="200.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+         <children>
+            <TabPane minWidth="100.0" prefHeight="600.0" prefWidth="300.0" tabClosingPolicy="UNAVAILABLE">
+              <tabs>
+                <Tab text="Basic Patterns">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="200.0">
+                           <children>
+                              <ScrollPane prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                <Tab text="Canned Patterns">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <ScrollPane layoutX="39.0" layoutY="140.0" prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+              </tabs>
+            </TabPane>
+            <AnchorPane prefHeight="290.0" prefWidth="300.0">
+               <children>
+                  <Pane layoutX="-20.0" layoutY="-10.0" prefHeight="230.0" prefWidth="300.0" style="-fx-background-color: #f4f4f4;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <Separator halignment="LEFT" orientation="VERTICAL" prefHeight="200.0" translateX="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ScrollPane fx:id="info_pane" prefHeight="280.0" prefWidth="300.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <content>
+                        <AnchorPane prefHeight="228.0" prefWidth="298.0">
+                           <children>
+                              <Text fx:id="text_node_or_relation" layoutX="32.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Node Information" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Text>
+                              <HBox layoutX="10.0" layoutY="50.0" spacing="60.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="50.0">
+                                 <children>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="text_label_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </HBox>
+                              <HBox layoutX="10.0" layoutY="106.431640625" spacing="32.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="110.0">
+                                 <children>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Properties:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="text_property_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                     </content>
+                  </ScrollPane>
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
       <VBox layoutX="24.0" layoutY="62.0" minWidth="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0">
          <children>
             <Button fx:id="btn_load_db" mnemonicParsing="false" onAction="#handleLoadDB" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Load Database">
@@ -211,79 +284,6 @@
                 </Tab>
               </tabs>
             </TabPane>
-         </children>
-      </VBox>
-      <VBox prefHeight="200.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
-         <children>
-            <TabPane minWidth="100.0" prefHeight="600.0" prefWidth="300.0" tabClosingPolicy="UNAVAILABLE">
-              <tabs>
-                <Tab text="Basic Patterns">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="200.0">
-                           <children>
-                              <ScrollPane prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                           </children>
-                        </AnchorPane>
-                  </content>
-                </Tab>
-                <Tab text="Canned Patterns">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                              <ScrollPane layoutX="39.0" layoutY="140.0" prefHeight="738.5" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                           </children>
-                        </AnchorPane>
-                  </content>
-                </Tab>
-              </tabs>
-            </TabPane>
-            <AnchorPane prefHeight="290.0" prefWidth="300.0">
-               <children>
-                  <Pane layoutX="-20.0" layoutY="-10.0" prefHeight="230.0" prefWidth="300.0" style="-fx-background-color: #f4f4f4;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                  <Separator halignment="LEFT" orientation="VERTICAL" prefHeight="200.0" translateX="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                  <ScrollPane fx:id="info_pane" prefHeight="280.0" prefWidth="300.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <content>
-                        <AnchorPane prefHeight="228.0" prefWidth="298.0">
-                           <children>
-                              <Text fx:id="text_node_or_relation" layoutX="32.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Node Information" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
-                                 <font>
-                                    <Font size="16.0" />
-                                 </font>
-                              </Text>
-                              <HBox layoutX="10.0" layoutY="50.0" spacing="60.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="50.0">
-                                 <children>
-                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Label:">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Text>
-                                    <Text fx:id="text_label_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Text>
-                                 </children>
-                              </HBox>
-                              <HBox layoutX="10.0" layoutY="106.431640625" spacing="32.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="110.0">
-                                 <children>
-                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Properties:">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Text>
-                                    <Text fx:id="text_property_info" strokeType="OUTSIDE" strokeWidth="0.0" text="To be filled">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Text>
-                                 </children>
-                              </HBox>
-                           </children>
-                        </AnchorPane>
-                     </content>
-                  </ScrollPane>
-               </children>
-            </AnchorPane>
          </children>
       </VBox>
       <MenuBar layoutX="87.0" layoutY="23.0" prefHeight="30.0" prefWidth="1200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
