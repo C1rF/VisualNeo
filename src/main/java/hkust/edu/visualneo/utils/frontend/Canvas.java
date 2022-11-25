@@ -169,6 +169,20 @@ public class Canvas extends Pane {
                 .map(element -> (GraphElement) element)
                 .toList();
     }
+    public List<Vertex> getVertices() {
+        return getChildren()
+                .stream()
+                .filter(element -> element instanceof Vertex)
+                .map(element -> (Vertex) element)
+                .toList();
+    }
+    public List<Edge> getEdges() {
+        return getChildren()
+                .stream()
+                .filter(element -> element instanceof Edge)
+                .map(element -> (Edge) element)
+                .toList();
+    }
     public void addElement(GraphElement element) {
         getChildren().add(element);
         clearHighlights();
@@ -195,7 +209,7 @@ public class Canvas extends Pane {
     public List<GraphElement> getHighlights() {
         return highlightElements.stream().toList();
     }
-    public GraphElement singleHighlight() {
+    public GraphElement getSingleHighlight() {
         List<GraphElement> elements = getHighlights();
         return elements.size() == 1 ?
                elements.get(0) : null;
