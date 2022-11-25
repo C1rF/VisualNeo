@@ -22,7 +22,7 @@ public class Canvas extends Pane {
     public final OrthogonalCamera camera = new OrthogonalCamera(this);
 
     private final ObservableSet<GraphElement> highlightElements =
-            new SimpleSetProperty<>(FXCollections.observableSet());
+            new SimpleSetProperty<>(this, "highlightElements", FXCollections.observableSet());
 
     private final ObservableSet<GraphElement> unmodifiableHighlightElements =
             FXCollections.unmodifiableObservableSet(highlightElements);
@@ -34,8 +34,11 @@ public class Canvas extends Pane {
         super();
 
         getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
-            if (c.wasAdded())
+            if (c.wasAdded()) {
                 c.getElementAdded().setHighlight(true);
+                if (c.getElementAdded() instanceof Vertex vertex)
+                    vertex.toFront();
+            }
             else
                 c.getElementRemoved().setHighlight(false);
         });
