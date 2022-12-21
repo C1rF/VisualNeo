@@ -8,7 +8,6 @@ import javafx.event.EventTarget;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 
 import java.util.Collection;
@@ -40,7 +39,7 @@ public class Canvas extends Pane {
                 c.getElementRemoved().setHighlight(false);
         });
 
-        addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+        setOnKeyPressed(e -> {
             if (e.isControlDown()) {
                 if (e.getCode() == KeyCode.A)
                     getChildren().forEach(node -> addHighlight((GraphElement) node));

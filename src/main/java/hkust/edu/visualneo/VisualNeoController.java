@@ -21,6 +21,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.internal.value.FloatValue;
 import org.neo4j.driver.internal.value.IntegerValue;
 import org.neo4j.driver.internal.value.StringValue;
 
@@ -94,6 +95,8 @@ public class VisualNeoController {
      * Drawing Space
      */
     @FXML
+    private TabPane tab_pane;
+    @FXML
     private AnchorPane query_constructor_pane;
     /**
      * Zoom In and Zoom Out Buttons
@@ -164,11 +167,10 @@ public class VisualNeoController {
                 textfield_property_value.setPromptText(propmt_text);
             }
         };
+        tab_pane.onKeyPressedProperty().bind(canvas.onKeyPressedProperty());
     }
 
-    public void setApp(VisualNeoApp app) {
-        this.app = app;
-    }
+    public void setApp(VisualNeoApp app) { this.app = app; }
 
     /**
      * Clear the drawing board
@@ -299,10 +301,20 @@ public class VisualNeoController {
     }
 
     private Value parsePropValue(String type, String input) {
-        if(type.equals("String")) return new StringValue(input);
-        else if(type.equals("Long")){
-            long num = Long.parseLong(input);
-            return new IntegerValue(num);
+        try{
+            if(type.equals("String")){
+                return new StringValue(input);
+            }
+            else if(type.equals("Long")){
+                long num = Long.parseLong(input);
+                return new IntegerValue(num);
+            }
+            else if(type.equals("Float")){
+                double num = Double.parseDouble(input);
+                return new FloatValue(num);
+            }
+        }catch(Exception e){
+            return null;
         }
         return null;
     }
@@ -314,7 +326,6 @@ public class VisualNeoController {
     private void handleMouseEnterButton(MouseEvent m) {
         canvas.getScene().setCursor(Cursor.HAND);
     }
-
     /**
      * Called when the user's mouse leaves a button
      */

@@ -143,7 +143,8 @@ public class Vertex extends GraphElement {
     }
 
     public void detach(Edge edge) {
-        getEdgesBetween(edge.other(this)).remove(edge);
+        Set<Edge> edges = getEdgesBetween(edge.other(this));
+        if(edges != null) edges.remove(edge);
     }
 
     public MapProperty<Vertex, SetProperty<Edge>> neighborhoodProperty() {
