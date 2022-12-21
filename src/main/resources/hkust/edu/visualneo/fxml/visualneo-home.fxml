@@ -148,7 +148,7 @@
                         </TabPane>
                      </children>
                   </VBox>
-                  <TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
+                  <TabPane fx:id="tab_pane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
                     <tabs>
                       <Tab text="Query Constructor">
                         <content>

@@ -8,7 +8,6 @@ import javafx.event.EventTarget;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 
 import java.util.Collection;
