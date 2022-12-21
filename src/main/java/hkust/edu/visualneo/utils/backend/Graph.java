@@ -61,13 +61,13 @@ public class Graph implements Expandable {
                     Node s2 = links.get(e2.startVertex);
                     Node t2 = links.get(e2.endVertex);
 
-                    if (!e1.directed && s1.compareTo(t1) > 0) {
+                    if (!e1.isDirected() && s1.compareTo(t1) > 0) {
                         Node temp = s1;
                         s1 = t1;
                         t1 = temp;
                     }
 
-                    if (!e2.directed && s2.compareTo(t2) > 0) {
+                    if (!e2.isDirected() && s2.compareTo(t2) > 0) {
                         Node temp = s2;
                         s2 = t2;
                         t2 = temp;

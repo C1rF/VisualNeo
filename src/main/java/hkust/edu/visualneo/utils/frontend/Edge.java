@@ -2,9 +2,7 @@ package hkust.edu.visualneo.utils.frontend;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcTo;
@@ -39,7 +37,8 @@ public class Edge extends GraphElement {
 
     public final Vertex primaryVertex;
     public final Vertex secondaryVertex;
-    public final boolean directed;
+    public final BooleanProperty directed =
+            new SimpleBooleanProperty(this, "directed", true);
     private final IntegerProperty idx =
             new SimpleIntegerProperty(this, "idx", -1);
 
@@ -49,7 +48,7 @@ public class Edge extends GraphElement {
         super(canvas);
         this.startVertex = startVertex;
         this.endVertex = endVertex;
-        this.directed = directed;
+        setDirected(directed);
         
         if (isReverted()) {
             primaryVertex = endVertex;
@@ -111,8 +110,7 @@ public class Edge extends GraphElement {
                     new ArcTo(r, r, 0.0, lFX, -lFY, true, false),
                     new LineTo(lNX, -lNY));
 
-            // TODO: Revert this
-            if (!directed) {
+            if (isDirected()) {
                 double h1Cos = Math.cos((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
                 double h1Sin = Math.sin((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
                 double h1X = lNX + ARROWHEAD_LENGTH * h1Cos;
@@ -239,8 +237,7 @@ public class Edge extends GraphElement {
             }
         }
 
-        // TODO: Revert this
-        if (!directed) {
+        if (isDirected()) {
             double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE / 2);
             double h1Sin = Math.sin(offsetAngle + ARROWHEAD_ANGLE / 2);
             double h1X = aX - ARROWHEAD_LENGTH * h1Cos;
@@ -262,6 +259,16 @@ public class Edge extends GraphElement {
                         new MoveTo(aX, aY),
                         new LineTo(h2X, h2Y));
         }
+    }
+
+    public BooleanProperty directedProperty() {
+        return directed;
+    }
+    public boolean isDirected() {
+        return directedProperty().get();
+    }
+    public void setDirected(boolean directed) {
+        directedProperty().set(directed);
     }
 
     public IntegerProperty idxProperty() {

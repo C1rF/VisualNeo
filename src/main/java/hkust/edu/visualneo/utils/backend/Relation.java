@@ -17,7 +17,7 @@ public class Relation extends Entity {
     public Relation(long id, Edge edge, Map<Vertex, Node> links) {
         this(
                 id,
-                edge.directed,
+                edge.isDirected(),
                 links.get(edge.startVertex),
                 links.get(edge.endVertex),
                 edge.getLabel(),
