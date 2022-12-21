@@ -37,11 +37,11 @@ public class Edge extends GraphElement {
 
     public final Vertex primaryVertex;
     public final Vertex secondaryVertex;
-    public final BooleanProperty directed =
+
+    private final BooleanProperty directed =
             new SimpleBooleanProperty(this, "directed", true);
     private final IntegerProperty idx =
             new SimpleIntegerProperty(this, "idx", -1);
-
     private final DoubleProperty angle;
 
     public Edge(Canvas canvas, Vertex startVertex, Vertex endVertex, boolean directed) {
@@ -68,7 +68,7 @@ public class Edge extends GraphElement {
         attach();
         initializeGraphics();
 
-        // For Testing
+        // For Debugging
         System.out.println("An Edge from (" + startVertex.getX() + " , " + startVertex.getY() + ") to " +
                 "(" + endVertex.getX() + " , " + endVertex.getY() + ")" + " is created!");
     }
@@ -104,7 +104,7 @@ public class Edge extends GraphElement {
             double lFX = LINE_LENGTH * sCos;
             double lFY = LINE_LENGTH * sSin;
 
-            curve().getElements().addAll(
+            arc().getElements().addAll(
                     new MoveTo(lNX, lNY),
                     new LineTo(lFX, lFY),
                     new ArcTo(r, r, 0.0, lFX, -lFY, true, false),
@@ -120,7 +120,7 @@ public class Edge extends GraphElement {
                 double h2X = lNX + ARROWHEAD_LENGTH * h2Cos;
                 double h2Y = -lNY + ARROWHEAD_LENGTH * h2Sin;
 
-                curve().getElements().addAll(
+                arc().getElements().addAll(
                         new LineTo(h1X, h1Y),
                         new MoveTo(lNX, -lNY),
                         new LineTo(h2X, h2Y));
@@ -128,8 +128,8 @@ public class Edge extends GraphElement {
         }
         else {  // Crossing-arc case
             positionProperty().bind(Bindings.createObjectBinding(
-                    () -> startVertex.getPosition().midpoint(endVertex.getPosition()),
-                    startVertex.positionProperty(), endVertex.positionProperty()));
+                    () -> primaryVertex.getPosition().midpoint(secondaryVertex.getPosition()),
+                    primaryVertex.positionProperty(), secondaryVertex.positionProperty()));
             angleProperty().bind(Bindings.createDoubleBinding(
                     () -> Math.toDegrees(angle(startVertex, endVertex)),
                     startVertex.positionProperty(), endVertex.positionProperty()));
@@ -156,6 +156,7 @@ public class Edge extends GraphElement {
             final ChangeListener<Object> updateListener =
                     (observable, oldValue, newValue) -> updateCrossingArc(d, offsetAngle);
 
+            directedProperty().addListener(updateListener);
             d.addListener(updateListener);
             offsetAngle.addListener(updateListener);
             text.layoutBoundsProperty().addListener(updateListener);
@@ -172,8 +173,8 @@ public class Edge extends GraphElement {
         });
     }
 
-    public void updateCrossingArc(DoubleBinding dBinding, DoubleBinding offsetAngleBinding) {
-        curve().getElements().clear();
+    private void updateCrossingArc(DoubleBinding dBinding, DoubleBinding offsetAngleBinding) {
+        arc().getElements().clear();
 
         double d = dBinding.get();
         double offsetAngle = offsetAngleBinding.get();
@@ -190,7 +191,7 @@ public class Edge extends GraphElement {
             aY = 0.0;
 
             if (text.getLayoutBounds().getWidth() < TEXT_EPSILON)
-                curve().getElements().addAll(
+                arc().getElements().addAll(
                         new MoveTo(-aX, 0.0),
                         new LineTo(aX, 0.0));
             else {
@@ -198,7 +199,7 @@ public class Edge extends GraphElement {
                 if (tX > d / 2)
                     tX = d / 2;
 
-                curve().getElements().addAll(
+                arc().getElements().addAll(
                         new MoveTo(-aX, 0.0),
                         new LineTo(-tX, 0.0),
                         new MoveTo(tX, 0.0),
@@ -219,7 +220,7 @@ public class Edge extends GraphElement {
             double fY = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d / 2, 2));
 
             if (text.getText() == null || text.getText().equals(""))
-                curve().getElements().addAll(
+                arc().getElements().addAll(
                         new MoveTo(-aX, aY),
                         new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
             else {
@@ -229,7 +230,7 @@ public class Edge extends GraphElement {
                 double offY = r - Math.sqrt(Math.pow(r, 2) - Math.pow(tX, 2));
                 double tY = lowerHalf ? -fY + offY : fY - offY;
 
-                curve().getElements().addAll(
+                arc().getElements().addAll(
                         new MoveTo(-aX, aY),
                         new ArcTo(r, r, 0.0, -tX, tY, cos < 0.0, lowerHalf),
                         new MoveTo(tX, tY),
@@ -249,7 +250,7 @@ public class Edge extends GraphElement {
             double h2X = aX - ARROWHEAD_LENGTH * h2Cos;
             double h2Y = aY + ARROWHEAD_LENGTH * h2Sin;
 
-            curve().getElements().addAll(
+            arc().getElements().addAll(
                     new LineTo(h1X, h1Y),
                     new MoveTo(aX, aY),
                     new LineTo(h2X, h2Y));
@@ -313,7 +314,7 @@ public class Edge extends GraphElement {
         return System.identityHashCode(startVertex) > System.identityHashCode(endVertex);
     }
 
-    private Path curve() {
+    private Path arc() {
         return (Path) shape;
     }
 
