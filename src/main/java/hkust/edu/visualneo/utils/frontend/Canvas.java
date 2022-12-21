@@ -8,6 +8,7 @@ import javafx.event.EventTarget;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 
 import java.util.Collection;
@@ -20,11 +21,11 @@ public class Canvas extends Pane {
 
     public final OrthogonalCamera camera = new OrthogonalCamera(this);
 
-    private final ObservableSet<GraphElement> highlightElements =
-            new SimpleSetProperty<>(FXCollections.observableSet());
+    private final ObservableSet<GraphElement> highlights =
+            new SimpleSetProperty<>(this, "highlights", FXCollections.observableSet());
 
-    private final ObservableSet<GraphElement> unmodifiableHighlightElements =
-            FXCollections.unmodifiableObservableSet(highlightElements);
+    private final ObservableSet<GraphElement> unmodifiableHighlights =
+            FXCollections.unmodifiableObservableSet(highlights);
 
     private Point2D cursor;
     private boolean dragged;
@@ -33,14 +34,17 @@ public class Canvas extends Pane {
         super();
 
         getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
-            if (c.wasAdded())
+            if (c.wasAdded()) {
                 c.getElementAdded().setHighlight(true);
+                if (c.getElementAdded() instanceof Vertex vertex)
+                    vertex.toFront();
+            }
             else
                 c.getElementRemoved().setHighlight(false);
         });
 
-        setOnKeyPressed(e -> {
-            if (e.isControlDown()) {
+        addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+            if (e.isShortcutDown()) {
                 if (e.getCode() == KeyCode.A)
                     getChildren().forEach(node -> addHighlight((GraphElement) node));
             }
@@ -66,7 +70,7 @@ public class Canvas extends Pane {
                 Vertex lastVertex = nomineeVertex();
                 if (e.isShiftDown() && lastVertex != null && currentElement instanceof Vertex currentVertex)
                     createEdge(lastVertex, currentVertex);
-                else if (e.isControlDown()) {
+                else if (e.isShortcutDown()) {
                     if (currentElement.isHighlighted())
                         removeHighlight(currentElement);
                     else
@@ -119,7 +123,7 @@ public class Canvas extends Pane {
         });
 
         setOnScroll(e -> {
-            if (e.isControlDown())
+            if (e.isShortcutDown())
                 camera.zoom(e.getDeltaY() / UNIT_SCROLL, e.getX(), e.getY());
             else
                 camera.translate(-e.getDeltaX(), -e.getDeltaY());
@@ -181,7 +185,7 @@ public class Canvas extends Pane {
     }
 
     public ObservableSet<GraphElement> getHighlights() {
-        return unmodifiableHighlightElements;
+        return unmodifiableHighlights;
     }
     public GraphElement getSingleHighlight() {
         Set<GraphElement> elements = getHighlights();
@@ -194,12 +198,12 @@ public class Canvas extends Pane {
                vertex : null;
     }
     public void addHighlight(GraphElement e) {
-        highlightElements.add(e);
+        highlights.add(e);
     }
     public void removeHighlight(GraphElement e) {
-        highlightElements.remove(e);
+        highlights.remove(e);
     }
     public void clearHighlights() {
-        highlightElements.clear();
+        highlights.clear();
     }
 }

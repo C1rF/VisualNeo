@@ -127,11 +127,11 @@ public record DbMetadata(
     }
 
     public Map<String, String> nodePropertiesOf(String nodeLabel) {
-        return nodePropertiesByLabel.getOrDefault(nodeLabel, Collections.emptyMap());
+        return nodePropertiesByLabel.get(nodeLabel);
     }
 
     public Map<String, String> relationPropertiesOf(String relationLabel) {
-        return relationPropertiesByLabel.getOrDefault(relationLabel, Collections.emptyMap());
+        return relationPropertiesByLabel.get(relationLabel);
     }
 
     @Override
@@ -166,10 +166,5 @@ public record DbMetadata(
         expansion.put("Schema Graph", schemaGraph);
 
         return expansion;
-    }
-
-    // TODO: Remove this
-    public Iterable<String> propertyKeys() {
-        return Collections.emptyList();
     }
 }
