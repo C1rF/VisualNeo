@@ -8,9 +8,9 @@ import javafx.event.EventTarget;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -43,10 +43,10 @@ public class Canvas extends Pane {
                 c.getElementRemoved().setHighlight(false);
         });
 
-        addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+        setOnKeyPressed(e -> {
             if (e.isShortcutDown()) {
                 if (e.getCode() == KeyCode.A)
-                    getChildren().forEach(node -> addHighlight((GraphElement) node));
+                    new ArrayList<>(getChildren()).forEach(node -> addHighlight((GraphElement) node));
             }
             else {
                 if (e.getCode() == KeyCode.DELETE || e.getCode() == KeyCode.BACK_SPACE)
