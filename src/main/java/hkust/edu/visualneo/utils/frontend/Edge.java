@@ -110,7 +110,7 @@ public class Edge extends GraphElement {
                     new ArcTo(r, r, 0.0, lFX, -lFY, true, false),
                     new LineTo(lNX, -lNY));
 
-            if (isDirected()) {
+            if (!isDirected()) {
                 double h1Cos = Math.cos((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
                 double h1Sin = Math.sin((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
                 double h1X = lNX + ARROWHEAD_LENGTH * h1Cos;
@@ -128,11 +128,11 @@ public class Edge extends GraphElement {
         }
         else {  // Crossing-arc case
             positionProperty().bind(Bindings.createObjectBinding(
-                    () -> primaryVertex.getPosition().midpoint(secondaryVertex.getPosition()),
-                    primaryVertex.positionProperty(), secondaryVertex.positionProperty()));
+                    () -> startVertex.getPosition().midpoint(endVertex.getPosition()),
+                    startVertex.positionProperty(), endVertex.positionProperty()));
             angleProperty().bind(Bindings.createDoubleBinding(
-                    () -> Math.toDegrees(angle(primaryVertex, secondaryVertex)),
-                    primaryVertex.positionProperty(), secondaryVertex.positionProperty()));
+                    () -> Math.toDegrees(angle(startVertex, endVertex)),
+                    startVertex.positionProperty(), endVertex.positionProperty()));
 
             final DoubleBinding baseAngle = Bindings.createDoubleBinding(
                     () -> Math.toRadians(getAngle()),
@@ -148,7 +148,9 @@ public class Edge extends GraphElement {
 
             final DoubleBinding offsetAngle = Bindings.createDoubleBinding(
                     () -> 2 * getIdx() + 1 == primaryVertex.getNumEdgesBetween(secondaryVertex) ?
-                          0.0 : (getIdx() - (primaryVertex.getNumEdgesBetween(secondaryVertex) - 1) / 2.0) * GAP_ANGLE,
+                          0.0 : (isReverted() ? -1 : 1) *
+                                (getIdx() - (primaryVertex.getNumEdgesBetween(secondaryVertex) - 1) / 2.0) *
+                                GAP_ANGLE,
                     idxProperty(), primaryVertex.numEdgesPropertyBetween(secondaryVertex));
 
             final ChangeListener<Object> updateListener =
@@ -206,7 +208,7 @@ public class Edge extends GraphElement {
             }
         }
         else {
-            boolean lowerHalf = idx < num / 2;
+            boolean lowerHalf = (idx < num / 2) != isReverted();
 
             double cos = Math.cos(offsetAngle);
             double sin = Math.sin(offsetAngle);
@@ -237,7 +239,7 @@ public class Edge extends GraphElement {
             }
         }
 
-        if (isDirected()) {
+        if (!isDirected()) {
             double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE / 2);
             double h1Sin = Math.sin(offsetAngle + ARROWHEAD_ANGLE / 2);
             double h1X = aX - ARROWHEAD_LENGTH * h1Cos;
@@ -247,17 +249,10 @@ public class Edge extends GraphElement {
             double h2X = aX - ARROWHEAD_LENGTH * h2Cos;
             double h2Y = aY + ARROWHEAD_LENGTH * h2Sin;
 
-            if (isReverted())
-                curve().getElements().addAll(
-                        new MoveTo(-aX, aY),
-                        new LineTo(-h1X, h1Y),
-                        new MoveTo(-aX, aY),
-                        new LineTo(-h2X, h2Y));
-            else
-                curve().getElements().addAll(
-                        new LineTo(h1X, h1Y),
-                        new MoveTo(aX, aY),
-                        new LineTo(h2X, h2Y));
+            curve().getElements().addAll(
+                    new LineTo(h1X, h1Y),
+                    new MoveTo(aX, aY),
+                    new LineTo(h2X, h2Y));
         }
     }
 
