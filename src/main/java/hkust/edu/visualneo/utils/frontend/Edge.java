@@ -110,7 +110,7 @@ public class Edge extends GraphElement {
                     new ArcTo(r, r, 0.0, lFX, -lFY, true, false),
                     new LineTo(lNX, -lNY));
 
-            if (!isDirected()) {
+            if (isDirected()) {
                 double h1Cos = Math.cos((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
                 double h1Sin = Math.sin((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
                 double h1X = lNX + ARROWHEAD_LENGTH * h1Cos;
@@ -240,7 +240,7 @@ public class Edge extends GraphElement {
             }
         }
 
-        if (!isDirected()) {
+        if (isDirected()) {
             double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE / 2);
             double h1Sin = Math.sin(offsetAngle + ARROWHEAD_ANGLE / 2);
             double h1X = aX - ARROWHEAD_LENGTH * h1Cos;

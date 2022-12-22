@@ -101,6 +101,7 @@
                                                                </cursor>
                                                             </ChoiceBox>
                                                             <Button fx:id="btn_add_relation_label" disable="true" mnemonicParsing="false" onAction="#handleAddRelationLabel" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" text="Add Label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="100.0" />
+                                                            <CheckBox fx:id="checkbox_directed" layoutX="14.0" layoutY="149.0" mnemonicParsing="false" selected="true" text="Directed" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="150.0" />
                                                          </children>
                                                       </AnchorPane>
                                                    </children>

@@ -53,7 +53,7 @@ public class VisualNeoController {
     @FXML
     private Button btn_similarity_search;
     /**
-     * Buttons and Labels in the Label and Property Pane (8 in total)
+     * Buttons and Labels in the Label and Property Pane (9 in total)
      */
     @FXML
     private ChoiceBox<String> choicebox_node_label;
@@ -69,6 +69,8 @@ public class VisualNeoController {
     private TextField textfield_property_value;
     @FXML
     private Button btn_add_property;
+    @FXML
+    private CheckBox checkbox_directed;
     /**
      * Buttons and Texts in the Info Pane (4 in total)
      */
@@ -91,6 +93,7 @@ public class VisualNeoController {
     private AnchorPane pane_property;
     private Map<String, String> current_property_map;
     private ChangeListener<String> property_change_listener;
+    private ChangeListener<Boolean> directed_change_listener;
     /**
      * Drawing Space
      */
@@ -165,6 +168,15 @@ public class VisualNeoController {
                     propmt_text = "Please input a Number";
                 }
                 textfield_property_value.setPromptText(propmt_text);
+            }
+        };
+
+        directed_change_listener = new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                GraphElement current_highlight = canvas.getSingleHighlight();
+                Edge highlight_edge = (Edge) current_highlight;
+                if(highlight_edge != null) highlight_edge.setDirected(newValue);
             }
         };
         tab_pane.onKeyPressedProperty().bind(canvas.onKeyPressedProperty());
@@ -382,6 +394,7 @@ public class VisualNeoController {
         choicebox_property_name.getSelectionModel()
                 .selectedItemProperty().removeListener(property_change_listener);
         choicebox_property_name.getItems().clear();
+        checkbox_directed.selectedProperty().removeListener(directed_change_listener);
         if (current_highlight instanceof Vertex) {
             // Node Info Pane (bottom-right pane)
             pane_node_label.setVisible(true);
@@ -399,6 +412,10 @@ public class VisualNeoController {
             pane_node_label.setVisible(false);
             pane_relation_label.setVisible(true);
             text_node_or_relation.setText("Relation Information");
+            // Display the checkbox according to the current status
+            Edge highlight_edge = (Edge) current_highlight;
+            checkbox_directed.setSelected(highlight_edge.isDirected());
+            checkbox_directed.selectedProperty().addListener(directed_change_listener);
             // Update property choices
             if(metadata == null) return;
             if(current_highlight.getLabel() == null)
