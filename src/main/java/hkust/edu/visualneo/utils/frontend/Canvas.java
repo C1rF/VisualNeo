@@ -136,7 +136,7 @@ public class Canvas extends Pane {
     }
 
     private void createEdge(Vertex start, Vertex end) {
-        Edge edge = new Edge(this, start, end, false);  // TODO: Modify this
+        Edge edge = new Edge(this, start, end, true);
         addElement(edge);
         edge.toBack();
     }
