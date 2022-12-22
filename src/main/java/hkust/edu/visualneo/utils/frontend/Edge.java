@@ -5,14 +5,13 @@ import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcTo;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
+import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static hkust.edu.visualneo.utils.frontend.Vertex.VERTEX_RADIUS;
 import static java.lang.Math.PI;
@@ -43,6 +42,8 @@ public class Edge extends GraphElement {
     private final IntegerProperty idx =
             new SimpleIntegerProperty(this, "idx", -1);
     private final DoubleProperty angle;
+
+    private final List<PathElement> arrowHead = new ArrayList<>();
 
     public Edge(Canvas canvas, Vertex startVertex, Vertex endVertex, boolean directed) {
         super(canvas);
@@ -120,11 +121,14 @@ public class Edge extends GraphElement {
                 double h2X = lNX + ARROWHEAD_LENGTH * h2Cos;
                 double h2Y = -lNY + ARROWHEAD_LENGTH * h2Sin;
 
-                arc().getElements().addAll(
-                        new LineTo(h1X, h1Y),
-                        new MoveTo(lNX, -lNY),
-                        new LineTo(h2X, h2Y));
+                arrowHead.add(new LineTo(h1X, h1Y));
+                arrowHead.add(new MoveTo(lNX, -lNY));
+                arrowHead.add(new LineTo(h2X, h2Y));
+
+                toggleArrowHead();
             }
+
+            directedProperty().addListener((observable, oldValue, newValue) -> toggleArrowHead());
         }
         else {  // Crossing-arc case
             positionProperty().bind(Bindings.createObjectBinding(
@@ -255,6 +259,14 @@ public class Edge extends GraphElement {
                     new MoveTo(aX, aY),
                     new LineTo(h2X, h2Y));
         }
+    }
+
+    // Only used for self-loops
+    private void toggleArrowHead() {
+        if (isDirected())
+            arc().getElements().addAll(arrowHead);
+        else
+            arc().getElements().removeAll(arrowHead);
     }
 
     public BooleanProperty directedProperty() {
