@@ -69,7 +69,7 @@ public class Canvas extends Pane {
                 GraphElement currentElement = (GraphElement) ((Node) target).getParent();
                 Vertex lastVertex = nomineeVertex();
                 if (e.isShiftDown() && lastVertex != null && currentElement instanceof Vertex currentVertex)
-                    createEdge(lastVertex, currentVertex);
+                    createEdge(lastVertex, currentVertex, true);
                 else if (e.isShortcutDown()) {
                     if (currentElement.isHighlighted())
                         removeHighlight(currentElement);
@@ -130,13 +130,13 @@ public class Canvas extends Pane {
         });
     }
 
-    private void createVertex(double x, double y) {
+    public void createVertex(double x, double y) {
         Vertex vertex = new Vertex(this, x, y);
         addElement(vertex);
     }
 
-    private void createEdge(Vertex start, Vertex end) {
-        Edge edge = new Edge(this, start, end, true);
+    public void createEdge(Vertex start, Vertex end, boolean directed) {
+        Edge edge = new Edge(this, start, end, directed);
         addElement(edge);
         edge.toBack();
     }

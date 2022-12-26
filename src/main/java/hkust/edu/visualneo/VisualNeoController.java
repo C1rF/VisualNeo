@@ -19,17 +19,19 @@ import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.internal.value.FloatValue;
 import org.neo4j.driver.internal.value.IntegerValue;
 import org.neo4j.driver.internal.value.StringValue;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.PrintWriter;
+import java.util.*;
 
 public class VisualNeoController {
     /**
@@ -187,26 +189,6 @@ public class VisualNeoController {
     public void setApp(VisualNeoApp app) { this.app = app; }
 
     /**
-     * Clear the drawing board
-     */
-    @FXML
-    private void handleClear() {
-        canvas.clearElements();
-    }
-
-    /**
-     * Save the drawing pattern
-     */
-    @FXML
-    private void handleSave() {}
-
-    /**
-     * Load the drawing pattern
-     */
-    @FXML
-    private void handleLoad() {}
-
-    /**
      * Called when the user click on Load Database button
      */
     @FXML
@@ -269,7 +251,16 @@ public class VisualNeoController {
     private void handleExactSearch() {
         List<Vertex> listOfVertices = canvas.getVertices();
         List<Edge> listOfEdges = canvas.getEdges();
-        app.queryHandler.exactSearch(listOfVertices,listOfEdges);
+        try{
+            app.queryHandler.exactSearch(listOfVertices,listOfEdges);
+        }catch (Exception e){
+           String errorMsg = e.getMessage();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Exact Search Error");
+            alert.setHeaderText("Cannot perform the exact search!");
+            alert.setContentText(errorMsg);
+            alert.showAndWait();
+        }
     }
 
     /**
@@ -299,7 +290,7 @@ public class VisualNeoController {
         // Add Node/Relation properties to the Node/Relation
         String prop_name = choicebox_property_name.getValue();
         String prop_type = current_property_map.get(prop_name);
-        String prop_value_text = textfield_property_value.getText();
+        String prop_value_text = textfield_property_value.getText().trim();
         Value prop_value = parsePropValue(prop_type, prop_value_text);
         if (prop_value != null) {
             current_highlight.addProperty(prop_name, prop_value);
@@ -461,5 +452,137 @@ public class VisualNeoController {
 
     @FXML
     void handleZoomOut() { canvas.camera.zoomOut();}
+
+    // Functions in the Menu Bar
+    /**
+     * Display the "About Us" information
+     */
+    @FXML
+    void aboutUs() throws IOException {
+        // Set the scene
+        FXMLLoader fxmlLoader = new FXMLLoader(VisualNeoController.class.getResource("fxml/about-us.fxml"));
+        Scene dialogScene = new Scene(fxmlLoader.load(), 500, 300);
+        // Set the stage
+        final Stage dialog = new Stage();
+        dialog.setTitle("About Us");
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setScene(dialogScene);
+        dialog.setResizable(false);
+        dialog.show();
+    }
+    /**
+     * Clear the drawing board
+     */
+    @FXML
+    private void handleClear() {
+        canvas.clearElements();
+    }
+
+    /**
+     * Save the drawing pattern
+     */
+    @FXML
+    private void handleSave() {
+        String outputText = "";
+        List<Vertex> vertices = canvas.getVertices();
+        List<Edge> edges =  canvas.getEdges();
+        for(Vertex v : vertices)
+            outputText += v.toText() + '\n';
+        for(int i = edges.size()-1; i >= 0; i--){
+            Edge e = edges.get(i);
+            outputText += e.toText() + '\n';
+        }
+        System.out.println(outputText);
+        FileChooser fileChooser = new FileChooser();
+        //Set extension filter for text files
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+        fileChooser.getExtensionFilters().add(extFilter);
+        //Show save file dialog
+        File file = fileChooser.showSaveDialog(app.stage);
+        if (file != null) {
+            // save the outputText to the file
+            try {
+                PrintWriter writer;
+                writer = new PrintWriter(file);
+                writer.println(outputText);
+                writer.close();
+            } catch (IOException e) {
+                System.out.println("Error when saving the pattern");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Load the drawing pattern
+     */
+    @FXML
+    private void handleLoad() {
+        FileChooser fileChooser = new FileChooser();
+        File selectedFile = fileChooser.showOpenDialog(app.stage);
+        try
+        {
+            Scanner sc = new Scanner(selectedFile);
+            canvas.clearElements();
+            while ( sc.hasNextLine() )
+            {
+                // For a single line
+                String s = sc.nextLine().trim();
+                if(!s.isEmpty()) {
+                    parseOneLine(s);
+                }
+            }
+        }
+        catch(FileNotFoundException fe){
+            System.out.println("Cannot find the file!");
+        }
+        catch( Exception ee ){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Load Data Error");
+            alert.setHeaderText("Cannot load the text file.");
+            alert.setContentText("Please check the format of the txt file!");
+            alert.showAndWait();
+        }
+    }
+
+    // Helper Function to parse one line
+    private void parseOneLine(String line){
+        if(line.isEmpty()) return;
+        String[] elements = line.split("\\s+");
+        if(elements[0].equals("v")){
+            // current line describes a Vertex
+            double x = Double.parseDouble(elements[2]);
+            double y = Double.parseDouble(elements[3]);
+            canvas.createVertex(x,y);
+        }
+        else if(elements[0].equals("e")){
+            // current line describes an Edge
+            List<Vertex> vertices = canvas.getVertices();
+            int startVertexId = Integer.parseInt(elements[1]);
+            int endVertexId = Integer.parseInt(elements[2]);
+            boolean directed = Boolean.valueOf(elements[3]);
+            canvas.createEdge(vertices.get(startVertexId), vertices.get(endVertexId), directed);
+        }
+        GraphElement newElement = canvas.getSingleHighlight();
+        // parse Label
+        String label = elements[4];
+        if(!label.equals("null")) newElement.setLabel(label);
+        // parse Properties
+        for(int i = 5; i < elements.length; i++){
+            String property = elements[i];
+            if(property.equals("null")) break;
+            String[] splitProperty = property.split(":");
+            String propertyName = splitProperty[0];
+            String propertyType;
+            if(newElement instanceof Vertex){
+                propertyType = metadata.nodeProperties().get(propertyName);
+            }else {
+                propertyType = metadata.relationProperties().get(propertyName);
+            }
+            String propertyValueText = splitProperty[1];
+            Value propertyValue = parsePropValue(propertyType, propertyValueText);
+            newElement.addProperty(propertyName, propertyValue);
+        }
+    }
 
 }

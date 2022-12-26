@@ -13,8 +13,8 @@
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
-                    <MenuItem fx:id="menu_item_save" mnemonicParsing="false" onAction="#handleSave" text="Save" />
-                        <MenuItem fx:id="menu_item_load" mnemonicParsing="false" onAction="#handleLoad" text="Load" />
+                    <MenuItem fx:id="menu_item_save" mnemonicParsing="false" onAction="#handleSave" text="Save Pattern" />
+                        <MenuItem fx:id="menu_item_load" mnemonicParsing="false" onAction="#handleLoad" text="Load Pattern" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
@@ -24,7 +24,7 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="About" />
+                    <MenuItem mnemonicParsing="false" onAction="#aboutUs" text="About Us" />
                   </items>
                 </Menu>
               </menus>

@@ -335,10 +335,18 @@ public class Edge extends GraphElement {
      */
     @Override
     public String toText() {
-        String[] temp = new String[]{String.valueOf(1),
-                                     String.valueOf(2),
-                                     text.getText()};
-        return (String) StringUtil.join(" ", Arrays.asList(temp));
+        List<Vertex> vertices = canvas.getVertices();
+        int startVertexId = vertices.indexOf(startVertex);
+        int endVertexId = vertices.indexOf(endVertex);
+        String[] temp = new String[]{
+                "e",
+                String.valueOf(startVertexId),
+                String.valueOf(endVertexId),
+                String.valueOf(isDirected()),
+                text.getText(),
+                propertyToText(),
+                };
+        return StringUtil.join(" ", Arrays.asList(temp)).toString();
     }
 
 }

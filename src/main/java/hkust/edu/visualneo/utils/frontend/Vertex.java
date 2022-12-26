@@ -215,8 +215,15 @@ public class Vertex extends GraphElement {
      */
     @Override
     public String toText() {
-        String[] temp = new String[]{positionProperty().toString(),
-                getLabel()};
-        return (String) StringUtil.join(" ", Arrays.asList(temp));
+        List<Vertex> vertices = canvas.getVertices();
+        int vertexId = vertices.indexOf(this);
+        String[] temp = new String[]{
+                "v",
+                String.valueOf(vertexId),
+                String.valueOf(getX()),
+                String.valueOf(getY()),
+                getLabel(),
+                propertyToText()};
+        return StringUtil.join(" ", Arrays.asList(temp)).toString();
     }
 }
