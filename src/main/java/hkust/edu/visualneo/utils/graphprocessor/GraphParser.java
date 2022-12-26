@@ -12,16 +12,24 @@ import java.util.List;
 
 public class GraphParser {
 
-    private static final String HEALTH_DATA = "src/main/resources/hkust/edu/visualneo/data/health.csv";
-    private static final String HEALTH_GRAPH = "src/main/resources/hkust/edu/visualneo/data/health_graph2.txt";
+    private static final String PREFIX = "src/main/resources/hkust/edu/visualneo/data/";
+    private static final String DATA_NAME = "worldcup.csv";
+    private static final String OUTPUT_NAME = "graph_adj_lists.txt";
+    private static final String GRAPH_DATA = PREFIX + DATA_NAME;
+    private static final String GRAPH_ADJ_LISTS = PREFIX + OUTPUT_NAME;
+    private static final long nodeNum = 2486;
+    private static final long edgeNum = 14799;
+    private static final int firstNodeIdx = 9;
+    private static final int secondNodeIdx = firstNodeIdx + 1;
 
     public static void parseGraph(){
-        readAllDataAtOnce(HEALTH_DATA, 11381, 61453, 16);
+        readGraphFile(GRAPH_DATA);
     }
 
-    public static void readAllDataAtOnce(String file, long nodeNum, long edgeNum, int colIdx)
+    public static void readGraphFile(String file)
     {
         try {
+            // Read the graph file
             FileReader filereader = new FileReader(file);
             CSVReader csvReader = new CSVReaderBuilder(filereader)
                     .withSkipLines(1)
@@ -36,15 +44,15 @@ public class GraphParser {
             int rowCount = 0;
             for (String[] row : allData) {
                 if(rowCount++ < nodeNum) continue;
-                int firstNode = Integer.parseInt(row[colIdx]);
-                int secondNode = Integer.parseInt(row[colIdx+1]);
+                int firstNode = Integer.parseInt(row[firstNodeIdx]);
+                int secondNode = Integer.parseInt(row[secondNodeIdx]);
                 adj_lists.get(firstNode).add(secondNode);
                 adj_lists.get(secondNode).add(firstNode);
             }
 
-
+            // Write the adjacency lists to the file
             try {
-                File myObj = new File(HEALTH_GRAPH);
+                File myObj = new File(GRAPH_ADJ_LISTS);
                 FileWriter myWriter = new FileWriter(myObj);
                 // Write the first line
                 String firstLine = String.valueOf(nodeNum) + ' ' + edgeNum + '\n';
@@ -56,19 +64,19 @@ public class GraphParser {
                     for(Integer num : adj_list){
                         new_line += String.valueOf(num+1) + ' ';
                     }
-                    new_line += '\n';
+                    if(i != nodeNum-1) new_line += '\n';
                     myWriter.write(new_line);
                 }
                 // Close the writer
                 myWriter.close();
-                System.out.println("Successfully wrote to the file.");
+                System.out.println("Successfully wrote to " + OUTPUT_NAME);
             } catch (IOException e) {
-                System.out.println("Error when writing the txt file!");
+                System.out.println("Error when writing to " + OUTPUT_NAME);
                 e.printStackTrace();
             }
         }
         catch (Exception e) {
-            System.out.println("Error when reading the graph!");
+            System.out.println("Error when reading " + DATA_NAME);
             e.printStackTrace();
         }
     }
