@@ -181,4 +181,12 @@ public abstract class GraphElement extends Group {
     protected OrthogonalCamera camera() {
         return canvas.camera;
     }
+
+    public String propertyToText(){
+        if(properties.isEmpty()) return "null";
+        String propertyText = "";
+        for (Map.Entry<String,Value> entry : properties.entrySet())
+            propertyText += entry.getKey() + ":" + entry.getValue().toString().replaceAll("\"","") + " ";
+        return propertyText.trim();
+    }
 }

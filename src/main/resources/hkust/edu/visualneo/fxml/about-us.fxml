@@ -6,12 +6,11 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
 
-
 <AnchorPane disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="300.0" minWidth="500.0" prefHeight="300.0" prefWidth="500.0" style="-fx-background-color: #eeeee4#eeeee4;" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <TextFlow prefHeight="20.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
          <children>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Copywright @ 2022-2023 HKUST FYP Group XZ2. All rights reserved.">
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Copyright @ 2022-2023 HKUST FYP Group XZ2. All rights reserved.">
                <font>
                   <Font name="Arial" size="14.0" />
                </font>
@@ -27,7 +26,7 @@
          <children>
             <TextFlow prefHeight="70.0" prefWidth="480.0">
                <children>
-                  <Text fill="#000000b2" strokeType="OUTSIDE" strokeWidth="0.0" text="This project is a 2023 final year project of Hong Kong University of Science and Technology. The work is done by the student group XZ2.">
+                  <Text fill="#000000b2" strokeType="OUTSIDE" strokeWidth="0.0" text="This project is the 2022-2023 final year project of Hong Kong University of Science and Technology. The work is done by the student group XZ2.">
                      <font>
                         <Font name="Arial Rounded MT Bold" size="18.0" />
                      </font>
