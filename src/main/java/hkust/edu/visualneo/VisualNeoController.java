@@ -19,6 +19,7 @@ import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.internal.value.FloatValue;
@@ -187,26 +188,6 @@ public class VisualNeoController {
     public void setApp(VisualNeoApp app) { this.app = app; }
 
     /**
-     * Clear the drawing board
-     */
-    @FXML
-    private void handleClear() {
-        canvas.clearElements();
-    }
-
-    /**
-     * Save the drawing pattern
-     */
-    @FXML
-    private void handleSave() {}
-
-    /**
-     * Load the drawing pattern
-     */
-    @FXML
-    private void handleLoad() {}
-
-    /**
      * Called when the user click on Load Database button
      */
     @FXML
@@ -269,7 +250,16 @@ public class VisualNeoController {
     private void handleExactSearch() {
         List<Vertex> listOfVertices = canvas.getVertices();
         List<Edge> listOfEdges = canvas.getEdges();
-        app.queryHandler.exactSearch(listOfVertices,listOfEdges);
+        try{
+            app.queryHandler.exactSearch(listOfVertices,listOfEdges);
+        }catch (Exception e){
+           String errorMsg = e.getMessage();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Exact Search Error");
+            alert.setHeaderText("Cannot perform the exact search!");
+            alert.setContentText(errorMsg);
+            alert.showAndWait();
+        }
     }
 
     /**
@@ -461,5 +451,44 @@ public class VisualNeoController {
 
     @FXML
     void handleZoomOut() { canvas.camera.zoomOut();}
+
+    // Functions in the Menu Bar
+    /**
+     * Display the "About Us" information
+     */
+    @FXML
+    void aboutUs() throws IOException {
+        // Set the scene
+        FXMLLoader fxmlLoader = new FXMLLoader(VisualNeoController.class.getResource("fxml/about-us.fxml"));
+        Scene dialogScene = new Scene(fxmlLoader.load(), 500, 300);
+        // Set the stage
+        final Stage dialog = new Stage();
+        dialog.setTitle("About Us");
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setScene(dialogScene);
+        dialog.setResizable(false);
+        dialog.show();
+    }
+    /**
+     * Clear the drawing board
+     */
+    @FXML
+    private void handleClear() {
+        canvas.clearElements();
+    }
+
+    /**
+     * Save the drawing pattern
+     */
+    @FXML
+    private void handleSave() {
+
+    }
+
+    /**
+     * Load the drawing pattern
+     */
+    @FXML
+    private void handleLoad() {}
 
 }
