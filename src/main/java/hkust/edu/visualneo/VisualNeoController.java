@@ -166,6 +166,8 @@ public class VisualNeoController {
                     propmt_text = "Please input a String";
                 } else if (type.equals("Long") ) {
                     propmt_text = "Please input a Number";
+                } else if (type.equals("Double") ) {
+                    propmt_text = "Please input a Double";
                 }
                 textfield_property_value.setPromptText(propmt_text);
             }
@@ -406,7 +408,10 @@ public class VisualNeoController {
                 current_property_map = metadata.nodeProperties();
             else
                 current_property_map = metadata.nodePropertiesOf(current_highlight.getLabel());
-            current_property_map.keySet().forEach(property -> choicebox_property_name.getItems().add(property));
+            if(current_property_map != null)
+                current_property_map.keySet().forEach(property -> choicebox_property_name.getItems().add(property));
+            else
+                choicebox_property_name.getItems().removeAll();
         } else {
             // Relation Info Pane (bottom-right pane)
             pane_node_label.setVisible(false);
@@ -422,7 +427,10 @@ public class VisualNeoController {
                 current_property_map = metadata.relationProperties();
             else
                 current_property_map = metadata.relationPropertiesOf(current_highlight.getLabel());
-            current_property_map.keySet().forEach(property -> choicebox_property_name.getItems().add(property));
+            if(current_property_map != null)
+                current_property_map.keySet().forEach(property -> choicebox_property_name.getItems().add(property));
+            else
+                choicebox_property_name.getItems().removeAll();
         }
 
         // Set the listener for choicebox_property_name

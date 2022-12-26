@@ -6,6 +6,7 @@ module hkust.edu.visualneo {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires org.neo4j.driver;
+    requires com.opencsv;
 
     requires protonpack;
     requires java.desktop;
