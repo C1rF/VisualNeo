@@ -146,7 +146,7 @@ public record DbMetadata(
 
     @Override
     public Map<Object, Object> toMap() {
-        Map<Object, Object> expansion = new LinkedHashMap<>();
+        Map<Object, Object> map = new LinkedHashMap<>();
 
         Map<Object, Object> nodesExpansion = new LinkedHashMap<>();
         nodeLabels().forEach(nodeLabel -> {
@@ -156,7 +156,7 @@ public record DbMetadata(
             nodeLabelExpansion.put("Properties", properties);
             nodesExpansion.put(nodeLabel, nodeLabelExpansion);
         });
-        expansion.put("Node Labels", nodesExpansion);
+        map.put("Node Labels", nodesExpansion);
 
         Map<Object, Object> relationsExpansion = new LinkedHashMap<>();
         relationLabels().forEach(relationLabel -> {
@@ -166,10 +166,10 @@ public record DbMetadata(
             relationLabelExpansion.put("Properties", properties);
             relationsExpansion.put(relationLabel, relationLabelExpansion);
         });
-        expansion.put("Relation Labels", relationsExpansion);
+        map.put("Relation Labels", relationsExpansion);
 
-        expansion.put("Schema Graph", schemaGraph);
+        map.put("Schema Graph", schemaGraph.toMap());
 
-        return expansion;
+        return map;
     }
 }
