@@ -14,6 +14,8 @@ public class QueryHandler {
 
     private final VisualNeoApp app;
 
+    private final QueryBuilder builder = new QueryBuilder();
+
     private Driver driver;
     private DbMetadata meta;
 
@@ -25,7 +27,7 @@ public class QueryHandler {
         initDriver(uri, user, password);
         retrieveMetadata();
 
-        System.out.println(Expander.expand(meta));
+        System.out.println(meta);
     }
 
     private void initDriver(String uri, String user, String password) {
@@ -154,7 +156,7 @@ public class QueryHandler {
 
     void exactSearch(List<Vertex> vertices, List<Edge> edges) {
         Graph queryPattern = Graph.fromDrawing(vertices, edges);
-        String query = QueryBuilder.translate(queryPattern);
+        String query = builder.translate(queryPattern);
         System.out.println(query);
     }
 

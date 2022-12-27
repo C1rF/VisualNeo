@@ -8,7 +8,7 @@ public record DbMetadata(
         Map<String, Integer> relationCountsByLabel,
         Map<String, Map<String, String>> nodePropertiesByLabel,
         Map<String, Map<String, String>> relationPropertiesByLabel,
-        Graph schemaGraph) implements Expandable {
+        Graph schemaGraph) implements Mappable {
 
     public DbMetadata {
         Objects.requireNonNull(nodeCountsByLabel);
@@ -136,11 +136,16 @@ public record DbMetadata(
 
     @Override
     public String toString() {
+        return new TreePrinter().print(getName(), toMap());
+    }
+
+    @Override
+    public String getName() {
         return "Database Metadata";
     }
 
     @Override
-    public Map<Object, Object> expand() {
+    public Map<Object, Object> toMap() {
         Map<Object, Object> expansion = new LinkedHashMap<>();
 
         Map<Object, Object> nodesExpansion = new LinkedHashMap<>();

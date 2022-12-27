@@ -2,11 +2,9 @@ package hkust.edu.visualneo.utils.backend;
 
 import org.neo4j.driver.Value;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
-abstract class Entity implements Comparable<Entity>, Expandable {
+abstract class Entity implements Comparable<Entity>, Mappable {
 
     protected static final int INITIAL_PRIME = 17;
     protected static final int MULTIPLIER_PRIME = 37;
@@ -19,7 +17,7 @@ abstract class Entity implements Comparable<Entity>, Expandable {
     protected Entity(long id, String label, Map<String, Value> properties) {
         this.id = id;
         this.label = label;
-        this.properties = Objects.requireNonNull(properties, "Property list is null!");
+        this.properties = properties == null ? Collections.emptyMap() : properties;
     }
 
     public boolean hasProperty() {
@@ -50,6 +48,19 @@ abstract class Entity implements Comparable<Entity>, Expandable {
     }
 
     @Override
+    public String toString() {
+        return new TreePrinter().print(getName(), toMap());
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("Label", label);
+        map.put("Properties", properties);
+        return map;
+    }
+
+    @Override
     public int hashCode() {
         int hash = INITIAL_PRIME;
         hash = MULTIPLIER_PRIME * hash + (int) id;
@@ -69,22 +80,9 @@ abstract class Entity implements Comparable<Entity>, Expandable {
         return id == ((Entity) other).id;
     }
 
-    @Override
-    public String toString() {
-        return String.valueOf(id);
-    }
-
     // Doesn't check for null
     @Override
     public int compareTo(Entity other) {
         return (int) (id - other.id);
-    }
-
-    @Override
-    public Map<Object, Object> expand() {
-        Map<Object, Object> expansion = new LinkedHashMap<>();
-        expansion.put("Label", label);
-        expansion.put("Properties", properties);
-        return expansion;
     }
 }

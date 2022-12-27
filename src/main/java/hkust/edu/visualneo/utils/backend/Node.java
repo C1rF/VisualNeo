@@ -96,14 +96,14 @@ public class Node extends Entity {
     }
 
     @Override
-    public String toString() {
-        return 'n' + super.toString();
+    public String getName() {
+        return 'n' + String.valueOf(id);
     }
 
     @Override
-    public Map<Object, Object> expand() {
-        Map<Object, Object> expansion = super.expand();
-        expansion.put("Relations", relations.stream().map(Relation::toString).toList());
-        return expansion;
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = super.toMap();
+        map.put("Relations", relations.stream().map(Relation::getName).toList());
+        return map;
     }
 }

@@ -15,13 +15,12 @@ public class Relation extends Entity {
     final Node end;
 
     public Relation(long id, Edge edge, Map<Vertex, Node> links) {
-        this(
-                id,
-                edge.isDirected(),
-                links.get(edge.startVertex),
-                links.get(edge.endVertex),
-                edge.getLabel(),
-                edge.getProp());
+        this(id,
+             edge.isDirected(),
+             links.get(edge.startVertex),
+             links.get(edge.endVertex),
+             edge.getLabel(),
+             edge.getProp());
     }
 
     public Relation(long id, boolean directed, Node start, Node end,
@@ -81,15 +80,16 @@ public class Relation extends Entity {
     }
 
     @Override
-    public String toString() {
-        return 'r' + super.toString();
+    public String getName() {
+        return 'e' + String.valueOf(id);
     }
 
     @Override
-    public Map<Object, Object> expand() {
-        Map<Object, Object> expansion = super.expand();
-        expansion.put("Start Node", start.toString());
-        expansion.put("End Node", end.toString());
-        return expansion;
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = super.toMap();
+        map.put("Directed", directed ? "True" : "False");
+        map.put("Start Node", start.getName());
+        map.put("End Node", end.getName());
+        return map;
     }
 }
