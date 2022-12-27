@@ -148,25 +148,25 @@ public record DbMetadata(
     public Map<Object, Object> toMap() {
         Map<Object, Object> map = new LinkedHashMap<>();
 
-        Map<Object, Object> nodesExpansion = new LinkedHashMap<>();
+        Map<Object, Object> nodeLabels = new LinkedHashMap<>();
         nodeLabels().forEach(nodeLabel -> {
             Map<Object, Object> nodeLabelExpansion = new LinkedHashMap<>();
             nodeLabelExpansion.put("Count", nodeCountOf(nodeLabel));
             Map<String, String> properties = nodePropertiesOf(nodeLabel);
             nodeLabelExpansion.put("Properties", properties);
-            nodesExpansion.put(nodeLabel, nodeLabelExpansion);
+            nodeLabels.put(nodeLabel, nodeLabelExpansion);
         });
-        map.put("Node Labels", nodesExpansion);
+        map.put("Node Labels", nodeLabels);
 
-        Map<Object, Object> relationsExpansion = new LinkedHashMap<>();
+        Map<Object, Object> relationLabels = new LinkedHashMap<>();
         relationLabels().forEach(relationLabel -> {
             Map<Object, Object> relationLabelExpansion = new LinkedHashMap<>();
             relationLabelExpansion.put("Count", relationCountOf(relationLabel));
             Map<String, String> properties = relationPropertiesOf(relationLabel);
             relationLabelExpansion.put("Properties", properties);
-            relationsExpansion.put(relationLabel, relationLabelExpansion);
+            relationLabels.put(relationLabel, relationLabelExpansion);
         });
-        map.put("Relation Labels", relationsExpansion);
+        map.put("Relation Labels", relationLabels);
 
         map.put("Schema Graph", schemaGraph.toMap());
 

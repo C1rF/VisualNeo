@@ -9,7 +9,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -224,6 +223,6 @@ public class Vertex extends GraphElement {
                 String.valueOf(getY()),
                 getLabel(),
                 propertyToText()};
-        return StringUtil.join(" ", Arrays.asList(temp)).toString();
+        return String.join(" ", Arrays.asList(temp));
     }
 }

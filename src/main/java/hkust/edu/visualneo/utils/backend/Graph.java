@@ -46,7 +46,7 @@ public class Graph implements Mappable {
         Map<Vertex, Node> links = StreamUtils
                 .zipWithIndex(vertices.stream())
                 .collect(Collectors.toMap(
-                        Indexed<Vertex>::getValue,
+                        Indexed::getValue,
                         vertexIndexed -> new Node(
                                 vertexIndexed.getIndex(),
                                 vertexIndexed.getValue()),
