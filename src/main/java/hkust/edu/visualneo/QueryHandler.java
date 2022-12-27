@@ -116,30 +116,21 @@ public class QueryHandler {
 
             // Retrieve schema information
             Graph schemaGraph = session.readTransaction(tx -> {
-                Record rec = tx.run(Queries.SCHEMA_QUERY).single();
+                Record record = tx.run(Queries.SCHEMA_QUERY).single();
 
-                Map<Long, Node> schemaNodes = rec
+                Map<Long, Node> schemaNodes = record
                         .get("nodes")
                         .asList(Value::asNode)
                         .stream()
                         .collect(Collectors.toMap(
                                 org.neo4j.driver.types.Node::id,
-                                node -> new Node(
-                                        node.id(),
-                                        node.labels().iterator().next(),
-                                        Collections.emptyMap())));
+                                node -> new Node(node, true)));
 
-                Set<Relation> schemaRelations = rec
+                Set<Relation> schemaRelations = record
                         .get("relationships")
                         .asList(Value::asRelationship)
                         .stream()
-                        .map(relationship -> new Relation(
-                                relationship.id(),
-                                true,
-                                schemaNodes.get(relationship.startNodeId()),
-                                schemaNodes.get(relationship.endNodeId()),
-                                relationship.type(),
-                                Collections.emptyMap()))
+                        .map(relationship -> new Relation(relationship, schemaNodes, true))
                         .collect(Collectors.toSet());
 
                 return new Graph(new HashSet<>(schemaNodes.values()), schemaRelations);
