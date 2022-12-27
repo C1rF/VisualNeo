@@ -73,10 +73,7 @@ public class QueryBuilder {
 
         // RETURN clause
         increaseIndent();
-        builder.append("RETURN");
-        // TODO: Refine return conditions
-        newLine();
-        builder.append(nodes.get(0).getName());
+        builder.append("RETURN *");
         decreaseIndent();
 
         System.out.println(graph);
@@ -109,14 +106,10 @@ public class QueryBuilder {
     }
 
     private void translate(Relation relation) {
-        if (!relation.hasLabel() && !relation.hasProperty())
-            builder.append("--");
-        else {
-            builder.append("-[");
-            builder.append(relation.getName());
-            translateEntity(relation);
-            builder.append("]-");
-        }
+        builder.append("-[");
+        builder.append(relation.getName());
+        translateEntity(relation);
+        builder.append("]-");
         if (relation.directed)
             builder.append('>');
     }
