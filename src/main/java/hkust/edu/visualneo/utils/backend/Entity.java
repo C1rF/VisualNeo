@@ -62,11 +62,12 @@ abstract class Entity implements Comparable<Entity>, Mappable {
 
     @Override
     public int hashCode() {
-        int hash = INITIAL_PRIME;
-        hash = MULTIPLIER_PRIME * hash + (int) id;
-        hash = MULTIPLIER_PRIME * hash + (label == null ? 0 : label.hashCode());
-        hash = MULTIPLIER_PRIME * hash + properties.hashCode();
-        return hash;
+//        int hash = INITIAL_PRIME;
+//        hash = MULTIPLIER_PRIME * hash + (int) id;
+//        hash = MULTIPLIER_PRIME * hash + (label == null ? 0 : label.hashCode());
+//        hash = MULTIPLIER_PRIME * hash + properties.hashCode();
+//        return hash;
+        return (int) (id ^ (id >>> 32));  // Implementation by Neo4j
     }
 
     @Override

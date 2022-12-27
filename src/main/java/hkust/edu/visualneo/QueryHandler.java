@@ -1,5 +1,7 @@
 package hkust.edu.visualneo;
 
+import com.codepoetics.protonpack.Indexed;
+import com.codepoetics.protonpack.StreamUtils;
 import hkust.edu.visualneo.utils.backend.*;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.Vertex;
@@ -40,18 +42,18 @@ public class QueryHandler {
                                                            .withDefaultAccessMode(AccessMode.READ)
                                                            .build())) {
             // Retrieve labels and corresponding counts
-            Function<Record, String> mapper = record -> record.get(0).asString();
+            Function<Record, String> labelCount = record -> record.get(0).asString();
 
             Set<String> nodeLabels = session.readTransaction(tx -> tx
                     .run(Queries.LABELS_QUERY)
                     .stream()
-                    .map(mapper)
+                    .map(labelCount)
                     .collect(Collectors.toCollection(TreeSet::new)));
 
             Set<String> relationLabels = session.readTransaction(tx -> tx
                     .run(Queries.RELATIONSHIP_TYPES_QUERY)
                     .stream()
-                    .map(mapper)
+                    .map(labelCount)
                     .collect(Collectors.toCollection(TreeSet::new)));
 
             Map<String, Integer> nodeCountsByLabel = nodeLabels
@@ -116,30 +118,21 @@ public class QueryHandler {
 
             // Retrieve schema information
             Graph schemaGraph = session.readTransaction(tx -> {
-                Record rec = tx.run(Queries.SCHEMA_QUERY).single();
+                Record record = tx.run(Queries.SCHEMA_QUERY).single();
 
-                Map<Long, Node> schemaNodes = rec
+                Map<Long, Node> schemaNodes = record
                         .get("nodes")
                         .asList(Value::asNode)
                         .stream()
                         .collect(Collectors.toMap(
                                 org.neo4j.driver.types.Node::id,
-                                node -> new Node(
-                                        node.id(),
-                                        node.labels().iterator().next(),
-                                        Collections.emptyMap())));
+                                node -> new Node(node, true)));
 
-                Set<Relation> schemaRelations = rec
+                Set<Relation> schemaRelations = record
                         .get("relationships")
                         .asList(Value::asRelationship)
                         .stream()
-                        .map(relationship -> new Relation(
-                                relationship.id(),
-                                true,
-                                schemaNodes.get(relationship.startNodeId()),
-                                schemaNodes.get(relationship.endNodeId()),
-                                relationship.type(),
-                                Collections.emptyMap()))
+                        .map(relationship -> new Relation(relationship, schemaNodes, true))
                         .collect(Collectors.toSet());
 
                 return new Graph(new HashSet<>(schemaNodes.values()), schemaRelations);
@@ -154,13 +147,91 @@ public class QueryHandler {
         }
     }
 
-    void exactSearch(List<Vertex> vertices, List<Edge> edges) {
-        Graph queryPattern = Graph.fromDrawing(vertices, edges);
-        String query = builder.translate(queryPattern);
+    Results exactSearch(List<Vertex> vertices, List<Edge> edges) {
+        Graph queryGraph = Graph.fromDrawing(vertices, edges);
+        String query = builder.translate(queryGraph);
         System.out.println(query);
+
+        try (Session session = driver.session(SessionConfig.builder()
+                                                           .withDefaultAccessMode(AccessMode.READ)
+                                                           .build())) {
+            Results results = session.readTransaction(tx -> {
+                Record record = tx.run(query).single();
+                
+                Map<Long, Node> nodes = record
+                        .get("nodes")
+                        .asList(Value::asNode)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                org.neo4j.driver.types.Node::id,
+                                node -> new Node(node, false)));
+
+                Set<Relation> relations = record
+                        .get("relationships")
+                        .asList(Value::asRelationship)
+                        .stream()
+                        .map(relationship -> new Relation(relationship, nodes, false))
+                        .collect(Collectors.toSet());
+
+                Graph resultGraph = new Graph(new HashSet<>(nodes.values()), relations);
+
+                List<Pair<List<Long>>> resultIds = record
+                        .get("resultIds")
+                        .asList(value -> {
+                            List<Value> pairList = value.asList(Function.identity());
+                            List<Long> nodeIds = pairList.get(0).asList(Value::asLong);
+                            List<Long> relationIds = pairList.get(1).asList(Value::asLong);
+                            return new Pair<>(nodeIds, relationIds);
+                        });
+
+                return new Results(resultGraph, resultIds);
+            });
+
+            System.out.println(results);
+            return results;
+        }
     }
 
     DbMetadata getMeta() {
         return meta;
+    }
+
+    public record Results(Graph graph, List<Pair<List<Long>>> ids) implements Mappable {
+
+        public Results {
+            Objects.requireNonNull(graph);
+            Objects.requireNonNull(ids);
+        }
+
+        @Override
+        public String toString() {
+            return new TreePrinter().print(getName(), toMap());
+        }
+
+        @Override
+        public String getName() {
+            return "Query Results";
+        }
+
+        @Override
+        public Map<?, ?> toMap() {
+            Map<Object, Object> map = new LinkedHashMap<>();
+
+            map.put("Graph", graph.toMap());
+            map.put("Node & Relation IDs",
+                    StreamUtils.zipWithIndex(ids.stream())
+                               .collect(Collectors.toMap(
+                                       Indexed::getIndex,
+                                       pairIndexed -> {
+                                           Map<String, List<Long>> ids = new LinkedHashMap<>();
+                                           ids.put("Nodes", pairIndexed.getValue().head());
+                                           ids.put("Relations", pairIndexed.getValue().tail());
+                                           return ids;
+                                       },
+                                       (e1, e2) -> e1,
+                                       LinkedHashMap::new)));
+
+            return map;
+        }
     }
 }

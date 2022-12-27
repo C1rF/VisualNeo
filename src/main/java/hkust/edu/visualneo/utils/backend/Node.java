@@ -4,18 +4,23 @@ import hkust.edu.visualneo.utils.frontend.Vertex;
 import org.neo4j.driver.Value;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Node extends Entity {
 
     final Set<Relation> relations = new TreeSet<>();
 
+    public Node(long id, String label, Map<String, Value> properties) {
+        super(id, label, properties);
+    }
     public Node(long id, Vertex vertex) {
         this(id, vertex.getLabel(), vertex.getProp());
     }
-
-    public Node(long id, String label, Map<String, Value> properties) {
-        super(id, label, properties);
+    public Node(org.neo4j.driver.types.Node node, boolean schema) {
+        this(node.id(),
+             node.labels().iterator().next(),
+             schema ? Collections.emptyMap() : node.asMap(Function.identity()));
     }
 
     public boolean hasRelation() {

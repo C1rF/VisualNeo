@@ -3,9 +3,12 @@ package hkust.edu.visualneo.utils.backend;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.Vertex;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.types.Relationship;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 public class Relation extends Entity {
 
@@ -13,15 +16,6 @@ public class Relation extends Entity {
 
     final Node start;
     final Node end;
-
-    public Relation(long id, Edge edge, Map<Vertex, Node> links) {
-        this(id,
-             edge.isDirected(),
-             links.get(edge.startVertex),
-             links.get(edge.endVertex),
-             edge.getLabel(),
-             edge.getProp());
-    }
 
     public Relation(long id, boolean directed, Node start, Node end,
                     String label, Map<String, Value> properties) {
@@ -39,6 +33,22 @@ public class Relation extends Entity {
         }
         start.attach(this);
         end.attach(this);
+    }
+    public Relation(long id, Edge edge, Map<Vertex, Node> links) {
+        this(id,
+             edge.isDirected(),
+             links.get(edge.startVertex),
+             links.get(edge.endVertex),
+             edge.getLabel(),
+             edge.getProp());
+    }
+    public Relation(Relationship relationship, Map<Long, Node> nodes, boolean schema) {
+        this(relationship.id(),
+             true,
+             nodes.get(relationship.startNodeId()),
+             nodes.get(relationship.endNodeId()),
+             relationship.type(),
+             schema ? Collections.emptyMap() : relationship.asMap(Function.identity()));
     }
 
     public Node other(Node node) {

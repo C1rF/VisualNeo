@@ -61,6 +61,14 @@ public class Queries {
             RETURN
               relType, properties""";
 
+    public static final String SINGLETON_QUERY = """
+            MATCH
+              (%1$s%2$s)
+            RETURN
+              [%1$s] AS nodes,
+              [] AS relationships,
+              [[[ID(%1$s)], []]] AS resultIds""";
+
     public static char[] separator(int length) {
         char[] sep = new char[length];
         Arrays.fill(sep, '-');
@@ -72,5 +80,9 @@ public class Queries {
     }
     public static String relationshipCountByTypeQuery(String type) {
         return String.format(RELATIONSHIP_COUNT_BY_TYPE_QUERY, type);
+    }
+
+    public static String singletonQuery(String name, String translation) {
+        return String.format(SINGLETON_QUERY, name, translation);
     }
 }

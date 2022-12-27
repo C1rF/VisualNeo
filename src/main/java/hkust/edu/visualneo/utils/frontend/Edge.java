@@ -7,7 +7,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
-import org.neo4j.driver.internal.shaded.io.netty.util.internal.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -346,7 +345,7 @@ public class Edge extends GraphElement {
                 text.getText(),
                 propertyToText(),
                 };
-        return StringUtil.join(" ", Arrays.asList(temp)).toString();
+        return String.join(" ", Arrays.asList(temp));
     }
 
 }
