@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Graph implements Expandable {
+public class Graph implements Mappable {
 
     final Set<Node> nodes;
     final Set<Relation> relations;
@@ -217,17 +217,29 @@ public class Graph implements Expandable {
     //        return builder.toString();
     //    }
 
-
     @Override
     public String toString() {
+        return new TreePrinter().print(getName(), toMap());
+    }
+
+    @Override
+    public String getName() {
         return "Graph";
     }
 
     @Override
-    public Map<Object, Object> expand() {
-        Map<Object, Object> expansion = new LinkedHashMap<>();
-        expansion.put("Nodes", nodes);
-        expansion.put("Relations", relations);
-        return expansion;
+    public Map<Object, Object> toMap() {
+        Map<Object, Object> map = new LinkedHashMap<>();
+        map.put("Nodes", nodes.stream()
+                              .collect(Collectors.toMap(Node::getName,
+                                                        Node::toMap,
+                                                        (e1, e2) -> e2,
+                                                        LinkedHashMap::new)));
+        map.put("Relations", relations.stream()
+                                      .collect(Collectors.toMap(Relation::getName,
+                                                                Relation::toMap,
+                                                                (e1, e2) -> e2,
+                                                                LinkedHashMap::new)));
+        return map;
     }
 }
