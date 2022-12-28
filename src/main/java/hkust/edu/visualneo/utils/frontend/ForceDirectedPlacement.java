@@ -5,7 +5,6 @@ import hkust.edu.visualneo.utils.backend.Relation;
 import javafx.geometry.Point2D;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
@@ -19,7 +18,6 @@ public class ForceDirectedPlacement {
     private final Graph graph;
 
     private final int nodeCount;
-    private final int relationCount;
 
     private final Long[] nodeIds;
     private final Map<Long, Integer> nodeIndices;
@@ -27,7 +25,8 @@ public class ForceDirectedPlacement {
     private final Point2D[] positions;
     private final Point2D[] displacements;
 
-    private final Point2D size;
+    private final Point2D min;
+    private final Point2D max;
     private final double area;
 
     private final int numIt;
@@ -36,23 +35,29 @@ public class ForceDirectedPlacement {
     private final double invOptDist;
     private final double sqrOptDist;
 
-    public ForceDirectedPlacement(Graph graph, Point2D size, int numIt, double spsCoef) {
+    private final double coolingCoef;  // Cooling coefficient
+
+    private double temp = 1.0;  // Temperature
+
+    // numIt: number of iterations
+    // spsCoef: sparse coefficient
+    public ForceDirectedPlacement(Graph graph, Point2D size, int numIt, double spsCoef, double coolingCoef) {
         this.graph = graph;
-        this.size = size;
         this.numIt = numIt;
+        this.coolingCoef = coolingCoef;
 
         nodeCount = graph.nodeCount();
-        relationCount = graph.relationCount();
 
         nodeIds = graph.nodeIds().toArray(new Long[nodeCount]);
         nodeIndices = IntStream.range(0, nodeCount)
                                .boxed()
                                .collect(Collectors.toMap(i -> nodeIds[i], Function.identity()));
 
+        min = size.multiply(-0.5);
+        max = min.add(size);
+
         positions = new Point2D[nodeCount];
         displacements = new Point2D[nodeCount];
-        Point2D min = size.multiply(-0.5);
-        Point2D max = min.add(size);
         Arrays.setAll(positions, i -> randomPoint(min, max));
         Arrays.setAll(displacements, i -> new Point2D(0.0, 0.0));
 
@@ -86,13 +91,29 @@ public class ForceDirectedPlacement {
                 displacements[j] = displacements[j].subtract(disp);
             }
 
+            // Compute gravities
+            for (int i = 0; i < nodeCount; ++i) {
+                displacements[i] = displacements[i].add(gravity(positions[i]));
+            }
+
             // Apply displacements
             for (int i = 0; i < nodeCount; ++i) {
-                positions[i] = positions[i].add(displacements[i]);
+                Point2D disp = displacements[i];
+                positions[i] = positions[i].add(disp.multiply(Math.min(1.0, temp / disp.magnitude())));
+                Point2D rawPos = positions[i];
+                double framedX = Math.min(max.getX(), Math.max(min.getX(), rawPos.getX()));
+                double framedY = Math.min(max.getY(), Math.max(min.getY(), rawPos.getY()));
+                positions[i] = new Point2D(framedX, framedY);
             }
+
+            // Clear all displacements
+            Arrays.setAll(displacements, i -> new Point2D(0.0, 0.0));
+
+            // Cooling
+            cool();
         }
 
-        return Collections.emptyMap();
+        return IntStream.range(0, nodeCount).boxed().collect(Collectors.toMap(i -> nodeIds[i], i -> positions[i]));
     }
 
     // Attractive and repulsive displacements between u and v
@@ -105,6 +126,14 @@ public class ForceDirectedPlacement {
     private Point2D repDisp(Point2D diff) {
         double dist = diff.magnitude();
         return diff.multiply(sqrOptDist / (dist * dist));
+    }
+
+    private Point2D gravity(Point2D pos) {
+        return attDisp(Point2D.ZERO.subtract(pos));
+    }
+
+    private void cool() {
+        temp = temp * coolingCoef;
     }
 
     private static Point2D randomPoint(Point2D min, Point2D max) {
