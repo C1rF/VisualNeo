@@ -93,19 +93,19 @@ public class Canvas extends Pane {
             EventTarget target = e.getTarget();
 
             if (target == this) {
-                camera.translate(-(e.getX() - cursor.getX()), -(e.getY() - cursor.getY()));
+                camera.translateInScreen(-(e.getX() - cursor.getX()), -(e.getY() - cursor.getY()));
             }
             else {
                 GraphElement currentElement = (GraphElement) ((Node) target).getParent();
                 if (currentElement.isHighlighted()) {
-                    Point2D delta = camera.canvasToViewScale(e.getX() - cursor.getX(), e.getY() - cursor.getY());  // To avoid redundant calculations
+                    Point2D delta = camera.screenToWorldScale(e.getX() - cursor.getX(), e.getY() - cursor.getY());  // To avoid redundant calculations
                     for (GraphElement element : getHighlights()) {
                         if (element instanceof Vertex)
-                            element.translateInView(delta);
+                            element.translate(delta);
                     }
                 }
                 else if (currentElement instanceof Vertex)
-                    currentElement.translate(e.getX() - cursor.getX(), e.getY() - cursor.getY());
+                    currentElement.translateInScreen(e.getX() - cursor.getX(), e.getY() - cursor.getY());
             }
 
             cursor = new Point2D(e.getX(), e.getY());
@@ -124,9 +124,9 @@ public class Canvas extends Pane {
 
         setOnScroll(e -> {
             if (e.isShortcutDown())
-                camera.zoom(e.getDeltaY() / UNIT_SCROLL, e.getX(), e.getY());
+                camera.zoomWithPivot(e.getDeltaY() / UNIT_SCROLL, e.getX(), e.getY());
             else
-                camera.translate(-e.getDeltaX(), -e.getDeltaY());
+                camera.translateInScreen(-e.getDeltaX(), -e.getDeltaY());
         });
     }
 

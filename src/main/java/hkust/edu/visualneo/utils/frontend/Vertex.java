@@ -65,7 +65,7 @@ public class Vertex extends GraphElement {
     public Vertex(Canvas canvas, double x, double y) {
         super(canvas, currentId++);
 
-        setPosition(x, y);
+        setPositionInScreen(x, y);
         initializeGraphics();
 
         positionProperty().addListener(positionListener);
@@ -79,7 +79,7 @@ public class Vertex extends GraphElement {
         super(canvas, node.getId());
         // TODO: Add information
 
-        setPositionInView(position);
+        setPosition(position);
         initializeGraphics();
 
         positionProperty().addListener(positionListener);

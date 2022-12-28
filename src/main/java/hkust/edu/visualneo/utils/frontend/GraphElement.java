@@ -103,37 +103,37 @@ public abstract class GraphElement extends Group {
 
     public long id() { return id; }
 
-    public void setPositionInView(Point2D p) {
+    public void setPosition(Point2D p) {
         if (!getPosition().equals(p))  // To function with ObjectProperty
             positionProperty().set(p);
-    }
-
-    public void setPositionInView(double x, double y) {
-        setPositionInView(new Point2D(x, y));
-    }
-
-    public void translateInView(Point2D delta) {
-        setPositionInView(getPosition().add(delta));
-    }
-
-    public void translateInView(double deltaX, double deltaY) {
-        translateInView(new Point2D(deltaX, deltaY));
-    }
-
-    public void setPosition(Point2D p) {
-        setPositionInView(camera().canvasToView(p));
     }
 
     public void setPosition(double x, double y) {
         setPosition(new Point2D(x, y));
     }
 
-    public void translate(Point2D p) {
-        translateInView(camera().canvasToViewScale(p));
+    public void translate(Point2D delta) {
+        setPosition(getPosition().add(delta));
     }
 
     public void translate(double deltaX, double deltaY) {
         translate(new Point2D(deltaX, deltaY));
+    }
+
+    public void setPositionInScreen(Point2D p) {
+        setPosition(camera().screenToWorld(p));
+    }
+
+    public void setPositionInScreen(double x, double y) {
+        setPositionInScreen(new Point2D(x, y));
+    }
+
+    public void translateInScreen(Point2D p) {
+        translate(camera().screenToWorldScale(p));
+    }
+
+    public void translateInScreen(double deltaX, double deltaY) {
+        translateInScreen(new Point2D(deltaX, deltaY));
     }
 
 
