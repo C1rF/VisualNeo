@@ -45,7 +45,7 @@ public class Edge extends GraphElement {
     private final List<PathElement> arrowHead = new ArrayList<>();
 
     public Edge(Canvas canvas, Vertex startVertex, Vertex endVertex, boolean directed) {
-        super(canvas);
+        super(canvas, currentId++);
         this.startVertex = startVertex;
         this.endVertex = endVertex;
         setDirected(directed);
@@ -72,6 +72,11 @@ public class Edge extends GraphElement {
         System.out.println("An Edge from (" + startVertex.getX() + " , " + startVertex.getY() + ") to " +
                 "(" + endVertex.getX() + " , " + endVertex.getY() + ")" + " is created!");
     }
+
+//    public Edge(Canvas canvas, Relation relation) {
+//        super(canvas, relation.getId());
+//        // TODO: Aba
+//    }
 
     @Override
     protected void initializeGraphics() {

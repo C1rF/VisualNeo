@@ -19,14 +19,11 @@ import static java.lang.Math.PI;
 
 public abstract class GraphElement extends Group {
 
-    public static double angle(Vertex start, Vertex end) {
-        Point2D delta = end.getPosition().subtract(start.getPosition());
-        return delta.getX() == 0.0 ?
-                delta.getY() < 0.0 ? -PI / 2 : PI / 2 :
-                Math.atan2(delta.getY(), delta.getX());
-    }
+    protected static long currentId = 0;
 
     protected final Canvas canvas;
+
+    protected final long id;
 
     // String of the label
     private final StringProperty label =
@@ -43,8 +40,9 @@ public abstract class GraphElement extends Group {
     // Label shown on the GraphElement
     protected Text text;
 
-    GraphElement(Canvas canvas) {
+    GraphElement(Canvas canvas, long id) {
         this.canvas = canvas;
+        this.id = id;
         properties = new TreeMap<>();
         initializeHandlers();
     }
@@ -102,6 +100,8 @@ public abstract class GraphElement extends Group {
     public double getY() {
         return positionProperty().get().getY();
     }
+
+    public long id() { return id; }
 
     public void setPositionInView(Point2D p) {
         if (!getPosition().equals(p))  // To function with ObjectProperty
@@ -188,5 +188,12 @@ public abstract class GraphElement extends Group {
         for (Map.Entry<String,Value> entry : properties.entrySet())
             propertyText += entry.getKey() + ":" + entry.getValue().toString().replaceAll("\"","") + " ";
         return propertyText.trim();
+    }
+
+    public static double angle(Vertex start, Vertex end) {
+        Point2D delta = end.getPosition().subtract(start.getPosition());
+        return delta.getX() == 0.0 ?
+                delta.getY() < 0.0 ? -PI / 2 : PI / 2 :
+                Math.atan2(delta.getY(), delta.getX());
     }
 }
