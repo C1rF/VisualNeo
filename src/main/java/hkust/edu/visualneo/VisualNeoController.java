@@ -35,26 +35,6 @@ import java.util.*;
 
 public class VisualNeoController {
     /**
-     * Functions in the MenuBar
-     */
-    @FXML
-    private MenuItem menu_item_save;
-    @FXML
-    private MenuItem menu_item_load;
-    @FXML
-    private MenuItem menu_item_clear;
-    /**
-     * 4 Buttons controlling the core operations
-     */
-    @FXML
-    private Button btn_load_db;
-    @FXML
-    private Button btn_generate_p;
-    @FXML
-    private Button btn_exact_search;
-    @FXML
-    private Button btn_similarity_search;
-    /**
      * Buttons and Labels in the Label and Property Pane (9 in total)
      */
     @FXML
@@ -101,16 +81,6 @@ public class VisualNeoController {
      */
     @FXML
     private TabPane tab_pane;
-    @FXML
-    private AnchorPane query_constructor_pane;
-    /**
-     * Zoom In and Zoom Out Buttons
-     */
-    @FXML
-    private Button btn_zoom_in;
-    @FXML
-    private Button btn_zoom_out;
-
     /**
      * Database Info Pane
      */
