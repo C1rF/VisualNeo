@@ -121,7 +121,7 @@ public abstract class GraphElement extends Group {
     }
 
     public void setPositionInScreen(Point2D p) {
-        setPosition(camera().canvasToView(p));
+        setPosition(camera().screenToWorld(p));
     }
 
     public void setPositionInScreen(double x, double y) {
@@ -129,7 +129,7 @@ public abstract class GraphElement extends Group {
     }
 
     public void translateInScreen(Point2D p) {
-        translate(camera().canvasToViewScale(p));
+        translate(camera().screenToWorldScale(p));
     }
 
     public void translateInScreen(double deltaX, double deltaY) {

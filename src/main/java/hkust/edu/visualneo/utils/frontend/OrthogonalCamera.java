@@ -12,14 +12,14 @@ import java.util.Objects;
 public class OrthogonalCamera {
 
     private static final double DEFAULT_RATIO = 1.0;
-    private static final double MIN_RATIO = 0.2;
+    private static final double MIN_RATIO = 0.5;
     private static final double MAX_RATIO  = 1.5;
     private static final double UNIT_RATIO = 0.05;
     private static final double ZOOM_UNITS = 2.5;
 
     private final Canvas canvas;
 
-    // View port size to canvas size
+    // World port size to canvas size
     private final DoubleProperty ratio =
             new SimpleDoubleProperty(this, "ratio", DEFAULT_RATIO);
     private final DoubleProperty inverseRatio =
@@ -42,35 +42,35 @@ public class OrthogonalCamera {
         viewHeightProperty().bind(Bindings.multiply(canvas.heightProperty(), inverseRatioProperty()));
     }
 
-    public double viewToCanvasScale(double delta) {
+    public double worldToScreenScale(double delta) {
         return delta * getRatio();
     }
-    public double canvasToViewScale(double delta) {
+    public double screenToWorldScale(double delta) {
         return delta * getInverseRatio();
     }
-    public Point2D viewToCanvasScale(Point2D p) {
+    public Point2D worldToScreenScale(Point2D p) {
         return p.multiply(getRatio());
     }
-    public Point2D viewToCanvasScale(double deltaX, double deltaY) {
-        return viewToCanvasScale(new Point2D(deltaX, deltaY));
+    public Point2D worldToScreenScale(double deltaX, double deltaY) {
+        return worldToScreenScale(new Point2D(deltaX, deltaY));
     }
-    public Point2D canvasToViewScale(Point2D p) {
+    public Point2D screenToWorldScale(Point2D p) {
         return p.multiply(getInverseRatio());
     }
-    public Point2D canvasToViewScale(double deltaX, double deltaY) {
-        return canvasToViewScale(new Point2D(deltaX, deltaY));
+    public Point2D screenToWorldScale(double deltaX, double deltaY) {
+        return screenToWorldScale(new Point2D(deltaX, deltaY));
     }
-    public Point2D viewToCanvas(Point2D p) {
-        return p.subtract(getPosition()).multiply(getRatio());
+    public Point2D worldToScreen(Point2D p) {
+        return getCanvasCenter().add(p.subtract(getPosition()).multiply(getRatio()));
     }
-    public Point2D viewToCanvas(double x, double y) {
-        return viewToCanvas(new Point2D(x, y));
+    public Point2D worldToScreen(double x, double y) {
+        return worldToScreen(new Point2D(x, y));
     }
-    public Point2D canvasToView(Point2D p) {
-        return getPosition().add(p.multiply(getInverseRatio()));
+    public Point2D screenToWorld(Point2D p) {
+        return getPosition().add(p.subtract(getCanvasCenter()).multiply(getInverseRatio()));
     }
-    public Point2D canvasToView(double x, double y) {
-        return canvasToView(new Point2D(x, y));
+    public Point2D screenToWorld(double x, double y) {
+        return screenToWorld(new Point2D(x, y));
     }
 
     public DoubleProperty ratioProperty() {
@@ -93,17 +93,17 @@ public class OrthogonalCamera {
         return inverseRatioProperty().get();
     }
 
-    // The input pivot is in Pane coordinate system
-    public void zoom(double delta, Point2D pivot) {
+    // The input pivot is in Screen coordinate system
+    public void zoomWithPivot(double delta, Point2D pivot) {
         double originalInverseRatio = getInverseRatio();
         setRatio(getRatio() + delta * UNIT_RATIO);
-        translateInView(pivot.multiply(originalInverseRatio - getInverseRatio()));
+        translate(pivot.multiply(originalInverseRatio - getInverseRatio()));
     }
-    public void zoom(double delta, double pivotX, double pivotY) {
-        zoom(delta, new Point2D(pivotX, pivotY));
+    public void zoomWithPivot(double delta, double pivotX, double pivotY) {
+        zoomWithPivot(delta, new Point2D(pivotX, pivotY));
     }
     public void zoom(double delta) {
-        zoom(delta, viewToCanvas(getCenter()));
+        setRatio(getRatio() + delta * UNIT_RATIO);
     }
     public void zoomIn() {
         zoom(ZOOM_UNITS);
@@ -112,21 +112,27 @@ public class OrthogonalCamera {
         zoom(-ZOOM_UNITS);
     }
 
+    public double getCanvasWidth() {
+        return canvas.getWidth();
+    }
+    public double getCanvasHeight() {
+        return canvas.getHeight();
+    }
+    public Point2D getCanvasCenter() {
+        return new Point2D(getCanvasWidth() * 0.5, getCanvasHeight() * 0.5);
+    }
+
     public DoubleProperty viewWidthProperty() {
         return viewWidth;
     }
-    public double getWidth() {
+    public double getViewWidth() {
         return viewWidthProperty().get();
     }
     public DoubleProperty viewHeightProperty() {
         return viewHeight;
     }
-    public double getHeight() {
+    public double getViewHeight() {
         return viewHeightProperty().get();
-    }
-
-    public Point2D getCenter() {
-        return getPosition().add(Point2D.ZERO.midpoint(getWidth(), getHeight()));
     }
 
     public ObjectProperty<Point2D> positionProperty() {
@@ -141,30 +147,37 @@ public class OrthogonalCamera {
     public double getY() {
         return positionProperty().get().getY();
     }
-    public void setPositionInView(Point2D p) {
+    public void setPosition(Point2D p) {
         if (!getPosition().equals(p))  // To function with ObjectProperty
             positionProperty().set(p);
-    }
-    public void setPositionInView(double x, double y) {
-        setPositionInView(new Point2D(x, y));
-    }
-    public void translateInView(Point2D delta) {
-        setPositionInView(getPosition().add(delta));
-    }
-    public void translateInView(double deltaX, double deltaY) {
-        translateInView(new Point2D(deltaX, deltaY));
-    }
-
-    public void setPosition(Point2D p) {
-        setPositionInView(canvasToView(p));
     }
     public void setPosition(double x, double y) {
         setPosition(new Point2D(x, y));
     }
-    public void translate(Point2D p) {
-        translateInView(canvasToViewScale(p));
+    public void translate(Point2D delta) {
+        setPosition(getPosition().add(delta));
     }
     public void translate(double deltaX, double deltaY) {
-        translate(new Point2D(deltaX,  deltaY));
+        translate(new Point2D(deltaX, deltaY));
+    }
+
+    public void setPositionInScreen(Point2D p) {
+        setPosition(screenToWorld(p));
+    }
+    public void setPositionInScreen(double x, double y) {
+        setPositionInScreen(new Point2D(x, y));
+    }
+    public void translateInScreen(Point2D p) {
+        translate(screenToWorldScale(p));
+    }
+    public void translateInScreen(double deltaX, double deltaY) {
+        translateInScreen(new Point2D(deltaX, deltaY));
+    }
+    public void returnToOrigin() {
+        setPosition(Point2D.ZERO);
+    }
+
+    public Point2D getMin() {
+        return getPosition().subtract(getViewWidth() * 0.5, getViewHeight() * 0.5);
     }
 }
