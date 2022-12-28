@@ -12,10 +12,10 @@ import java.util.function.Function;
 
 public class Relation extends Entity {
 
-    final boolean directed;
+    public final boolean directed;
 
-    final Node start;
-    final Node end;
+    public final Node start;
+    public final Node end;
 
     public Relation(long id, boolean directed, Node start, Node end,
                     String label, Map<String, Value> properties) {
@@ -82,7 +82,7 @@ public class Relation extends Entity {
     // Check whether two relations can match the same relation
     // This method assumes the other relation is non-null and the two relations are distinct
     @Override
-    boolean resembles(Entity other) {
+    public boolean resembles(Entity other) {
         if (!(other instanceof Relation))
             return false;
 

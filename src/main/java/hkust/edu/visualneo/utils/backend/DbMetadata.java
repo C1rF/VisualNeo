@@ -34,68 +34,68 @@ public record DbMetadata(
         return relationCountsByLabel.getOrDefault(relationLabel, 0);
     }
 
-    public Set<String> nodeLabels() {
+    public Collection<String> nodeLabels() {
         return nodeCountsByLabel.keySet();
     }
 
-    public Set<String> relationLabels() {
+    public Collection<String> relationLabels() {
         return relationCountsByLabel.keySet();
     }
 
-    public Set<String> sourcesOf(String relationLabel) {
+    public Collection<String> sourcesOf(String relationLabel) {
         if (!relationLabels().contains(relationLabel))
             return Collections.emptySet();
-        return schemaGraph.relations
+        return schemaGraph.relations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.label, relationLabel))
                 .map(relation -> relation.start.label)
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public Set<String> targetsOf(String relationLabel) {
+    public Collection<String> targetsOf(String relationLabel) {
         if (!relationLabels().contains(relationLabel))
             return Collections.emptySet();
-        return schemaGraph.relations
+        return schemaGraph.relations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.label, relationLabel))
                 .map(relation -> relation.end.label)
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public Set<String> relationsFrom(String sourceLabel) {
+    public Collection<String> relationsFrom(String sourceLabel) {
         if (!nodeLabels().contains(sourceLabel))
             return Collections.emptySet();
-        return schemaGraph.relations
+        return schemaGraph.relations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.start.label, sourceLabel))
                 .map(relation -> relation.label)
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public Set<String> targetsFrom(String sourceLabel) {
+    public Collection<String> targetsFrom(String sourceLabel) {
         if (!nodeLabels().contains(sourceLabel))
             return Collections.emptySet();
-        return schemaGraph.relations
+        return schemaGraph.relations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.start.label, sourceLabel))
                 .map(relation -> relation.end.label)
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public Set<String> sourcesTo(String targetLabel) {
+    public Collection<String> sourcesTo(String targetLabel) {
         if (!nodeLabels().contains(targetLabel))
             return Collections.emptySet();
-        return schemaGraph.relations
+        return schemaGraph.relations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.end.label, targetLabel))
                 .map(relation -> relation.start.label)
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public Set<String> relationsTo(String targetLabel) {
+    public Collection<String> relationsTo(String targetLabel) {
         if (!nodeLabels().contains(targetLabel))
             return Collections.emptySet();
-        return schemaGraph.relations
+        return schemaGraph.relations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.end.label, targetLabel))
                 .map(relation -> relation.label)

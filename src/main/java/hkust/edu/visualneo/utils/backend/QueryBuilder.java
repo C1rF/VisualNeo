@@ -16,22 +16,22 @@ public class QueryBuilder {
 
     // TODO: Modify this
     public String translate(Graph graph) {
-        if (graph.relations.isEmpty()) {
-            Node singleton = graph.nodes.iterator().next();
+        if (graph.relations().isEmpty()) {
+            Node singleton = graph.nodes().iterator().next();
             translateEntity(singleton);
             String translation = buffer.toString();
             clear();
             return singletonQuery(singleton.getName(), translation);
         }
 
-        Set<Node> unusedNodes = new HashSet<>(graph.nodes);
-        Collection<String> nodeNames = graph.nodes.stream().map(Node::getName).toList();
-        Collection<String> relationNames = graph.relations.stream().map(Relation::getName).toList();
+        Set<Node> unusedNodes = new HashSet<>(graph.nodes());
+        Collection<String> nodeNames = graph.nodes().stream().map(Node::getName).toList();
+        Collection<String> relationNames = graph.relations().stream().map(Relation::getName).toList();
 
         // MATCH clause
         increaseIndent();
         buffer.append("MATCH");
-        Iterator<Relation> relationIt = graph.relations.iterator();
+        Iterator<Relation> relationIt = graph.relations().iterator();
         while (true) {
             Relation relation = relationIt.next();
             newLine();
@@ -48,7 +48,7 @@ public class QueryBuilder {
         // WHERE clause
         // TODO: Modify this naive approach
         List<Pair<Node>> dupPairs = new ArrayList<>();
-        List<Node> nodes = new ArrayList<>(graph.nodes);
+        List<Node> nodes = new ArrayList<>(graph.nodes());
         for (int i = 0; i < nodes.size(); ++i) {
             for (int j = i + 1; j < nodes.size(); ++j) {
                 dupPairs.add(Pair.ordered(nodes.get(i), nodes.get(j)));
