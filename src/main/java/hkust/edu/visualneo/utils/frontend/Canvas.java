@@ -101,11 +101,11 @@ public class Canvas extends Pane {
                     Point2D delta = camera.canvasToViewScale(e.getX() - cursor.getX(), e.getY() - cursor.getY());  // To avoid redundant calculations
                     for (GraphElement element : getHighlights()) {
                         if (element instanceof Vertex)
-                            element.translateInView(delta);
+                            element.translate(delta);
                     }
                 }
                 else if (currentElement instanceof Vertex)
-                    currentElement.translate(e.getX() - cursor.getX(), e.getY() - cursor.getY());
+                    currentElement.translateInScreen(e.getX() - cursor.getX(), e.getY() - cursor.getY());
             }
 
             cursor = new Point2D(e.getX(), e.getY());
