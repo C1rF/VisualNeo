@@ -12,7 +12,7 @@ import java.util.Objects;
 public class OrthogonalCamera {
 
     private static final double DEFAULT_RATIO = 1.0;
-    private static final double MIN_RATIO = 0.5;
+    private static final double MIN_RATIO = 0.2;
     private static final double MAX_RATIO  = 1.5;
     private static final double UNIT_RATIO = 0.05;
     private static final double ZOOM_UNITS = 2.5;
