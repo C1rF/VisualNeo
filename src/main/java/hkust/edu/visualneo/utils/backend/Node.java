@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class Node extends Entity {
 
-    final Set<Relation> relations = new TreeSet<>();
+    private Collection<Relation> unmodifiableRelations = new TreeSet<>();
 
     public Node(long id, String label, Map<String, Value> properties) {
         super(id, label, properties);
@@ -23,16 +23,20 @@ public class Node extends Entity {
              schema ? Collections.emptyMap() : node.asMap(Function.identity()));
     }
 
+    public Collection<Relation> relations() {
+        return unmodifiableRelations;
+    }
+
     public boolean hasRelation() {
-        return !relations.isEmpty();
+        return !relations().isEmpty();
     }
 
     public int relationCount() {
-        return relations.size();
+        return relations().size();
     }
 
     public Set<Node> neighbors() {
-        return relations
+        return relations()
                 .stream()
                 .map(relation -> relation.other(this))
                 .collect(Collectors.toCollection(TreeSet::new));
@@ -42,14 +46,20 @@ public class Node extends Entity {
         if (other == null)
             return Collections.emptySet();
 
-        return relations
+        return relations()
                 .stream()
                 .filter(relation -> other.equals(relation.other(this)))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     void attach(Relation relation) {
-        relations.add(relation);
+        unmodifiableRelations.add(relation);
+    }
+
+    void close() {
+        Collection<Relation> copy = Collections.unmodifiableCollection(unmodifiableRelations);
+        if (unmodifiableRelations != copy)
+            unmodifiableRelations = copy;
     }
 
     //    // Two distinct node are indistinguishable in the neighborhood of this node
@@ -90,7 +100,7 @@ public class Node extends Entity {
     // Check whether two distinct nodes can match the same node
     // This method assumes the other node is non-null
     @Override
-    boolean resembles(Entity other) {
+    public boolean resembles(Entity other) {
         if (!(other instanceof Node))
             return false;
 
@@ -108,7 +118,7 @@ public class Node extends Entity {
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = super.toMap();
-        map.put("Relations", relations.stream().map(Relation::getName).toList());
+        map.put("Relations", relations().stream().map(Relation::getName).toList());
         return map;
     }
 }

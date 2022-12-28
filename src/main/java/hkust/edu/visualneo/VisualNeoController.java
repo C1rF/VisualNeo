@@ -344,7 +344,7 @@ public class VisualNeoController {
         node_count_col.setCellValueFactory(new MapValueFactory("Count"));
         ObservableList<Map<String, Object>> items =
                 FXCollections.<Map<String, Object>>observableArrayList();
-        Set<String> nodeLabels = metadata.nodeLabels();
+        Collection<String> nodeLabels = metadata.nodeLabels();
         for (String label : nodeLabels) {
             Map<String, Object> temp_item = new HashMap<>();
             temp_item.put("Label", label);
@@ -363,7 +363,7 @@ public class VisualNeoController {
         relation_count_col.setCellValueFactory(new MapValueFactory("Count"));
         ObservableList<Map<String, Object>> items =
                 FXCollections.<Map<String, Object>>observableArrayList();
-        Set<String> relationLabels = metadata.relationLabels();
+        Collection<String> relationLabels = metadata.relationLabels();
         for (String label : relationLabels) {
             Map<String, Object> temp_item = new HashMap<>();
             temp_item.put("Label", label);

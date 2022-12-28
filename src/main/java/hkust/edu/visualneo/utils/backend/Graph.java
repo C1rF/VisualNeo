@@ -12,33 +12,24 @@ import java.util.stream.Stream;
 
 public class Graph implements Mappable {
 
-    final Set<Node> nodes;
-    final Set<Relation> relations;
+    private final Map<Long, Node> unmodifiableNodeMap;
+    private final Map<Long, Relation> unmodifiableRelationMap;
 
-    private final Map<Long, Node> nodesById;
-    private final Map<Long, Relation> relationsById;
+    private final Collection<Node> unmodifiableNodeSet;
+    private final Collection<Relation> unmodifiableRelationSet;
 
     public Graph(Set<Node> nodes,
                  Set<Relation> relations) {
-        this.nodes = nodes;
-        this.relations = relations;
+        unmodifiableNodeMap = nodes
+                .stream()
+                .collect(Collectors.toUnmodifiableMap(Node::getId, Function.identity()));
+        unmodifiableRelationMap = relations
+                .stream()
+                .collect(Collectors.toUnmodifiableMap(Relation::getId, Function.identity()));
+        unmodifiableNodeSet = Set.copyOf(nodes);
+        unmodifiableRelationSet = Set.copyOf(relations);
 
         validate();
-        
-        nodesById = nodes
-                .stream()
-                .collect(Collectors.toMap(
-                        Node::getId,
-                        Function.identity(),
-                        (e1, e2) -> e2,
-                        HashMap::new));
-        relationsById = relations
-                .stream()
-                .collect(Collectors.toMap(
-                        Relation::getId,
-                        Function.identity(),
-                        (e1, e2) -> e2,
-                        HashMap::new));
     }
 
     // Construct a graph from vertices and edges, generated nodes and relations are sorted
@@ -97,125 +88,70 @@ public class Graph implements Mappable {
     }
 
     private boolean checkNonNull() {
-        return !(nodes == null || relations == null ||
-                 nodes.isEmpty() ||
-                 nodes.contains(null) || relations.contains(null));
+        return !(nodes() == null || relations() == null ||
+                 nodes().isEmpty() ||
+                 nodes().contains(null) || relations().contains(null));
     }
 
     private boolean checkCompleteness() {
-        Set<Node> nodeSet = new HashSet<>(nodes);
-        Set<Relation> relationSet = new HashSet<>(relations);
-
-        for (Node node : nodeSet)
-            if (!relationSet.containsAll(node.relations))
+        for (Node node : nodes())
+            if (!relations().containsAll(node.relations()))
                 return false;
 
-        for (Relation relation : relationSet)
-            if (!nodeSet.contains(relation.start) || !nodes.contains(relation.end))
+        for (Relation relation : relations())
+            if (!nodes().contains(relation.start) || !nodes().contains(relation.end))
                 return false;
 
         return true;
     }
 
     private boolean checkConnectivity() {
-        if (nodes.size() == 1)
+        if (nodes().size() == 1)
             return true;
 
-        // Temporary map for node visit states: false for unvisited, true for visited
-        final Map<Node, Boolean> colorMap = new HashMap<>();
-        nodes.forEach(node -> colorMap.put(node, false));
-        color(colorMap, nodes.iterator().next());
+        Collection<Node> uncoloredNodes = new HashSet<>(nodes());
+        color(uncoloredNodes, nodes().iterator().next());
 
-        return !colorMap.containsValue(false);
+        return !uncoloredNodes.isEmpty();
     }
 
     // Recursively color nodes with depth first algorithm
-    private void color(Map<Node, Boolean> colorMap, Node focus) {
-        colorMap.replace(focus, true);
-        focus.relations.forEach(relation -> {
+    private void color(Collection<Node> uncoloredNodes, Node focus) {
+        uncoloredNodes.remove(focus);
+        focus.relations().forEach(relation -> {
             Node other = relation.other(focus);
-            if (!colorMap.get(other))
-                color(colorMap, other);
+            if (uncoloredNodes.contains(other))
+                color(uncoloredNodes, other);
         });
     }
 
-    Node getNode(long id) {
-        return nodesById.get(id);
+    public Collection<Node> nodes() {
+        return unmodifiableNodeSet;
+    }
+    public Collection<Relation> relations() {
+        return unmodifiableRelationSet;
     }
 
-    Relation getRelation(long id) {
-        return relationsById.get(id);
+    public int nodeCount() {
+        return nodes().size();
+    }
+    public int relationCount() {
+        return relations().size();
     }
 
-    //    // Generate all duplicate/indistinguishable node pairs, used for inequality constraints
-    //    // TODO: Enhance efficiency
-    //    ArrayList<Pair<Node>> getDuplicateNodePairs() {
-    //        HashSet<Pair<Node>> dupPairs = new HashSet<>();
-    //        for (Node node : nodes) {
-    //            dupPairs.addAll(node.getDuplicateNeighborPairs());
-    //        }
-    //        return new ArrayList<>(dupPairs);
-    //    }
+    public Collection<Long> nodeIds() {
+        return unmodifiableNodeMap.keySet();
+    }
+    public Collection<Long> relationIds() {
+        return unmodifiableRelationMap.keySet();
+    }
 
-    //    // Unused
-    //    // Generate all duplicate/indistinguishable relation pairs, used for inequality constraints
-    //    ArrayList<Pair<Relation>> getDuplicateRelationPairs() {
-    //        HashSet<Relation> dups = new HashSet<>();
-    //        ArrayList<ArrayList<Relation>> dupSets = new ArrayList<>();
-    //        for (int i = 0; i < relations.size(); ++i) {
-    //            Relation outer = relations.get(i);
-    //            if (dups.contains(outer))
-    //                continue;
-    //            ArrayList<Relation> dupSet = new ArrayList<>();
-    //            dupSet.add(outer);
-    //            for (int j = i + 1; j < relations.size(); ++j) {
-    //                Relation inner = relations.get(j);
-    //                if (!dups.contains(inner) && outer.duplicates(inner)) {
-    //                    dups.add(inner);
-    //                    dupSet.add(inner);
-    //                }
-    //            }
-    //            dupSets.add(dupSet);
-    //        }
-    //
-    //        ArrayList<Pair<Relation>> dupPairs = new ArrayList<>();
-    //        dupSets.forEach(dupSet -> {
-    //            for (int i = 0; i < dupSet.size(); ++i)
-    //                for (int j = i + 1; j < dupSet.size(); ++j)
-    //                    dupPairs.add(Pair.ordered(dupSet.get(i), dupSet.get(j)));
-    //        });
-    //
-    //        return dupPairs;
-    //    }
-
-    //    public String elaborate() {
-    //        StringBuilder builder = new StringBuilder();
-    //
-    //        char[] sep = Queries.separator(40);
-    //
-    //        builder.append(sep)
-    //                .append(NEW_LINE);
-    //
-    //        builder.append("Nodes")
-    //                .append(NEW_LINE);
-    //        nodes.forEach(node ->
-    //                builder.append("|-").append(node.elaborate().replaceAll("(\r\n?|\n)", "$1" + "| "))
-    //                        .append(NEW_LINE));
-    //
-    //        builder.append(sep)
-    //                .append(NEW_LINE);
-    //
-    //        builder.append("Relations")
-    //                .append(NEW_LINE);
-    //        relations.forEach(relation ->
-    //                builder.append("|-").append(relation.elaborate().replaceAll("(\r\n?|\n)", "$1" + "| "))
-    //                        .append(NEW_LINE));
-    //
-    //        builder.append(sep)
-    //                .append(NEW_LINE);
-    //
-    //        return builder.toString();
-    //    }
+    public Node getNode(long id) {
+        return unmodifiableNodeMap.get(id);
+    }
+    public Relation getRelation(long id) {
+        return unmodifiableRelationMap.get(id);
+    }
 
     @Override
     public String toString() {
@@ -230,13 +166,13 @@ public class Graph implements Mappable {
     @Override
     public Map<Object, Object> toMap() {
         Map<Object, Object> map = new LinkedHashMap<>();
-        map.put("Nodes", nodes.stream()
-                              .collect(Collectors.toMap(Node::getName,
+        map.put("Nodes", nodes().stream()
+                                .collect(Collectors.toMap(Node::getName,
                                                         Node::toMap,
                                                         (e1, e2) -> e2,
                                                         LinkedHashMap::new)));
-        map.put("Relations", relations.stream()
-                                      .collect(Collectors.toMap(Relation::getName,
+        map.put("Relations", relations().stream()
+                                        .collect(Collectors.toMap(Relation::getName,
                                                                 Relation::toMap,
                                                                 (e1, e2) -> e2,
                                                                 LinkedHashMap::new)));
