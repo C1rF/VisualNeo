@@ -1,5 +1,6 @@
 package hkust.edu.visualneo.utils.frontend;
 
+import hkust.edu.visualneo.utils.backend.Node;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -25,7 +26,6 @@ public class Vertex extends GraphElement {
     private static final Color DEFAULT_COLOR = Color.DARKGREY;
     private static final Color HIGHLIGHT_COLOR = Color.BLACK;
     private static final Color CIRCLE_COLOR = Color.LIGHTGRAY;
-    // The shape contains a circle and a text(not necessary) on top of it
 
     private final DoubleProperty selfLoopAngle =
             new SimpleDoubleProperty(this, "selfLoopAngle", DEFAULT_ANGLE);
@@ -63,9 +63,23 @@ public class Vertex extends GraphElement {
 
     // Constructor
     public Vertex(Canvas canvas, double x, double y) {
-        super(canvas);
+        super(canvas, currentId++);
 
         setPosition(x, y);
+        initializeGraphics();
+
+        positionProperty().addListener(positionListener);
+        neighborhoodProperty().addListener(neighborhoodListener);
+
+        // For debugging
+        System.out.println("A new Vertex is created.");
+    }
+
+    public Vertex(Canvas canvas, Node node, Point2D position) {
+        super(canvas, node.getId());
+        // TODO: Add information
+
+        setPositionInView(position);
         initializeGraphics();
 
         positionProperty().addListener(positionListener);
