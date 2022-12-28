@@ -42,6 +42,30 @@ public class OrthogonalCamera {
         viewHeightProperty().bind(Bindings.multiply(canvas.heightProperty(), inverseRatioProperty()));
     }
 
+    public Point2D worldToScreen(Point2D p) {
+        return getCanvasCenter().add(p.subtract(getPosition()).multiply(getRatio()));
+    }
+    public Point2D worldToScreen(double x, double y) {
+        return worldToScreen(new Point2D(x, y));
+    }
+    public Point2D screenToWorld(Point2D p) {
+        return getPosition().add(p.subtract(getCanvasCenter()).multiply(getInverseRatio()));
+    }
+    public Point2D screenToWorld(double x, double y) {
+        return screenToWorld(new Point2D(x, y));
+    }
+    public double worldToScreenX(double x) {
+        return getCanvasWidth() * 0.5 + (x - getX()) * getRatio();
+    }
+    public double worldToScreenY(double y) {
+        return getCanvasHeight() * 0.5 + (y - getY()) * getRatio();
+    }
+    public double screenToWorldX(double x) {
+        return getX() + (x - getCanvasWidth() * 0.5) * getInverseRatio();
+    }
+    public double screenToWorldY(double y) {
+        return getY() + (y - getCanvasHeight() * 0.5) * getInverseRatio();
+    }
     public double worldToScreenScale(double delta) {
         return delta * getRatio();
     }
@@ -59,18 +83,6 @@ public class OrthogonalCamera {
     }
     public Point2D screenToWorldScale(double deltaX, double deltaY) {
         return screenToWorldScale(new Point2D(deltaX, deltaY));
-    }
-    public Point2D worldToScreen(Point2D p) {
-        return getCanvasCenter().add(p.subtract(getPosition()).multiply(getRatio()));
-    }
-    public Point2D worldToScreen(double x, double y) {
-        return worldToScreen(new Point2D(x, y));
-    }
-    public Point2D screenToWorld(Point2D p) {
-        return getPosition().add(p.subtract(getCanvasCenter()).multiply(getInverseRatio()));
-    }
-    public Point2D screenToWorld(double x, double y) {
-        return screenToWorld(new Point2D(x, y));
     }
 
     public DoubleProperty ratioProperty() {
@@ -97,7 +109,7 @@ public class OrthogonalCamera {
     public void zoomWithPivot(double delta, Point2D pivot) {
         double originalInverseRatio = getInverseRatio();
         setRatio(getRatio() + delta * UNIT_RATIO);
-        translate(pivot.multiply(originalInverseRatio - getInverseRatio()));
+        translate(pivot.subtract(getCanvasCenter()).multiply(originalInverseRatio - getInverseRatio()));
     }
     public void zoomWithPivot(double delta, double pivotX, double pivotY) {
         zoomWithPivot(delta, new Point2D(pivotX, pivotY));

@@ -139,10 +139,10 @@ public abstract class GraphElement extends Group {
 
     protected void initializeGraphics() {
         layoutXProperty().bind(Bindings.createDoubleBinding(
-                () -> camera().getCanvasWidth() * 0.5 + (getX() - camera().getX()) * camera().getRatio(),
+                () -> camera().worldToScreenX(getX()),
                 positionProperty(), camera().positionProperty(), camera().ratioProperty()));
         layoutYProperty().bind(Bindings.createDoubleBinding(
-                () -> camera().getCanvasHeight() * 0.5 + (getY() - camera().getY()) * camera().getRatio(),
+                () -> camera().worldToScreenY(getY()),
                 positionProperty(), camera().positionProperty(), camera().ratioProperty()));
 
         Scale scale = new Scale();
