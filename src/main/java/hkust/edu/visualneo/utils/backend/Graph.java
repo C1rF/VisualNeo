@@ -12,24 +12,23 @@ import java.util.stream.Stream;
 
 public class Graph implements Mappable {
 
-    private final Map<Long, Node> unmodifiableNodeMap;
-    private final Map<Long, Relation> unmodifiableRelationMap;
+    private final Map<Long, Node> nodeMap;
+    private final Map<Long, Relation> relationMap;
 
-    private final Collection<Node> unmodifiableNodeSet;
-    private final Collection<Relation> unmodifiableRelationSet;
+    private final Collection<Node> nodes;
+    private final Collection<Relation> relations;
 
-    public Graph(Set<Node> nodes,
-                 Set<Relation> relations) {
-        unmodifiableNodeMap = nodes
+    public Graph(Set<Node> nodes, Set<Relation> relations, boolean checkConnectivity) {
+        this.nodes = Set.copyOf(nodes);
+        this.relations = Set.copyOf(relations);
+        nodeMap = nodes
                 .stream()
                 .collect(Collectors.toUnmodifiableMap(Node::getId, Function.identity()));
-        unmodifiableRelationMap = relations
+        relationMap = relations
                 .stream()
                 .collect(Collectors.toUnmodifiableMap(Relation::getId, Function.identity()));
-        unmodifiableNodeSet = Set.copyOf(nodes);
-        unmodifiableRelationSet = Set.copyOf(relations);
 
-        validate();
+        validate(checkConnectivity);
     }
 
     // Construct a graph from vertices and edges, generated nodes and relations are sorted
@@ -75,25 +74,23 @@ public class Graph implements Mappable {
                         links))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        return new Graph(new LinkedHashSet<>(links.values()), relations);
+        return new Graph(new LinkedHashSet<>(links.values()), relations, true);
     }
 
-    private void validate() {
-        if (!checkNonNull())
+    private void validate(boolean checkConnectivity) {
+        if (!isNonNull())
             throw new NullPointerException("Null/Empty Entity!");
-        if (!checkCompleteness())
+        if (!isComplete())
             throw new IllegalArgumentException("Node/Relation list is not complete!");
-        if (!checkConnectivity())
+        if (checkConnectivity && !isConnected())
             throw new IllegalArgumentException("Graph is not connected!");
     }
 
-    private boolean checkNonNull() {
-        return !(nodes() == null || relations() == null ||
-                 nodes().isEmpty() ||
-                 nodes().contains(null) || relations().contains(null));
+    private boolean isNonNull() {
+        return !(nodes() == null || relations() == null || nodes().isEmpty());
     }
 
-    private boolean checkCompleteness() {
+    private boolean isComplete() {
         for (Node node : nodes())
             if (!relations().containsAll(node.relations()))
                 return false;
@@ -105,14 +102,14 @@ public class Graph implements Mappable {
         return true;
     }
 
-    private boolean checkConnectivity() {
+    private boolean isConnected() {
         if (nodes().size() == 1)
             return true;
 
         Collection<Node> uncoloredNodes = new HashSet<>(nodes());
         color(uncoloredNodes, nodes().iterator().next());
 
-        return !uncoloredNodes.isEmpty();
+        return uncoloredNodes.isEmpty();
     }
 
     // Recursively color nodes with depth first algorithm
@@ -126,10 +123,10 @@ public class Graph implements Mappable {
     }
 
     public Collection<Node> nodes() {
-        return unmodifiableNodeSet;
+        return nodes;
     }
     public Collection<Relation> relations() {
-        return unmodifiableRelationSet;
+        return relations;
     }
 
     public int nodeCount() {
@@ -140,17 +137,17 @@ public class Graph implements Mappable {
     }
 
     public Collection<Long> nodeIds() {
-        return unmodifiableNodeMap.keySet();
+        return nodeMap.keySet();
     }
     public Collection<Long> relationIds() {
-        return unmodifiableRelationMap.keySet();
+        return relationMap.keySet();
     }
 
     public Node getNode(long id) {
-        return unmodifiableNodeMap.get(id);
+        return nodeMap.get(id);
     }
     public Relation getRelation(long id) {
-        return unmodifiableRelationMap.get(id);
+        return relationMap.get(id);
     }
 
     @Override

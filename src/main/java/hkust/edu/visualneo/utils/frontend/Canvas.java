@@ -17,7 +17,16 @@ import java.util.Set;
 
 public class Canvas extends Pane {
 
+    public enum CanvasType {
+        NONE,
+        STATIC,
+        NAVIGABLE,
+        MODIFIABLE
+    }
+
     private static final double UNIT_SCROLL = 32.0;
+
+    private CanvasType type = CanvasType.NONE;
 
     public final OrthogonalCamera camera = new OrthogonalCamera(this);
 
@@ -32,16 +41,6 @@ public class Canvas extends Pane {
 
     public Canvas() {
         super();
-
-        getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
-            if (c.wasAdded()) {
-                c.getElementAdded().setHighlight(true);
-                if (c.getElementAdded() instanceof Vertex vertex)
-                    vertex.toFront();
-            }
-            else
-                c.getElementRemoved().setHighlight(false);
-        });
 
         setOnKeyPressed(e -> {
             if (e.isShortcutDown()) {
@@ -85,51 +84,150 @@ public class Canvas extends Pane {
                 }
             }
         });
-
-        setOnMouseDragged(e -> {
-            if (cursor == null)
-                return;
-
-            EventTarget target = e.getTarget();
-
-            if (target == this) {
-                camera.translateInScreen(-(e.getX() - cursor.getX()), -(e.getY() - cursor.getY()));
-            }
-            else {
-                GraphElement currentElement = (GraphElement) ((Node) target).getParent();
-                if (currentElement.isHighlighted()) {
-                    Point2D delta = camera.screenToWorldScale(e.getX() - cursor.getX(), e.getY() - cursor.getY());  // To avoid redundant calculations
-                    for (GraphElement element : getHighlights()) {
-                        if (element instanceof Vertex)
-                            element.translate(delta);
-                    }
-                }
-                else if (currentElement instanceof Vertex)
-                    currentElement.translateInScreen(e.getX() - cursor.getX(), e.getY() - cursor.getY());
-            }
-
-            cursor = new Point2D(e.getX(), e.getY());
-            dragged = true;
-        });
-
-        setOnMouseReleased(e -> {
-            EventTarget target = e.getTarget();
-            if (target != this && cursor != null && !dragged) {
-                clearHighlights();
-                addHighlight((GraphElement) ((Node) target).getParent());
-            }
-            cursor = null;
-            dragged = false;
-        });
-
-        setOnScroll(e -> {
-            if (e.isShortcutDown())
-                camera.zoomWithPivot(e.getDeltaY() / UNIT_SCROLL, e.getX(), e.getY());
-            else
-                camera.translateInScreen(-e.getDeltaX(), -e.getDeltaY());
-        });
     }
 
+    public void setType(CanvasType type) {
+        if (this.type != CanvasType.NONE || type == CanvasType.NONE)
+            return;
+        this.type = type;
+
+        if (type == CanvasType.NAVIGABLE || type == CanvasType.MODIFIABLE) {
+            setOnMouseDragged(e -> {
+                if (cursor == null)
+                    return;
+
+                EventTarget target = e.getTarget();
+
+                if (target == this) {
+                    camera.translateInScreen(-(e.getX() - cursor.getX()), -(e.getY() - cursor.getY()));
+                }
+                else {
+                    GraphElement currentElement = (GraphElement) ((Node) target).getParent();
+                    if (currentElement.isHighlighted()) {
+                        Point2D delta = camera.screenToWorldScale(e.getX() - cursor.getX(),
+                                                                  e.getY() -
+                                                                  cursor.getY());  // To avoid redundant calculations
+                        for (GraphElement element : getHighlights()) {
+                            if (element instanceof Vertex)
+                                element.translate(delta);
+                        }
+                    }
+                    else if (currentElement instanceof Vertex)
+                        currentElement.translateInScreen(e.getX() - cursor.getX(), e.getY() - cursor.getY());
+                }
+
+                cursor = new Point2D(e.getX(), e.getY());
+                dragged = true;
+            });
+
+            setOnMouseReleased(e -> {
+                EventTarget target = e.getTarget();
+                if (target != this && cursor != null && !dragged) {
+                    clearHighlights();
+                    addHighlight((GraphElement) ((Node) target).getParent());
+                }
+                cursor = null;
+                dragged = false;
+            });
+
+            setOnScroll(e -> {
+                if (e.isShortcutDown())
+                    camera.zoomWithPivot(e.getDeltaY() / UNIT_SCROLL, e.getX(), e.getY());
+                else
+                    camera.translateInScreen(-e.getDeltaX(), -e.getDeltaY());
+            });
+
+            getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
+                if (c.wasAdded()) {
+                    c.getElementAdded().setHighlight(true);
+                    if (c.getElementAdded() instanceof Vertex vertex)
+                        vertex.toFront();
+                }
+                else
+                    c.getElementRemoved().setHighlight(false);
+            });
+
+            if (type == CanvasType.NAVIGABLE) {
+                setOnKeyPressed(e -> {
+                    if (e.isShortcutDown()) {
+                        if (e.getCode() == KeyCode.A)
+                            new ArrayList<>(getChildren()).forEach(node -> addHighlight((GraphElement) node));
+                    }
+                });
+
+                setOnMousePressed(e -> {
+                    EventTarget target = e.getTarget();
+
+                    if (target == this) {  // Clicked on Canvas
+                        clearHighlights();
+                        cursor = new Point2D(e.getX(), e.getY());
+                    }
+                    else {  // Clicked on a GraphElement
+                        GraphElement currentElement = (GraphElement) ((Node) target).getParent();
+                        if (e.isShortcutDown()) {
+                            if (currentElement.isHighlighted())
+                                removeHighlight(currentElement);
+                            else
+                                addHighlight(currentElement);
+                        }
+                        else {
+                            if (!currentElement.isHighlighted()) {
+                                clearHighlights();
+                                addHighlight(currentElement);
+                            }
+                            cursor = new Point2D(e.getX(), e.getY());
+                        }
+                    }
+                });
+            }
+            else {
+                setOnKeyPressed(e -> {
+                    if (e.isShortcutDown()) {
+                        if (e.getCode() == KeyCode.A)
+                            new ArrayList<>(getChildren()).forEach(node -> addHighlight((GraphElement) node));
+                    }
+                    else {
+                        if (e.getCode() == KeyCode.DELETE || e.getCode() == KeyCode.BACK_SPACE)
+                            removeElements(getHighlights());
+                    }
+                });
+
+                setOnMousePressed(e -> {
+                    EventTarget target = e.getTarget();
+
+                    if (target == this) {  // Clicked on Canvas
+                        if (e.isShiftDown())
+                            createVertex(e.getX(), e.getY());
+                        else {
+                            clearHighlights();
+                            cursor = new Point2D(e.getX(), e.getY());
+                        }
+                    }
+                    else {  // Clicked on a GraphElement
+                        GraphElement currentElement = (GraphElement) ((Node) target).getParent();
+                        Vertex lastVertex = nomineeVertex();
+                        if (e.isShiftDown() && lastVertex != null && currentElement instanceof Vertex currentVertex)
+                            createEdge(lastVertex, currentVertex, true);
+                        else if (e.isShortcutDown()) {
+                            if (currentElement.isHighlighted())
+                                removeHighlight(currentElement);
+                            else
+                                addHighlight(currentElement);
+                        }
+                        else {
+                            if (!currentElement.isHighlighted()) {
+                                clearHighlights();
+                                addHighlight(currentElement);
+                            }
+                            cursor = new Point2D(e.getX(), e.getY());
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    // TODO: Make these private
     public void createVertex(double x, double y) {
         Vertex vertex = new Vertex(this, x, y);
         addElement(vertex);

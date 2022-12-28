@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class Node extends Entity {
 
-    private Collection<Relation> unmodifiableRelations = new TreeSet<>();
+    private Collection<Relation> relations = new TreeSet<>();
 
     public Node(long id, String label, Map<String, Value> properties) {
         super(id, label, properties);
@@ -24,7 +24,7 @@ public class Node extends Entity {
     }
 
     public Collection<Relation> relations() {
-        return unmodifiableRelations;
+        return relations;
     }
 
     public boolean hasRelation() {
@@ -53,13 +53,13 @@ public class Node extends Entity {
     }
 
     void attach(Relation relation) {
-        unmodifiableRelations.add(relation);
+        relations.add(relation);
     }
 
     void close() {
-        Collection<Relation> copy = Collections.unmodifiableCollection(unmodifiableRelations);
-        if (unmodifiableRelations != copy)
-            unmodifiableRelations = copy;
+        Collection<Relation> copy = Collections.unmodifiableCollection(relations);
+        if (relations != copy)
+            relations = copy;
     }
 
     //    // Two distinct node are indistinguishable in the neighborhood of this node

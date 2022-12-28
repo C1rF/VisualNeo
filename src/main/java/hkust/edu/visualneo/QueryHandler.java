@@ -135,7 +135,7 @@ public class QueryHandler {
                         .map(relationship -> new Relation(relationship, schemaNodes, true))
                         .collect(Collectors.toSet());
 
-                return new Graph(new HashSet<>(schemaNodes.values()), schemaRelations);
+                return new Graph(new HashSet<>(schemaNodes.values()), schemaRelations, false);
             });
 
             meta = new DbMetadata(
@@ -173,7 +173,7 @@ public class QueryHandler {
                         .map(relationship -> new Relation(relationship, nodes, false))
                         .collect(Collectors.toSet());
 
-                Graph resultGraph = new Graph(new HashSet<>(nodes.values()), relations);
+                Graph resultGraph = new Graph(new HashSet<>(nodes.values()), relations, false);
 
                 List<Pair<List<Long>>> resultIds = record
                         .get("resultIds")

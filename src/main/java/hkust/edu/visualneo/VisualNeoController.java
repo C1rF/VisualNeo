@@ -105,7 +105,7 @@ public class VisualNeoController {
     private VisualNeoApp app;
     // The canvas
     @FXML
-    private Canvas canvas;
+    private Canvas constructCanvas;
 
     DbMetadata metadata;
 
@@ -121,9 +121,10 @@ public class VisualNeoController {
      */
     @FXML
     private void initialize() {
-        canvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
-            if (canvas.getHighlights().size() == 1)
-                refreshAllPane(canvas.getSingleHighlight());
+        constructCanvas.setType(Canvas.CanvasType.MODIFIABLE);
+        constructCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
+            if (constructCanvas.getHighlights().size() == 1)
+                refreshAllPane(constructCanvas.getSingleHighlight());
             else
                 hideAllPane();
         });
@@ -148,12 +149,12 @@ public class VisualNeoController {
         directed_change_listener = new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                GraphElement current_highlight = canvas.getSingleHighlight();
+                GraphElement current_highlight = constructCanvas.getSingleHighlight();
                 Edge highlight_edge = (Edge) current_highlight;
                 if(highlight_edge != null) highlight_edge.setDirected(newValue);
             }
         };
-        tab_pane.onKeyPressedProperty().bind(canvas.onKeyPressedProperty());
+        tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
     }
 
     public void setApp(VisualNeoApp app) { this.app = app; }
@@ -204,7 +205,7 @@ public class VisualNeoController {
         choicebox_relation_label.getSelectionModel().selectFirst();
 
         // If there is a single highlight, refresh all panes
-        if(canvas.getSingleHighlight() != null) refreshAllPane(canvas.getSingleHighlight());
+        if(constructCanvas.getSingleHighlight() != null) refreshAllPane(constructCanvas.getSingleHighlight());
     }
 
     /**
@@ -219,8 +220,8 @@ public class VisualNeoController {
      */
     @FXML
     private void handleExactSearch() {
-        List<Vertex> listOfVertices = canvas.getVertices();
-        List<Edge> listOfEdges = canvas.getEdges();
+        List<Vertex> listOfVertices = constructCanvas.getVertices();
+        List<Edge> listOfEdges = constructCanvas.getEdges();
         try{
             app.queryHandler.exactSearch(listOfVertices,listOfEdges);
         }catch (Exception e){
@@ -242,21 +243,21 @@ public class VisualNeoController {
 
     @FXML
     void handleAddNodeLabel() {
-        GraphElement current_highlight = canvas.getSingleHighlight();
+        GraphElement current_highlight = constructCanvas.getSingleHighlight();
         current_highlight.setLabel(choicebox_node_label.getValue());
         refreshAllPane(current_highlight);
     }
 
     @FXML
     void handleAddRelationLabel() {
-        GraphElement current_highlight = canvas.getSingleHighlight();
+        GraphElement current_highlight = constructCanvas.getSingleHighlight();
         current_highlight.setLabel(choicebox_relation_label.getValue());
         refreshAllPane(current_highlight);
     }
 
     @FXML
     void handleAddProperty() {
-        GraphElement current_highlight = canvas.getSingleHighlight();
+        GraphElement current_highlight = constructCanvas.getSingleHighlight();
         // Add Node/Relation properties to the Node/Relation
         String prop_name = choicebox_property_name.getValue();
         String prop_type = current_property_map.get(prop_name);
@@ -299,14 +300,14 @@ public class VisualNeoController {
      */
     @FXML
     private void handleMouseEnterButton(MouseEvent m) {
-        canvas.getScene().setCursor(Cursor.HAND);
+        constructCanvas.getScene().setCursor(Cursor.HAND);
     }
     /**
      * Called when the user's mouse leaves a button
      */
     @FXML
     private void handleMouseLeaveButton(MouseEvent m) {
-        canvas.getScene().setCursor(Cursor.DEFAULT);
+        constructCanvas.getScene().setCursor(Cursor.DEFAULT);
     }
 
     private void UpdateNodeTable(DbMetadata metadata) {
@@ -418,10 +419,10 @@ public class VisualNeoController {
     }
 
     @FXML
-    void handleZoomIn() { canvas.camera.zoomIn();}
+    void handleZoomIn() { constructCanvas.camera.zoomIn();}
 
     @FXML
-    void handleZoomOut() { canvas.camera.zoomOut();}
+    void handleZoomOut() { constructCanvas.camera.zoomOut();}
 
     // Functions in the Menu Bar
     /**
@@ -445,7 +446,7 @@ public class VisualNeoController {
      */
     @FXML
     private void handleClear() {
-        canvas.clearElements();
+        constructCanvas.clearElements();
     }
 
     /**
@@ -454,8 +455,8 @@ public class VisualNeoController {
     @FXML
     private void handleSave() {
         String outputText = "";
-        List<Vertex> vertices = canvas.getVertices();
-        List<Edge> edges =  canvas.getEdges();
+        List<Vertex> vertices = constructCanvas.getVertices();
+        List<Edge> edges =  constructCanvas.getEdges();
         for(Vertex v : vertices)
             outputText += v.toText() + '\n';
         for(int i = edges.size()-1; i >= 0; i--){
@@ -493,7 +494,7 @@ public class VisualNeoController {
         try
         {
             Scanner sc = new Scanner(selectedFile);
-            canvas.clearElements();
+            constructCanvas.clearElements();
             while ( sc.hasNextLine() )
             {
                 // For a single line
@@ -515,6 +516,7 @@ public class VisualNeoController {
         }
     }
 
+    // TODO: Change this
     // Helper Function to parse one line
     private void parseOneLine(String line){
         if(line.isEmpty()) return;
@@ -523,17 +525,17 @@ public class VisualNeoController {
             // current line describes a Vertex
             double x = Double.parseDouble(elements[2]);
             double y = Double.parseDouble(elements[3]);
-            canvas.createVertex(x,y);
+            constructCanvas.createVertex(x, y);
         }
         else if(elements[0].equals("e")){
             // current line describes an Edge
-            List<Vertex> vertices = canvas.getVertices();
+            List<Vertex> vertices = constructCanvas.getVertices();
             int startVertexId = Integer.parseInt(elements[1]);
             int endVertexId = Integer.parseInt(elements[2]);
             boolean directed = Boolean.valueOf(elements[3]);
-            canvas.createEdge(vertices.get(startVertexId), vertices.get(endVertexId), directed);
+            constructCanvas.createEdge(vertices.get(startVertexId), vertices.get(endVertexId), directed);
         }
-        GraphElement newElement = canvas.getSingleHighlight();
+        GraphElement newElement = constructCanvas.getSingleHighlight();
         // parse Label
         String label = elements[4];
         if(!label.equals("null")) newElement.setLabel(label);
