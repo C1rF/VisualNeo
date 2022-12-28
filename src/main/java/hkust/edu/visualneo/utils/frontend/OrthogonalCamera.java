@@ -176,8 +176,4 @@ public class OrthogonalCamera {
     public void returnToOrigin() {
         setPosition(Point2D.ZERO);
     }
-
-    public Point2D getMin() {
-        return getPosition().subtract(getViewWidth() * 0.5, getViewHeight() * 0.5);
-    }
 }
