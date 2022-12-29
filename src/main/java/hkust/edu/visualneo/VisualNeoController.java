@@ -165,7 +165,28 @@ public class VisualNeoController {
             }
         };
 
-        tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
+        tab_pane.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number> (){
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                int selectedIndex = newValue.intValue();
+                switch (selectedIndex){
+                    case 0 -> {
+                        resultCanvas.clearHighlights();
+                        tab_pane.onKeyPressedProperty().unbind();
+                        tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
+                    }
+                    case 1 -> {
+                        constructCanvas.clearHighlights();
+                        tab_pane.onKeyPressedProperty().unbind();
+                        tab_pane.onKeyPressedProperty().bind(resultCanvas.onKeyPressedProperty());
+                    }
+                    case 2 -> {
+                        constructCanvas.clearHighlights();
+                        resultCanvas.clearHighlights();
+                    }
+                }
+            }
+        });
     }
 
     public void setApp(VisualNeoApp app) { this.app = app; }
@@ -237,15 +258,16 @@ public class VisualNeoController {
         try{
             results = app.queryHandler.exactSearch(listOfVertices,listOfEdges);
         }catch (Exception e){
-           String errorMsg = e.getMessage();
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Exact Search Error");
             alert.setHeaderText("Cannot perform the exact search!");
-            alert.setContentText(errorMsg);
+            alert.setContentText(e.getMessage());
             alert.showAndWait();
         }
-        // if(results != null) resultCanvas.loadGraph(results.graph());
-        if(results != null) resultCanvas.loadGraph(results.graph());
+        if(results != null) {
+            resultCanvas.clearElements();
+            resultCanvas.loadGraph(results.graph());
+        }
     }
 
     /**
