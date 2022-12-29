@@ -106,7 +106,8 @@ public class VisualNeoController {
     // The canvas
     @FXML
     private Canvas constructCanvas;
-
+    @FXML
+    private Canvas resultCanvas;
     DbMetadata metadata;
 
     /**
@@ -123,8 +124,17 @@ public class VisualNeoController {
     private void initialize() {
         constructCanvas.setType(Canvas.CanvasType.MODIFIABLE);
         constructCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
-            if (constructCanvas.getHighlights().size() == 1)
-                refreshAllPane(constructCanvas.getSingleHighlight());
+            GraphElement temp = constructCanvas.getSingleHighlight();
+            if (temp != null)
+                refreshAllPane(temp, false);
+            else
+                hideAllPane();
+        });
+        resultCanvas.setType(Canvas.CanvasType.NAVIGABLE);
+        resultCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
+            GraphElement temp = resultCanvas.getSingleHighlight();
+            if (temp != null)
+                refreshAllPane(temp, true);
             else
                 hideAllPane();
         });
@@ -154,6 +164,7 @@ public class VisualNeoController {
                 if(highlight_edge != null) highlight_edge.setDirected(newValue);
             }
         };
+
         tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
     }
 
@@ -205,7 +216,7 @@ public class VisualNeoController {
         choicebox_relation_label.getSelectionModel().selectFirst();
 
         // If there is a single highlight, refresh all panes
-        if(constructCanvas.getSingleHighlight() != null) refreshAllPane(constructCanvas.getSingleHighlight());
+        if(constructCanvas.getSingleHighlight() != null) refreshAllPane(constructCanvas.getSingleHighlight(), false);
     }
 
     /**
@@ -222,8 +233,9 @@ public class VisualNeoController {
     private void handleExactSearch() {
         List<Vertex> listOfVertices = constructCanvas.getVertices();
         List<Edge> listOfEdges = constructCanvas.getEdges();
+        QueryHandler.Results results = null;
         try{
-            app.queryHandler.exactSearch(listOfVertices,listOfEdges);
+            results = app.queryHandler.exactSearch(listOfVertices,listOfEdges);
         }catch (Exception e){
            String errorMsg = e.getMessage();
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -232,6 +244,8 @@ public class VisualNeoController {
             alert.setContentText(errorMsg);
             alert.showAndWait();
         }
+        // if(results != null) resultCanvas.loadGraph(results.graph());
+        if(results != null) resultCanvas.loadGraph(results.graph());
     }
 
     /**
@@ -245,14 +259,14 @@ public class VisualNeoController {
     void handleAddNodeLabel() {
         GraphElement current_highlight = constructCanvas.getSingleHighlight();
         current_highlight.setLabel(choicebox_node_label.getValue());
-        refreshAllPane(current_highlight);
+        refreshAllPane(current_highlight, false);
     }
 
     @FXML
     void handleAddRelationLabel() {
         GraphElement current_highlight = constructCanvas.getSingleHighlight();
         current_highlight.setLabel(choicebox_relation_label.getValue());
-        refreshAllPane(current_highlight);
+        refreshAllPane(current_highlight, false);
     }
 
     @FXML
@@ -266,7 +280,7 @@ public class VisualNeoController {
         if (prop_value != null) {
             current_highlight.addProperty(prop_name, prop_value);
             textfield_property_value.clear();
-            refreshAllPane(current_highlight);
+            refreshAllPane(current_highlight, false);
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Add Property Error");
@@ -352,63 +366,54 @@ public class VisualNeoController {
      * Helper Function
      * Given a GraphElement, REFRESH the InfoPane according to the information
      */
-    private void refreshAllPane(GraphElement current_highlight) {
+    private void refreshAllPane(GraphElement current_highlight, boolean info_only) {
+        boolean isVertex = current_highlight instanceof Vertex;
+
+        // Display the information on the information pane
         info_pane.setVisible(true);
+        text_node_or_relation.setText(isVertex ? "Node Information" : "Relation Information");
+        StringBuilder builder = new StringBuilder();
+        text_label_info.setText(current_highlight.getLabel());
+        Map<String, Value> properties = current_highlight.getProp();
+        for (String propertyKey : properties.keySet())
+            builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
+        text_property_info.setText(builder.toString());
+
+        if (info_only) return;
+
+        // Display the information on the label and property pane
         pane_property.setVisible(true);
+        pane_node_label.setVisible(isVertex);
+        pane_relation_label.setVisible(!isVertex);
         choicebox_property_name.getSelectionModel()
                 .selectedItemProperty().removeListener(property_change_listener);
         choicebox_property_name.getItems().clear();
         checkbox_directed.selectedProperty().removeListener(directed_change_listener);
-        if (current_highlight instanceof Vertex) {
-            // Node Info Pane (bottom-right pane)
-            pane_node_label.setVisible(true);
-            pane_relation_label.setVisible(false);
-            text_node_or_relation.setText("Node Information");
-            // Update property choices
-            if(metadata == null) return;
-            if(current_highlight.getLabel() == null)
-                current_property_map = metadata.nodeProperties();
-            else
-                current_property_map = metadata.nodePropertiesOf(current_highlight.getLabel());
-            if(current_property_map != null)
-                current_property_map.keySet().forEach(property -> choicebox_property_name.getItems().add(property));
-            else
-                choicebox_property_name.getItems().removeAll();
-        } else {
-            // Relation Info Pane (bottom-right pane)
-            pane_node_label.setVisible(false);
-            pane_relation_label.setVisible(true);
-            text_node_or_relation.setText("Relation Information");
-            // Display the checkbox according to the current status
+        if (!isVertex) {
+            // Display the checkbox according to current status and add listener
             Edge highlight_edge = (Edge) current_highlight;
             checkbox_directed.setSelected(highlight_edge.isDirected());
             checkbox_directed.selectedProperty().addListener(directed_change_listener);
-            // Update property choices
-            if(metadata == null) return;
-            if(current_highlight.getLabel() == null)
-                current_property_map = metadata.relationProperties();
-            else
-                current_property_map = metadata.relationPropertiesOf(current_highlight.getLabel());
-            if(current_property_map != null)
-                current_property_map.keySet().forEach(property -> choicebox_property_name.getItems().add(property));
-            else
-                choicebox_property_name.getItems().removeAll();
         }
+
+        // Update current property map
+        if (metadata == null) return;
+        if (isVertex)
+            current_property_map = current_highlight.getLabel() == null ? metadata.nodeProperties() : metadata.nodePropertiesOf(current_highlight.getLabel());
+        else
+            current_property_map = current_highlight.getLabel() == null ? metadata.relationProperties() : metadata.relationPropertiesOf(current_highlight.getLabel());
+
+        // Update the property choice box according to current property map
+        if (current_property_map != null)
+            current_property_map.keySet().forEach(property -> choicebox_property_name.getItems().add(property));
+        else
+            choicebox_property_name.getItems().removeAll();
 
         // Set the listener for choicebox_property_name
         choicebox_property_name.getSelectionModel().selectFirst();
         choicebox_property_name.getSelectionModel()
                 .selectedItemProperty()
                 .addListener(property_change_listener);
-
-        // Display the information on the information pane
-        StringBuilder builder = new StringBuilder();
-        text_label_info.setText(current_highlight.getLabel());
-        Map<String, Value> properties = current_highlight.getProp();
-        for (String propertyKey : properties.keySet()) {
-            builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
-        }
-        text_property_info.setText(builder.toString());
     }
 
     private void hideAllPane() {
@@ -525,7 +530,7 @@ public class VisualNeoController {
             // current line describes a Vertex
             double x = Double.parseDouble(elements[2]);
             double y = Double.parseDouble(elements[3]);
-            constructCanvas.createVertex(x, y);
+            //constructCanvas.createVertex(x, y);
         }
         else if(elements[0].equals("e")){
             // current line describes an Edge
@@ -533,7 +538,7 @@ public class VisualNeoController {
             int startVertexId = Integer.parseInt(elements[1]);
             int endVertexId = Integer.parseInt(elements[2]);
             boolean directed = Boolean.valueOf(elements[3]);
-            constructCanvas.createEdge(vertices.get(startVertexId), vertices.get(endVertexId), directed);
+            //constructCanvas.createEdge(vertices.get(startVertexId), vertices.get(endVertexId), directed);
         }
         GraphElement newElement = constructCanvas.getSingleHighlight();
         // parse Label

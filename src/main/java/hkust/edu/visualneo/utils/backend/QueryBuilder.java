@@ -158,7 +158,7 @@ public class QueryBuilder {
             buffer.append(entity.label);
         }
 
-        if (entity.hasProperty()) {
+        if (entity.hasProperties()) {
             buffer.append(" {");
             Iterator<String> propertyIt = entity.properties.keySet().iterator();
             while (true) {

@@ -77,13 +77,16 @@ public class Vertex extends GraphElement {
 
     public Vertex(Canvas canvas, Node node, Point2D position) {
         super(canvas, node.getId());
-        // TODO: Add information
 
         setPosition(position);
         initializeGraphics();
 
         positionProperty().addListener(positionListener);
         neighborhoodProperty().addListener(neighborhoodListener);
+
+        // Add the label and properties (if any)
+        setLabel(node.getLabel());
+        if(node.hasProperties()) properties = node.getProperties();
 
         // For debugging
         System.out.println("A new Vertex is created.");
@@ -220,6 +223,7 @@ public class Vertex extends GraphElement {
 
     @Override
     public void erase() {
+        canvas.removeFromVertices(this.id(), this);
         getEdges().forEach(Edge::erase);
     }
 

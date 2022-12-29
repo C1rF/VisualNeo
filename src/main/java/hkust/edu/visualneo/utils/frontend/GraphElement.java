@@ -23,7 +23,7 @@ public abstract class GraphElement extends Group {
 
     protected final Canvas canvas;
 
-    protected final long id;
+    private final long id;
 
     // String of the label
     private final StringProperty label =
