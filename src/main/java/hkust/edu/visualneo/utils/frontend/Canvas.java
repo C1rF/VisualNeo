@@ -184,15 +184,28 @@ public class Canvas extends Pane {
 
     public void loadGraph(Graph graph){
         // Compute the layout of the graph
-        ForceDirectedPlacement placement = new ForceDirectedPlacement(graph, new Point2D(this.getWidth(), this.getHeight()), 10000, 0.5, 0.9);
+        ForceDirectedPlacement placement = new ForceDirectedPlacement(graph, new Point2D(this.getWidth(), this.getHeight()), 10000, 0.8);
         Map<Long, Point2D> layout = placement.layout();
         // Create the vertices and edges
-        for(hkust.edu.visualneo.utils.backend.Node node : graph.nodes()){
+        for(hkust.edu.visualneo.utils.backend.Node node : graph.nodes())
             createVertex(node, layout.get(node.getId()));
-        }
-        for(Relation relation : graph.relations()){
+        for(Relation relation : graph.relations())
             createEdge(relation);
-        }
+    }
+
+    public void simulateLayout(Graph graph){
+        for(hkust.edu.visualneo.utils.backend.Node node : graph.nodes())
+            createVertex(node, new Point2D(0, 0));
+        for(Relation relation : graph.relations())
+            createEdge(relation);
+        ForceDirectedPlacement placement = new ForceDirectedPlacement(graph, new Point2D(this.getWidth(), this.getHeight()), 10000, 0.8);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            int iterNum = 0;
+            public void run() {
+                placement.simulate(getVertices(), iterNum++);
+            }
+        }, 0, 300);
     }
 
     private void createVertex(double x, double y) {

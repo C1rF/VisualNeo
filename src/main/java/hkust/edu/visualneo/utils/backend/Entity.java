@@ -2,7 +2,9 @@ package hkust.edu.visualneo.utils.backend;
 
 import org.neo4j.driver.Value;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 abstract class Entity implements Comparable<Entity>, Mappable {
 
@@ -20,13 +22,19 @@ abstract class Entity implements Comparable<Entity>, Mappable {
         this.properties = properties == null ? Collections.emptyMap() : properties;
     }
 
-    public boolean hasProperty() {
+    public boolean hasProperties() {
         return !properties.isEmpty();
+    }
+
+    public Map<String, Value> getProperties() {
+        return properties;
     }
 
     public boolean hasLabel() {
         return label != null;
     }
+
+    public String getLabel() { return label; }
 
     // Check whether two entities can match the same entity,
     // i.e., whether the two sets of nodes that the two entities match have non-empty intersection

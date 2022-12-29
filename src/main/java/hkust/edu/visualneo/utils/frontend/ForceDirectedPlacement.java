@@ -5,6 +5,7 @@ import hkust.edu.visualneo.utils.backend.Relation;
 import javafx.geometry.Point2D;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
@@ -35,17 +36,14 @@ public class ForceDirectedPlacement {
     private final double invOptDist;
     private final double sqrOptDist;
 
-    private final double coolingCoef;  // Cooling coefficient
-
-    private double temp = 1.0;  // Temperature
+    private final double initTemperature = 5.0;  // Initial temperature
+    private double temperature = initTemperature; // Temperature
 
     // numIt: number of iterations
     // spsCoef: sparse coefficient
-    public ForceDirectedPlacement(Graph graph, Point2D size, int numIt, double spsCoef, double coolingCoef) {
+    public ForceDirectedPlacement(Graph graph, Point2D size, int numIt, double spsCoef) {
         this.graph = graph;
         this.numIt = numIt;
-        this.coolingCoef = coolingCoef;
-
         nodeCount = graph.nodeCount();
 
         nodeIds = graph.nodeIds().toArray(new Long[nodeCount]);
@@ -99,7 +97,7 @@ public class ForceDirectedPlacement {
             // Apply displacements
             for (int i = 0; i < nodeCount; ++i) {
                 Point2D disp = displacements[i];
-                positions[i] = positions[i].add(disp.multiply(Math.min(1.0, temp / disp.magnitude())));
+                positions[i] = positions[i].add(disp.multiply(Math.min(1.0, temperature / disp.magnitude())));
                 Point2D rawPos = positions[i];
                 double framedX = Math.min(max.getX(), Math.max(min.getX(), rawPos.getX()));
                 double framedY = Math.min(max.getY(), Math.max(min.getY(), rawPos.getY()));
@@ -110,11 +108,63 @@ public class ForceDirectedPlacement {
             Arrays.setAll(displacements, i -> new Point2D(0.0, 0.0));
 
             // Cooling
-            cool();
+            temperature = initTemperature / (1 + Math.log(1+itCount));
         }
 
         return IntStream.range(0, nodeCount).boxed().collect(Collectors.toMap(i -> nodeIds[i], i -> positions[i]));
     }
+
+    public void simulate(Collection<Vertex> vertices, int iter_num) {
+
+        // Compute repulsive displacements
+        for (int i = 0; i < nodeCount; ++i) {
+            for (int j = i + 1; j < nodeCount; ++j) {
+                Point2D diff = positions[j].subtract(positions[i]);
+                Point2D disp = repDisp(diff);
+                displacements[i] = displacements[i].subtract(disp);
+                displacements[j] = displacements[j].add(disp);
+            }
+        }
+
+        // Compute attractive displacements
+        for (Relation relation : graph.relations()) {
+            int i = nodeIndices.get(relation.start.getId());
+            int j = nodeIndices.get(relation.end.getId());
+
+            Point2D diff = positions[j].subtract(positions[i]);
+            Point2D disp = attDisp(diff);
+            displacements[i] = displacements[i].add(disp);
+            displacements[j] = displacements[j].subtract(disp);
+        }
+
+        // Compute gravities
+        for (int i = 0; i < nodeCount; ++i) {
+            displacements[i] = displacements[i].add(gravity(positions[i]));
+        }
+
+        // Apply displacements
+        for (int i = 0; i < nodeCount; ++i) {
+            Point2D disp = displacements[i];
+            positions[i] = positions[i].add(disp.multiply(Math.min(1.0, temperature / disp.magnitude())));
+            Point2D rawPos = positions[i];
+            double framedX = Math.min(max.getX(), Math.max(min.getX(), rawPos.getX()));
+            double framedY = Math.min(max.getY(), Math.max(min.getY(), rawPos.getY()));
+            positions[i] = new Point2D(framedX, framedY);
+        }
+
+        // Clear all displacements
+        Arrays.setAll(displacements, i -> new Point2D(0.0, 0.0));
+
+        // Cooling
+        temperature = initTemperature/(1 + Math.log(1+iter_num++));
+
+        // Set positions of all vertices
+        for(Vertex v : vertices){
+            int idx = nodeIndices.get(v.id());
+            v.setPosition(positions[idx]);
+        }
+    }
+
 
     // Attractive and repulsive displacements between u and v
     // diff = v - u
@@ -130,10 +180,6 @@ public class ForceDirectedPlacement {
 
     private Point2D gravity(Point2D pos) {
         return attDisp(Point2D.ZERO.subtract(pos));
-    }
-
-    private void cool() {
-        temp = temp * coolingCoef;
     }
 
     private static Point2D randomPoint(Point2D min, Point2D max) {
