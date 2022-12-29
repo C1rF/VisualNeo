@@ -1,30 +1,25 @@
 package hkust.edu.visualneo.utils.backend;
 
-import com.codepoetics.protonpack.Indexed;
-import com.codepoetics.protonpack.StreamUtils;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.Vertex;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Graph implements Mappable {
 
-    private final Map<Long, Node> nodeMap;
-    private final Map<Long, Relation> relationMap;
+    private final Map<Long, Node> nodes;
+    private final Map<Long, Relation> relations;
 
-    private final Collection<Node> nodes;
-    private final Collection<Relation> relations;
-
-    public Graph(Set<Node> nodes, Set<Relation> relations, boolean checkConnectivity) {
-        this.nodes = Set.copyOf(nodes);
-        this.relations = Set.copyOf(relations);
-        nodeMap = nodes
+    public Graph(Collection<Node> nodes, Collection<Relation> relations, boolean checkConnectivity) {
+        this.nodes = nodes
                 .stream()
                 .collect(Collectors.toUnmodifiableMap(Node::getId, Function.identity()));
-        relationMap = relations
+        this.relations = relations
                 .stream()
                 .collect(Collectors.toUnmodifiableMap(Relation::getId, Function.identity()));
 
@@ -32,49 +27,19 @@ public class Graph implements Mappable {
     }
 
     // Construct a graph from vertices and edges, generated nodes and relations are sorted
-    public static Graph fromDrawing(List<Vertex> vertices, List<Edge> edges) {
-        Map<Vertex, Node> links = StreamUtils
-                .zipWithIndex(vertices.stream())
-                .collect(Collectors.toMap(
-                        Indexed::getValue,
-                        vertexIndexed -> new Node(
-                                vertexIndexed.getIndex(),
-                                vertexIndexed.getValue()),
-                        (e1, e2) -> e2,
-                        LinkedHashMap::new));
-
-        Stream<Edge> edgesSorted = edges
+    public static Graph fromDrawing(Collection<Vertex> vertices, Collection<Edge> edges) {
+        Map<Vertex, Node> nodes = vertices
                 .stream()
-                .sorted((e1, e2) -> {
-                    Node s1 = links.get(e1.startVertex);
-                    Node t1 = links.get(e1.endVertex);
-                    Node s2 = links.get(e2.startVertex);
-                    Node t2 = links.get(e2.endVertex);
+                .collect(Collectors.toMap(Function.identity(), Node::new, (e1, e2) -> e2, LinkedHashMap::new));
 
-                    if (!e1.isDirected() && s1.compareTo(t1) > 0) {
-                        Node temp = s1;
-                        s1 = t1;
-                        t1 = temp;
-                    }
+        Collection<Relation> relations = edges
+                .stream()
+                .map(edge -> new Relation(edge,
+                                          nodes.get(edge.startVertex),
+                                          nodes.get(edge.endVertex)))
+                .collect(Collectors.toSet());
 
-                    if (!e2.isDirected() && s2.compareTo(t2) > 0) {
-                        Node temp = s2;
-                        s2 = t2;
-                        t2 = temp;
-                    }
-
-                    return s1.compareTo(s2) == 0 ? t1.compareTo(t2) : s1.compareTo(s2);
-                });
-
-        Set<Relation> relations = StreamUtils
-                .zipWithIndex(edgesSorted)
-                .map(edgeIndexed -> new Relation(
-                        edgeIndexed.getIndex(),
-                        edgeIndexed.getValue(),
-                        links))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        return new Graph(new LinkedHashSet<>(links.values()), relations, true);
+        return new Graph(nodes.values(), relations, true);
     }
 
     private void validate(boolean checkConnectivity) {
@@ -123,10 +88,10 @@ public class Graph implements Mappable {
     }
 
     public Collection<Node> nodes() {
-        return nodes;
+        return nodes.values();
     }
     public Collection<Relation> relations() {
-        return relations;
+        return relations.values();
     }
 
     public int nodeCount() {
@@ -137,17 +102,17 @@ public class Graph implements Mappable {
     }
 
     public Collection<Long> nodeIds() {
-        return nodeMap.keySet();
+        return nodes.keySet();
     }
     public Collection<Long> relationIds() {
-        return relationMap.keySet();
+        return relations.keySet();
     }
 
     public Node getNode(long id) {
-        return nodeMap.get(id);
+        return nodes.get(id);
     }
     public Relation getRelation(long id) {
-        return relationMap.get(id);
+        return relations.get(id);
     }
 
     @Override

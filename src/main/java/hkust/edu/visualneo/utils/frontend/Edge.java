@@ -76,8 +76,8 @@ public class Edge extends GraphElement {
 
     public Edge(Canvas canvas, Relation relation) {
         super(canvas, relation.getId());
-        this.startVertex = canvas.getVertexById(relation.start.getId());
-        this.endVertex = canvas.getVertexById(relation.end.getId());
+        this.startVertex = canvas.getVertex(relation.start.getId());
+        this.endVertex = canvas.getVertex(relation.end.getId());
         setDirected(relation.directed);
 
         if (isReverted()) {
@@ -100,7 +100,7 @@ public class Edge extends GraphElement {
 
         // Add the label and properties (if any)
         setLabel(relation.getLabel());
-        if(relation.hasProperties()) properties = relation.getProperties();
+        properties = relation.getProperties();
 
         // For Debugging
         System.out.println("An Edge from (" + startVertex.getX() + " , " + startVertex.getY() + ") to " +
@@ -336,8 +336,7 @@ public class Edge extends GraphElement {
 
     @Override
     public void erase() {
-        canvas.removeFromEdges(this.id(), this);
-        canvas.getChildren().remove(this);
+        canvas.erase(this);
         startVertex.detach(this);
         endVertex.detach(this);
     }
@@ -357,7 +356,7 @@ public class Edge extends GraphElement {
     }
     
     public boolean isReverted() {
-        return System.identityHashCode(startVertex) > System.identityHashCode(endVertex);
+        return startVertex.compareTo(endVertex) > 0;
     }
 
     private Path arc() {
@@ -369,13 +368,10 @@ public class Edge extends GraphElement {
      */
     @Override
     public String toText() {
-        List<Vertex> vertices = canvas.getVertices();
-        int startVertexId = vertices.indexOf(startVertex);
-        int endVertexId = vertices.indexOf(endVertex);
         String[] temp = new String[]{
                 "e",
-                String.valueOf(startVertexId),
-                String.valueOf(endVertexId),
+                String.valueOf(startVertex.getId()),
+                String.valueOf(endVertex.getId()),
                 String.valueOf(isDirected()),
                 text.getText(),
                 propertyToText(),

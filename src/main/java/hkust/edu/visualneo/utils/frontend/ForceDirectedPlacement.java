@@ -160,7 +160,7 @@ public class ForceDirectedPlacement {
 
         // Set positions of all vertices
         for(Vertex v : vertices){
-            int idx = nodeIndices.get(v.id());
+            int idx = nodeIndices.get(v.getElementId());
             v.setPosition(positions[idx]);
         }
     }

@@ -47,8 +47,8 @@ public record DbMetadata(
             return Collections.emptySet();
         return schemaGraph.relations()
                 .stream()
-                .filter(relation -> Objects.equals(relation.label, relationLabel))
-                .map(relation -> relation.start.label)
+                .filter(relation -> Objects.equals(relation.getLabel(), relationLabel))
+                .map(relation -> relation.start.getLabel())
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -57,8 +57,8 @@ public record DbMetadata(
             return Collections.emptySet();
         return schemaGraph.relations()
                 .stream()
-                .filter(relation -> Objects.equals(relation.label, relationLabel))
-                .map(relation -> relation.end.label)
+                .filter(relation -> Objects.equals(relation.getLabel(), relationLabel))
+                .map(relation -> relation.end.getLabel())
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -67,8 +67,8 @@ public record DbMetadata(
             return Collections.emptySet();
         return schemaGraph.relations()
                 .stream()
-                .filter(relation -> Objects.equals(relation.start.label, sourceLabel))
-                .map(relation -> relation.label)
+                .filter(relation -> Objects.equals(relation.start.getLabel(), sourceLabel))
+                .map(relation -> relation.getLabel())
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -77,8 +77,8 @@ public record DbMetadata(
             return Collections.emptySet();
         return schemaGraph.relations()
                 .stream()
-                .filter(relation -> Objects.equals(relation.start.label, sourceLabel))
-                .map(relation -> relation.end.label)
+                .filter(relation -> Objects.equals(relation.start.getLabel(), sourceLabel))
+                .map(relation -> relation.end.getLabel())
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -87,8 +87,8 @@ public record DbMetadata(
             return Collections.emptySet();
         return schemaGraph.relations()
                 .stream()
-                .filter(relation -> Objects.equals(relation.end.label, targetLabel))
-                .map(relation -> relation.start.label)
+                .filter(relation -> Objects.equals(relation.end.getLabel(), targetLabel))
+                .map(relation -> relation.start.getLabel())
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -97,8 +97,8 @@ public record DbMetadata(
             return Collections.emptySet();
         return schemaGraph.relations()
                 .stream()
-                .filter(relation -> Objects.equals(relation.end.label, targetLabel))
-                .map(relation -> relation.label)
+                .filter(relation -> Objects.equals(relation.end.getLabel(), targetLabel))
+                .map(relation -> relation.getLabel())
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 

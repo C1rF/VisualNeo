@@ -147,7 +147,7 @@ public class QueryHandler {
         }
     }
 
-    Results exactSearch(List<Vertex> vertices, List<Edge> edges) {
+    Results exactSearch(Collection<Vertex> vertices, Collection<Edge> edges) {
         Graph queryGraph = Graph.fromDrawing(vertices, edges);
         String query = builder.translate(queryGraph);
         System.out.println(query);

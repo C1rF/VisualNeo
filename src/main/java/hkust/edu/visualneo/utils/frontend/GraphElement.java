@@ -17,7 +17,7 @@ import java.util.TreeMap;
 
 import static java.lang.Math.PI;
 
-public abstract class GraphElement extends Group {
+public abstract class GraphElement extends Group implements Comparable<GraphElement> {
 
     protected static long currentId = 0;
 
@@ -29,9 +29,9 @@ public abstract class GraphElement extends Group {
     private final StringProperty label =
             new SimpleStringProperty(this, "label", null);
     // Properties attached to the element(node/relation)
-    Map<String, Value> properties;
+    protected Map<String, Value> properties;
     // Whether the element is highlighted
-    public final BooleanProperty highlight =
+    private final BooleanProperty highlight =
             new SimpleBooleanProperty(this, "highlight", false);
     // Position of the element
     private final ObjectProperty<Point2D> position =
@@ -101,39 +101,23 @@ public abstract class GraphElement extends Group {
         return positionProperty().get().getY();
     }
 
-    public long id() { return id; }
+    public long getElementId() { return id; }
 
     public void setPosition(Point2D p) {
         if (!getPosition().equals(p))  // To function with ObjectProperty
             positionProperty().set(p);
     }
 
-    public void setPosition(double x, double y) {
-        setPosition(new Point2D(x, y));
-    }
-
     public void translate(Point2D delta) {
         setPosition(getPosition().add(delta));
-    }
-
-    public void translate(double deltaX, double deltaY) {
-        translate(new Point2D(deltaX, deltaY));
     }
 
     public void setPositionInScreen(Point2D p) {
         setPosition(camera().screenToWorld(p));
     }
 
-    public void setPositionInScreen(double x, double y) {
-        setPositionInScreen(new Point2D(x, y));
-    }
-
     public void translateInScreen(Point2D p) {
         translate(camera().screenToWorldScale(p));
-    }
-
-    public void translateInScreen(double deltaX, double deltaY) {
-        translateInScreen(new Point2D(deltaX, deltaY));
     }
 
 
@@ -184,10 +168,14 @@ public abstract class GraphElement extends Group {
 
     public String propertyToText(){
         if(properties.isEmpty()) return "null";
-        String propertyText = "";
+        StringBuilder propertyText = new StringBuilder();
         for (Map.Entry<String,Value> entry : properties.entrySet())
-            propertyText += entry.getKey() + ":" + entry.getValue().toString().replaceAll("\"","") + " ";
-        return propertyText.trim();
+            propertyText
+                    .append(entry.getKey())
+                    .append(":")
+                    .append(entry.getValue().toString().replaceAll("\"", ""))
+                    .append(" ");
+        return propertyText.toString().trim();
     }
 
     public static double angle(Vertex start, Vertex end) {
@@ -195,5 +183,26 @@ public abstract class GraphElement extends Group {
         return delta.getX() == 0.0 ?
                 delta.getY() < 0.0 ? -PI / 2 : PI / 2 :
                 Math.atan2(delta.getY(), delta.getX());
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));  // Implementation by Neo4j
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other)
+            return true;
+        if (other == null)
+            return false;
+        if (!getClass().equals(other.getClass()))
+            return false;
+        return id == ((GraphElement) other).id;
+    }
+
+    @Override
+    public int compareTo(GraphElement other) {
+        return (int) (id - other.id);
     }
 }

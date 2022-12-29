@@ -5,6 +5,7 @@ import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableMap;
 import javafx.collections.SetChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
@@ -30,46 +31,47 @@ public class Vertex extends GraphElement {
     private final DoubleProperty selfLoopAngle =
             new SimpleDoubleProperty(this, "selfLoopAngle", DEFAULT_ANGLE);
 
-    private final MapProperty<Vertex, SetProperty<Edge>> neighborhood =
+    private final ObservableMap<Vertex, SetProperty<Edge>> neighborhood =
             new SimpleMapProperty<>(this, "neighborhood", FXCollections.observableHashMap());
+    private final ObservableMap<Vertex, SetProperty<Edge>> unmodifiableNeighborhood =
+            FXCollections.unmodifiableObservableMap(neighborhood);
 
     private final ChangeListener<Point2D> positionListener =  // For re-usability
             (observable, oldValue, newValue) -> updateSelfLoopAngle();
 
-    private final SetChangeListener<Edge> neighborEdgesListener = c -> {  // For re-usability
-        if (c.getSet().size() == 0) {
-            getNeighborhood().remove(c.getElementRemoved().other(Vertex.this));
+    private final SetChangeListener<Edge> neighborEdgesListener = change -> {  // For re-usability
+        if (change.getSet().size() == 0) {
+            getNeighborhood().remove(change.getElementRemoved().other(Vertex.this));
             return;
         }
-        if (Vertex.this == c.getSet().iterator().next().primaryVertex) {
+        if (Vertex.this == change.getSet().iterator().next().primaryVertex) {
             int idx = 0;
-            for (Edge edge : c.getSet()) {
+            for (Edge edge : change.getSet()) {
                 edge.setIdx(idx);
                 ++idx;
             }
         }
     };
 
-    private final MapChangeListener<Vertex, SetProperty<Edge>> neighborhoodListener = c -> {  // For clarity
-        if (c.wasAdded()) {
-            c.getKey().positionProperty().addListener(positionListener);
-            c.getValueAdded().addListener(neighborEdgesListener);
-        } else if (c.wasRemoved()) {
-            c.getKey().positionProperty().removeListener(positionListener);
-            c.getValueRemoved().removeListener(neighborEdgesListener);
+    private final MapChangeListener<Vertex, SetProperty<Edge>> neighborhoodListener = change -> {  // For clarity
+        if (change.wasAdded()) {
+            change.getKey().positionProperty().addListener(positionListener);
+            change.getValueAdded().addListener(neighborEdgesListener);
+        } else if (change.wasRemoved()) {
+            change.getKey().positionProperty().removeListener(positionListener);
+            change.getValueRemoved().removeListener(neighborEdgesListener);
         }
         updateSelfLoopAngle();
     };
 
-    // Constructor
-    public Vertex(Canvas canvas, double x, double y) {
+    public Vertex(Canvas canvas, Point2D position) {
         super(canvas, currentId++);
 
-        setPositionInScreen(x, y);
+        setPositionInScreen(position);
         initializeGraphics();
 
         positionProperty().addListener(positionListener);
-        neighborhoodProperty().addListener(neighborhoodListener);
+        getNeighborhood().addListener(neighborhoodListener);
 
         // For debugging
         System.out.println("A new Vertex is created.");
@@ -82,11 +84,11 @@ public class Vertex extends GraphElement {
         initializeGraphics();
 
         positionProperty().addListener(positionListener);
-        neighborhoodProperty().addListener(neighborhoodListener);
+        getNeighborhood().addListener(neighborhoodListener);
 
         // Add the label and properties (if any)
         setLabel(node.getLabel());
-        if(node.hasProperties()) properties = node.getProperties();
+        properties = node.getProperties();
 
         // For debugging
         System.out.println("A new Vertex is created.");
@@ -163,12 +165,8 @@ public class Vertex extends GraphElement {
         if(edges != null) edges.remove(edge);
     }
 
-    public MapProperty<Vertex, SetProperty<Edge>> neighborhoodProperty() {
-        return neighborhood;
-    }
-
-    public Map<Vertex, SetProperty<Edge>> getNeighborhood() {
-        return neighborhood.get();
+    public ObservableMap<Vertex, SetProperty<Edge>> getNeighborhood() {
+        return unmodifiableNeighborhood;
     }
 
     public boolean hasNeighbor(Vertex neighbor) {
@@ -223,7 +221,7 @@ public class Vertex extends GraphElement {
 
     @Override
     public void erase() {
-        canvas.removeFromVertices(this.id(), this);
+        canvas.erase(this);
         getEdges().forEach(Edge::erase);
     }
 
@@ -232,11 +230,9 @@ public class Vertex extends GraphElement {
      */
     @Override
     public String toText() {
-        List<Vertex> vertices = canvas.getVertices();
-        int vertexId = vertices.indexOf(this);
         String[] temp = new String[]{
                 "v",
-                String.valueOf(vertexId),
+                String.valueOf(getId()),
                 String.valueOf(getX()),
                 String.valueOf(getY()),
                 getLabel(),

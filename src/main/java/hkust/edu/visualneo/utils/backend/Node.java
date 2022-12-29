@@ -14,8 +14,8 @@ public class Node extends Entity {
     public Node(long id, String label, Map<String, Value> properties) {
         super(id, label, properties);
     }
-    public Node(long id, Vertex vertex) {
-        this(id, vertex.getLabel(), vertex.getProp());
+    public Node(Vertex vertex) {
+        this(vertex.getElementId(), vertex.getLabel(), vertex.getProp());
     }
     public Node(org.neo4j.driver.types.Node node, boolean schema) {
         this(node.id(),
@@ -27,7 +27,7 @@ public class Node extends Entity {
         return relations;
     }
 
-    public boolean hasRelation() {
+    public boolean hasRelations() {
         return !relations().isEmpty();
     }
 
