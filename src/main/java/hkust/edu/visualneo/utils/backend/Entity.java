@@ -12,6 +12,7 @@ abstract class Entity implements Comparable<Entity>, Mappable {
     protected static final int MULTIPLIER_PRIME = 37;
 
     protected final long id;
+    protected int index = -1;
     private final String label;
     private final Map<String, Value> properties;
 
@@ -53,6 +54,12 @@ abstract class Entity implements Comparable<Entity>, Mappable {
 
     public long getId() {
         return id;
+    }
+
+    public void setIndex(int index) {
+        if (this.index != -1 || index < 0)
+            return;
+        this.index = index;
     }
 
     @Override

@@ -90,7 +90,7 @@ public class Relation extends Entity {
 
     @Override
     public String getName() {
-        return 'e' + String.valueOf(id);
+        return 'e' + (index == -1 ? String.valueOf(id) : String.valueOf(index));
     }
 
     @Override

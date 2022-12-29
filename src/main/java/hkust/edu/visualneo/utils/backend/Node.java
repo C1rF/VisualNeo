@@ -112,7 +112,7 @@ public class Node extends Entity {
 
     @Override
     public String getName() {
-        return 'n' + String.valueOf(id);
+        return 'n' + (index == -1 ? String.valueOf(id) : String.valueOf(index));
     }
 
     @Override

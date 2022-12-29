@@ -33,8 +33,8 @@ public class Vertex extends GraphElement {
 
     private final ObservableMap<Vertex, SetProperty<Edge>> neighborhood =
             new SimpleMapProperty<>(this, "neighborhood", FXCollections.observableHashMap());
-    private final ObservableMap<Vertex, SetProperty<Edge>> unmodifiableNeighborhood =
-            FXCollections.unmodifiableObservableMap(neighborhood);
+//    private final ObservableMap<Vertex, SetProperty<Edge>> unmodifiableNeighborhood =
+//            FXCollections.unmodifiableObservableMap(neighborhood);
 
     private final ChangeListener<Point2D> positionListener =  // For re-usability
             (observable, oldValue, newValue) -> updateSelfLoopAngle();
@@ -166,7 +166,7 @@ public class Vertex extends GraphElement {
     }
 
     public ObservableMap<Vertex, SetProperty<Edge>> getNeighborhood() {
-        return unmodifiableNeighborhood;
+        return neighborhood;
     }
 
     public boolean hasNeighbor(Vertex neighbor) {

@@ -3,10 +3,7 @@ package hkust.edu.visualneo.utils.backend;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.Vertex;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -18,10 +15,10 @@ public class Graph implements Mappable {
     public Graph(Collection<Node> nodes, Collection<Relation> relations, boolean checkConnectivity) {
         this.nodes = nodes
                 .stream()
-                .collect(Collectors.toUnmodifiableMap(Node::getId, Function.identity()));
+                .collect(Collectors.toMap(Node::getId, Function.identity(), (e1, e2) -> e1, TreeMap::new));
         this.relations = relations
                 .stream()
-                .collect(Collectors.toUnmodifiableMap(Relation::getId, Function.identity()));
+                .collect(Collectors.toMap(Relation::getId, Function.identity(), (e1, e2) -> e1, TreeMap::new));
 
         validate(checkConnectivity);
     }
@@ -30,7 +27,7 @@ public class Graph implements Mappable {
     public static Graph fromDrawing(Collection<Vertex> vertices, Collection<Edge> edges) {
         Map<Vertex, Node> nodes = vertices
                 .stream()
-                .collect(Collectors.toMap(Function.identity(), Node::new, (e1, e2) -> e2, LinkedHashMap::new));
+                .collect(Collectors.toMap(Function.identity(), Node::new));
 
         Collection<Relation> relations = edges
                 .stream()
@@ -39,7 +36,10 @@ public class Graph implements Mappable {
                                           nodes.get(edge.endVertex)))
                 .collect(Collectors.toSet());
 
-        return new Graph(nodes.values(), relations, true);
+        Graph graph = new Graph(nodes.values(), relations, true);
+        graph.index();
+
+        return graph;
     }
 
     private void validate(boolean checkConnectivity) {
@@ -85,6 +85,15 @@ public class Graph implements Mappable {
             if (uncoloredNodes.contains(other))
                 color(uncoloredNodes, other);
         });
+    }
+
+    private void index() {
+        int nodeIndex = 0;
+        for (Node node : nodes())
+            node.setIndex(nodeIndex++);
+        int relationIndex = 0;
+        for (Relation relation : relations())
+            relation.setIndex(relationIndex++);
     }
 
     public Collection<Node> nodes() {
