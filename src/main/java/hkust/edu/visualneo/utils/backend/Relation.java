@@ -1,7 +1,6 @@
 package hkust.edu.visualneo.utils.backend;
 
 import hkust.edu.visualneo.utils.frontend.Edge;
-import hkust.edu.visualneo.utils.frontend.Vertex;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.types.Relationship;
 
@@ -34,11 +33,11 @@ public class Relation extends Entity {
         start.attach(this);
         end.attach(this);
     }
-    public Relation(long id, Edge edge, Map<Vertex, Node> links) {
-        this(id,
+    public Relation(Edge edge, Node start, Node end) {
+        this(edge.getElementId(),
              edge.isDirected(),
-             links.get(edge.startVertex),
-             links.get(edge.endVertex),
+             start,
+             end,
              edge.getLabel(),
              edge.getProp());
     }
@@ -91,7 +90,7 @@ public class Relation extends Entity {
 
     @Override
     public String getName() {
-        return 'e' + String.valueOf(id);
+        return 'e' + (index == -1 ? String.valueOf(id) : String.valueOf(index));
     }
 
     @Override

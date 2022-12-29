@@ -155,17 +155,17 @@ public class QueryBuilder {
     private void translateEntity(Entity entity) {
         if (entity.hasLabel()) {
             buffer.append(':');
-            buffer.append(entity.label);
+            buffer.append(entity.getLabel());
         }
 
         if (entity.hasProperties()) {
             buffer.append(" {");
-            Iterator<String> propertyIt = entity.properties.keySet().iterator();
+            Iterator<String> propertyIt = entity.getProperties().keySet().iterator();
             while (true) {
                 String propertyKey = propertyIt.next();
                 buffer.append(propertyKey);
                 buffer.append(": ");
-                Value value = entity.properties.get(propertyKey);
+                Value value = entity.getProperties().get(propertyKey);
                 buffer.append(value);
                 if (!propertyIt.hasNext())
                     break;

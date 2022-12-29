@@ -252,8 +252,8 @@ public class VisualNeoController {
      */
     @FXML
     private void handleExactSearch() {
-        List<Vertex> listOfVertices = constructCanvas.getVertices();
-        List<Edge> listOfEdges = constructCanvas.getEdges();
+        Collection<Vertex> listOfVertices = constructCanvas.getVertices();
+        Collection<Edge> listOfEdges = constructCanvas.getEdges();
         QueryHandler.Results results = null;
         try{
             results = app.queryHandler.exactSearch(listOfVertices,listOfEdges);
@@ -481,15 +481,13 @@ public class VisualNeoController {
      */
     @FXML
     private void handleSave() {
-        String outputText = "";
-        List<Vertex> vertices = constructCanvas.getVertices();
-        List<Edge> edges =  constructCanvas.getEdges();
+        StringBuilder outputText = new StringBuilder();
+        Collection<Vertex> vertices = constructCanvas.getVertices();
+        Collection<Edge> edges =  constructCanvas.getEdges();
         for(Vertex v : vertices)
-            outputText += v.toText() + '\n';
-        for(int i = edges.size()-1; i >= 0; i--){
-            Edge e = edges.get(i);
-            outputText += e.toText() + '\n';
-        }
+            outputText.append(v.toText()).append('\n');
+        for(Edge e : edges)
+            outputText.append(e.toText()).append('\n');
         System.out.println(outputText);
         FileChooser fileChooser = new FileChooser();
         //Set extension filter for text files
@@ -556,7 +554,7 @@ public class VisualNeoController {
         }
         else if(elements[0].equals("e")){
             // current line describes an Edge
-            List<Vertex> vertices = constructCanvas.getVertices();
+            Collection<Vertex> vertices = constructCanvas.getVertices();
             int startVertexId = Integer.parseInt(elements[1]);
             int endVertexId = Integer.parseInt(elements[2]);
             boolean directed = Boolean.valueOf(elements[3]);

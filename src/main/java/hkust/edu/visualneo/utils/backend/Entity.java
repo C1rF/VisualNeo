@@ -12,8 +12,9 @@ abstract class Entity implements Comparable<Entity>, Mappable {
     protected static final int MULTIPLIER_PRIME = 37;
 
     protected final long id;
-    final String label;
-    final Map<String, Value> properties;
+    protected int index = -1;
+    private final String label;
+    private final Map<String, Value> properties;
 
     // Pass null for an unlabeled node/relationship
     protected Entity(long id, String label, Map<String, Value> properties) {
@@ -55,6 +56,12 @@ abstract class Entity implements Comparable<Entity>, Mappable {
         return id;
     }
 
+    public void setIndex(int index) {
+        if (this.index != -1 || index < 0)
+            return;
+        this.index = index;
+    }
+
     @Override
     public String toString() {
         return new TreePrinter().print(getName(), toMap());
@@ -70,11 +77,6 @@ abstract class Entity implements Comparable<Entity>, Mappable {
 
     @Override
     public int hashCode() {
-//        int hash = INITIAL_PRIME;
-//        hash = MULTIPLIER_PRIME * hash + (int) id;
-//        hash = MULTIPLIER_PRIME * hash + (label == null ? 0 : label.hashCode());
-//        hash = MULTIPLIER_PRIME * hash + properties.hashCode();
-//        return hash;
         return (int) (id ^ (id >>> 32));  // Implementation by Neo4j
     }
 
@@ -89,7 +91,7 @@ abstract class Entity implements Comparable<Entity>, Mappable {
         return id == ((Entity) other).id;
     }
 
-    // Doesn't check for null
+    // No null check
     @Override
     public int compareTo(Entity other) {
         return (int) (id - other.id);
