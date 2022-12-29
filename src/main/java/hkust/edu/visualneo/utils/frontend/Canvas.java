@@ -1,5 +1,7 @@
 package hkust.edu.visualneo.utils.frontend;
 
+import hkust.edu.visualneo.utils.backend.Graph;
+import hkust.edu.visualneo.utils.backend.Relation;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -10,10 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Canvas extends Pane {
 
@@ -38,6 +37,9 @@ public class Canvas extends Pane {
 
     private Point2D cursor;
     private boolean dragged;
+
+    private final Map<Long, Vertex> vertices = new HashMap<>();
+    private final Map<Long, Edge> edges = new HashMap<>();
 
     public void setType(CanvasType type) {
         if (this.type != CanvasType.NONE || type == CanvasType.NONE)
@@ -180,14 +182,41 @@ public class Canvas extends Pane {
         }
     }
 
-    // TODO: Make these private
-    public void createVertex(double x, double y) {
+    public void loadGraph(Graph graph){
+        // Compute the layout of the graph
+        ForceDirectedPlacement placement = new ForceDirectedPlacement(graph, new Point2D(this.getWidth(), this.getHeight()), 10000, 0.5, 0.9);
+        Map<Long, Point2D> layout = placement.layout();
+        // Create the vertices and edges
+        for(hkust.edu.visualneo.utils.backend.Node node : graph.nodes()){
+            createVertex(node, layout.get(node.getId()));
+        }
+        for(Relation relation : graph.relations()){
+            createEdge(relation);
+        }
+    }
+
+    private void createVertex(double x, double y) {
         Vertex vertex = new Vertex(this, x, y);
+        vertices.put(vertex.id(), vertex);
         addElement(vertex);
     }
 
-    public void createEdge(Vertex start, Vertex end, boolean directed) {
+    private void createEdge(Vertex start, Vertex end, boolean directed) {
         Edge edge = new Edge(this, start, end, directed);
+        edges.put(edge.id(), edge);
+        addElement(edge);
+        edge.toBack();
+    }
+
+    private void createVertex(hkust.edu.visualneo.utils.backend.Node node, Point2D position){
+        Vertex vertex = new Vertex(this, node, position);
+        vertices.put(vertex.id(), vertex);
+        addElement(vertex);
+    }
+
+    private void createEdge(Relation relation) {
+        Edge edge = new Edge(this, relation);
+        edges.put(edge.id(), edge);
         addElement(edge);
         edge.toBack();
     }
@@ -199,19 +228,30 @@ public class Canvas extends Pane {
                 .toList();
     }
     public List<Vertex> getVertices() {
-        return getChildren()
-                .stream()
-                .filter(element -> element instanceof Vertex)
-                .map(element -> (Vertex) element)
-                .toList();
+//        return getChildren()
+//                .stream()
+//                .filter(element -> element instanceof Vertex)
+//                .map(element -> (Vertex) element)
+//                .toList();
+        return vertices.values().stream().toList();
     }
     public List<Edge> getEdges() {
-        return getChildren()
-                .stream()
-                .filter(element -> element instanceof Edge)
-                .map(element -> (Edge) element)
-                .toList();
+//        return getChildren()
+//                .stream()
+//                .filter(element -> element instanceof Edge)
+//                .map(element -> (Edge) element)
+//                .toList();
+        return edges.values().stream().toList();
     }
+
+    public Vertex getVertexById(long id) {
+        return vertices.get(id);
+    }
+
+    public Edge getEdgeById(long id) {
+        return edges.get(id);
+    }
+
     public void addElement(GraphElement element) {
         getChildren().add(element);
         clearHighlights();
@@ -233,6 +273,13 @@ public class Canvas extends Pane {
     public void clearElements() {
         getChildren().clear();
         clearHighlights();
+    }
+
+    public void removeFromVertices(Long id, Vertex vertex){
+        vertices.remove(id, vertex);
+    }
+    public void removeFromEdges(Long id, Edge edge){
+        edges.remove(id, edge);
     }
 
     public ObservableSet<GraphElement> getHighlights() {

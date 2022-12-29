@@ -220,6 +220,7 @@ public class Vertex extends GraphElement {
 
     @Override
     public void erase() {
+        canvas.removeFromVertices(this.id(), this);
         getEdges().forEach(Edge::erase);
     }
 

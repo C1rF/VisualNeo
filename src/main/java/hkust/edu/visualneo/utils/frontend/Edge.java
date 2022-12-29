@@ -1,5 +1,6 @@
 package hkust.edu.visualneo.utils.frontend;
 
+import hkust.edu.visualneo.utils.backend.Relation;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
@@ -73,10 +74,34 @@ public class Edge extends GraphElement {
                 "(" + endVertex.getX() + " , " + endVertex.getY() + ")" + " is created!");
     }
 
-//    public Edge(Canvas canvas, Relation relation) {
-//        super(canvas, relation.getId());
-//        // TODO: Aba
-//    }
+    public Edge(Canvas canvas, Relation relation) {
+        super(canvas, relation.getId());
+        this.startVertex = canvas.getVertexById(relation.start.getId());
+        this.endVertex = canvas.getVertexById(relation.end.getId());
+        setDirected(relation.directed);
+
+        if (isReverted()) {
+            primaryVertex = endVertex;
+            secondaryVertex = startVertex;
+        }
+        else {
+            primaryVertex = startVertex;
+            secondaryVertex = endVertex;
+        }
+
+        // To change the pivot of rotation
+        Rotate rotate = new Rotate();
+        angle = rotate.angleProperty();
+        getTransforms().add(rotate);
+
+        // Notify two vertices to attach it
+        attach();
+        initializeGraphics();
+
+        // For Debugging
+        System.out.println("An Edge from (" + startVertex.getX() + " , " + startVertex.getY() + ") to " +
+                "(" + endVertex.getX() + " , " + endVertex.getY() + ")" + " is created!");
+    }
 
     @Override
     protected void initializeGraphics() {
@@ -307,6 +332,7 @@ public class Edge extends GraphElement {
 
     @Override
     public void erase() {
+        canvas.removeFromEdges(this.id(), this);
         canvas.getChildren().remove(this);
         startVertex.detach(this);
         endVertex.detach(this);

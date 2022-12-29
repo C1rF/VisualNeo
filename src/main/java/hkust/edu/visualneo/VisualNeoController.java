@@ -123,8 +123,9 @@ public class VisualNeoController {
     private void initialize() {
         constructCanvas.setType(Canvas.CanvasType.MODIFIABLE);
         constructCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
-            if (constructCanvas.getHighlights().size() == 1)
-                refreshAllPane(constructCanvas.getSingleHighlight());
+            GraphElement temp = constructCanvas.getSingleHighlight();
+            if (temp != null)
+                refreshAllPane(temp);
             else
                 hideAllPane();
         });
@@ -154,6 +155,7 @@ public class VisualNeoController {
                 if(highlight_edge != null) highlight_edge.setDirected(newValue);
             }
         };
+
         tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
     }
 
@@ -525,7 +527,7 @@ public class VisualNeoController {
             // current line describes a Vertex
             double x = Double.parseDouble(elements[2]);
             double y = Double.parseDouble(elements[3]);
-            constructCanvas.createVertex(x, y);
+            //constructCanvas.createVertex(x, y);
         }
         else if(elements[0].equals("e")){
             // current line describes an Edge
@@ -533,7 +535,7 @@ public class VisualNeoController {
             int startVertexId = Integer.parseInt(elements[1]);
             int endVertexId = Integer.parseInt(elements[2]);
             boolean directed = Boolean.valueOf(elements[3]);
-            constructCanvas.createEdge(vertices.get(startVertexId), vertices.get(endVertexId), directed);
+            //constructCanvas.createEdge(vertices.get(startVertexId), vertices.get(endVertexId), directed);
         }
         GraphElement newElement = constructCanvas.getSingleHighlight();
         // parse Label
