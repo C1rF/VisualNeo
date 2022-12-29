@@ -39,53 +39,6 @@ public class Canvas extends Pane {
     private Point2D cursor;
     private boolean dragged;
 
-    public Canvas() {
-        super();
-
-        setOnKeyPressed(e -> {
-            if (e.isShortcutDown()) {
-                if (e.getCode() == KeyCode.A)
-                    new ArrayList<>(getChildren()).forEach(node -> addHighlight((GraphElement) node));
-            }
-            else {
-                if (e.getCode() == KeyCode.DELETE || e.getCode() == KeyCode.BACK_SPACE)
-                    removeElements(getHighlights());
-            }
-        });
-
-        setOnMousePressed(e -> {
-            EventTarget target = e.getTarget();
-
-            if (target == this) {  // Clicked on Canvas
-                if (e.isShiftDown())
-                    createVertex(e.getX(), e.getY());
-                else {
-                    clearHighlights();
-                    cursor = new Point2D(e.getX(), e.getY());
-                }
-            }
-            else {  // Clicked on a GraphElement
-                GraphElement currentElement = (GraphElement) ((Node) target).getParent();
-                Vertex lastVertex = nomineeVertex();
-                if (e.isShiftDown() && lastVertex != null && currentElement instanceof Vertex currentVertex)
-                    createEdge(lastVertex, currentVertex, true);
-                else if (e.isShortcutDown()) {
-                    if (currentElement.isHighlighted())
-                        removeHighlight(currentElement);
-                    else
-                        addHighlight(currentElement);
-                }
-                else {
-                    if (!currentElement.isHighlighted()) {
-                        clearHighlights();
-                        addHighlight(currentElement);
-                    }
-                    cursor = new Point2D(e.getX(), e.getY());
-                }
-            }
-        });
-    }
-
     public void setType(CanvasType type) {
         if (this.type != CanvasType.NONE || type == CanvasType.NONE)
             return;
