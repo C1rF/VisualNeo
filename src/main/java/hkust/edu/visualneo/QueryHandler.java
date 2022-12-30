@@ -1,7 +1,5 @@
 package hkust.edu.visualneo;
 
-import com.codepoetics.protonpack.Indexed;
-import com.codepoetics.protonpack.StreamUtils;
 import hkust.edu.visualneo.utils.backend.*;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.Vertex;
@@ -11,6 +9,7 @@ import org.neo4j.driver.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class QueryHandler {
 
@@ -175,14 +174,14 @@ public class QueryHandler {
 
                 Graph resultGraph = new Graph(new HashSet<>(nodes.values()), relations, false);
 
-                List<Pair<List<Long>>> resultIds = record
+                List<Pair<List<Long>>> resultIds = new ArrayList<>(record
                         .get("resultIds")
                         .asList(value -> {
                             List<Value> pairList = value.asList(Function.identity());
                             List<Long> nodeIds = pairList.get(0).asList(Value::asLong);
                             List<Long> relationIds = pairList.get(1).asList(Value::asLong);
                             return new Pair<>(nodeIds, relationIds);
-                        });
+                        }));
 
                 return new Results(resultGraph, resultIds);
             });
@@ -219,17 +218,19 @@ public class QueryHandler {
 
             map.put("Graph", graph.toMap());
             map.put("Node & Relation IDs",
-                    StreamUtils.zipWithIndex(ids.stream())
-                               .collect(Collectors.toMap(
-                                       Indexed::getIndex,
-                                       pairIndexed -> {
-                                           Map<String, List<Long>> ids = new LinkedHashMap<>();
-                                           ids.put("Nodes", pairIndexed.getValue().head());
-                                           ids.put("Relations", pairIndexed.getValue().tail());
-                                           return ids;
-                                       },
-                                       (e1, e2) -> e1,
-                                       LinkedHashMap::new)));
+                    IntStream.range(0, ids.size())
+                             .boxed()
+                             .collect(Collectors.toMap(
+                                     Function.identity(),
+                                     i -> {
+                                         Pair<List<Long>> idPair = ids.get(i);
+                                         Map<String, List<Long>> idMap = new LinkedHashMap<>();
+                                         idMap.put("Nodes", idPair.head());
+                                         idMap.put("Relations", idPair.tail());
+                                         return idMap;
+                                     },
+                                     (e1, e2) -> e1,
+                                     LinkedHashMap::new)));
 
             return map;
         }
