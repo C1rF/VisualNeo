@@ -108,6 +108,8 @@ public class VisualNeoController {
     private Canvas constructCanvas;
     @FXML
     private Canvas resultCanvas;
+    @FXML
+    private Canvas schemaCanvas;
     DbMetadata metadata;
 
     /**
@@ -138,6 +140,16 @@ public class VisualNeoController {
             else
                 hideAllPane();
         });
+        schemaCanvas.setType(Canvas.CanvasType.NAVIGABLE);
+        schemaCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
+            GraphElement temp = resultCanvas.getSingleHighlight();
+            if (temp != null)
+                refreshAllPane(temp, true);
+            else
+                hideAllPane();
+        });
+
+        tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
 
         property_change_listener = new ChangeListener<String>() {
             @Override
@@ -172,17 +184,21 @@ public class VisualNeoController {
                 switch (selectedIndex){
                     case 0 -> {
                         resultCanvas.clearHighlights();
+                        schemaCanvas.clearHighlights();
                         tab_pane.onKeyPressedProperty().unbind();
                         tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
                     }
                     case 1 -> {
                         constructCanvas.clearHighlights();
+                        schemaCanvas.clearHighlights();
                         tab_pane.onKeyPressedProperty().unbind();
                         tab_pane.onKeyPressedProperty().bind(resultCanvas.onKeyPressedProperty());
                     }
                     case 2 -> {
                         constructCanvas.clearHighlights();
                         resultCanvas.clearHighlights();
+                        tab_pane.onKeyPressedProperty().unbind();
+                        tab_pane.onKeyPressedProperty().bind(schemaCanvas.onKeyPressedProperty());
                     }
                 }
             }
@@ -223,7 +239,9 @@ public class VisualNeoController {
         UpdateNodeTable(metadata);
         UpdateRelationTable(metadata);
 
-        // TODO: Show the schema
+        // Display the schema graph
+        schemaCanvas.clearElements();
+        schemaCanvas.loadGraph(metadata.schemaGraph());
 
         // Update the label choice box
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
