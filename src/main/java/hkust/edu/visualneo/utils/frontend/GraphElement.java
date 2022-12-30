@@ -29,7 +29,7 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     private final StringProperty label =
             new SimpleStringProperty(this, "label", null);
     // Properties attached to the element(node/relation)
-    protected Map<String, Value> properties;
+    private final Map<String, Value> properties = new TreeMap<>();
     // Whether the element is highlighted
     private final BooleanProperty highlight =
             new SimpleBooleanProperty(this, "highlight", false);
@@ -43,12 +43,15 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     GraphElement(Canvas canvas, long id) {
         this.canvas = canvas;
         this.id = id;
-        properties = new TreeMap<>();
         initializeHandlers();
     }
 
     public void addProperty(String name, Value val) {
         properties.put(name, val);
+    }
+
+    public void addProperties(Map<String, Value> properties) {
+        this.properties.putAll(properties);
     }
 
     public Map<String, Value> getProp() {

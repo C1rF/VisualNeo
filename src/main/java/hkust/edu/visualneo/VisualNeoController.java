@@ -18,6 +18,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -31,7 +32,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 public class VisualNeoController {
     /**
@@ -142,12 +146,15 @@ public class VisualNeoController {
         });
         schemaCanvas.setType(Canvas.CanvasType.NAVIGABLE);
         schemaCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
-            GraphElement temp = resultCanvas.getSingleHighlight();
+            GraphElement temp = schemaCanvas.getSingleHighlight();
             if (temp != null)
                 refreshAllPane(temp, true);
             else
                 hideAllPane();
         });
+
+        Rectangle schemaContainer = new Rectangle(648, 321.5);
+        schemaCanvas.setClip(schemaContainer);
 
         tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
 
@@ -242,6 +249,21 @@ public class VisualNeoController {
         // Display the schema graph
         schemaCanvas.clearElements();
         schemaCanvas.loadGraph(metadata.schemaGraph());
+        Map<String, Map<String, String>> labelToNodeProperty = metadata.nodePropertiesByLabel();
+        Map<String, Map<String, String>> labelToRelationProperty = metadata.relationPropertiesByLabel();
+        for(Vertex v : schemaCanvas.getVertices()){
+            Map<String, String> nodeProperties = labelToNodeProperty.get(v.getLabel());
+            if(nodeProperties == null) continue;
+            for(Map.Entry<String,String> nodeProperty : nodeProperties.entrySet())
+                v.addProperty(nodeProperty.getKey(), new StringValue(nodeProperty.getValue()));
+        }
+        for(Edge e : schemaCanvas.getEdges()){
+            Map<String, String> relationProperties = labelToRelationProperty.get(e.getLabel());
+            if(relationProperties == null) continue;
+            for(Map.Entry<String,String> relationProperty : relationProperties.entrySet()){
+                e.addProperty(relationProperty.getKey(), new StringValue(relationProperty.getValue()));
+            }
+        }
 
         // Update the label choice box
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
