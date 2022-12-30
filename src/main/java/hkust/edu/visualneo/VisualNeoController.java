@@ -530,10 +530,10 @@ public class VisualNeoController {
             outputText.append(e.toText()).append('\n');
         System.out.println(outputText);
         FileChooser fileChooser = new FileChooser();
-        //Set extension filter for text files
+        // Set extension filter for txt files
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
         fileChooser.getExtensionFilters().add(extFilter);
-        //Show save file dialog
+        // Show save file dialog
         File file = fileChooser.showSaveDialog(app.stage);
         if (file != null) {
             // save the outputText to the file
@@ -581,7 +581,6 @@ public class VisualNeoController {
         }
     }
 
-    // TODO: Change this
     // Helper Function to parse one line
     private void parseOneLine(String line){
         if(line.isEmpty()) return;
