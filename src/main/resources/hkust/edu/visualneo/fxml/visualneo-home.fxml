@@ -194,21 +194,28 @@
                                           </Text>
                                        </children>
                                     </AnchorPane>
-                                    <AnchorPane fx:id="pane_with_database" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+                                    <AnchorPane fx:id="pane_with_database" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
                                        <children>
-                                          <TableView fx:id="tableview_node" focusTraversable="false" layoutX="-22.0" layoutY="-2.0" prefHeight="300.0" prefWidth="250.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <AnchorPane layoutX="91.0" layoutY="382.0" maxHeight="323.5" maxWidth="650.0" minHeight="323.5" minWidth="650.0" prefHeight="323.5" prefWidth="650.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="350.0" />
+                                           <Canvas fx:id="schemaCanvas" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                                          <Text layoutX="55.0" layoutY="336.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ER Diagram" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="320.0">
+                                             <font>
+                                                <Font name="Arial Black" size="20.0" />
+                                             </font>
+                                          </Text>
+                                          <TableView fx:id="tableview_relation" prefHeight="300.0" prefWidth="300.0" AnchorPane.leftAnchor="350.0" AnchorPane.topAnchor="0.0">
                                             <columns>
-                                              <TableColumn fx:id="node_name_col" prefWidth="170.0" resizable="false" text="Node" />
-                                              <TableColumn fx:id="node_count_col" resizable="false" text="Count" />
+                                              <TableColumn fx:id="relation_name_col" prefWidth="200.0" resizable="false" text="Relation" />
+                                              <TableColumn fx:id="relation_count_col" prefWidth="100.0" resizable="false" text="Count" />
                                             </columns>
                                              <columnResizePolicy>
                                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                                              </columnResizePolicy>
                                           </TableView>
-                                          <TableView fx:id="tableview_relation" prefHeight="300.0" prefWidth="250.0" AnchorPane.leftAnchor="300.0" AnchorPane.topAnchor="0.0">
+                                          <TableView fx:id="tableview_node" focusTraversable="false" layoutX="-22.0" layoutY="-2.0" prefHeight="300.0" prefWidth="300.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <columns>
-                                              <TableColumn fx:id="relation_name_col" prefWidth="170.0" resizable="false" text="Relation" />
-                                              <TableColumn fx:id="relation_count_col" resizable="false" text="Count" />
+                                              <TableColumn fx:id="node_name_col" prefWidth="200.0" resizable="false" text="Node" />
+                                              <TableColumn fx:id="node_count_col" prefWidth="100.0" resizable="false" text="Count" />
                                             </columns>
                                              <columnResizePolicy>
                                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
