@@ -13,6 +13,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Canvas extends Pane {
 
@@ -106,7 +107,7 @@ public class Canvas extends Pane {
                 setOnKeyPressed(e -> {
                     if (e.isShortcutDown()) {
                         if (e.getCode() == KeyCode.A)
-                            new ArrayList<>(getChildren()).forEach(node -> addHighlight((GraphElement) node));
+                            highlightAll();
                     }
                 });
 
@@ -139,7 +140,7 @@ public class Canvas extends Pane {
                 setOnKeyPressed(e -> {
                     if (e.isShortcutDown()) {
                         if (e.getCode() == KeyCode.A)
-                            new ArrayList<>(getChildren()).forEach(node -> addHighlight((GraphElement) node));
+                            highlightAll();
                     }
                     else {
                         if (e.getCode() == KeyCode.DELETE || e.getCode() == KeyCode.BACK_SPACE)
@@ -183,15 +184,29 @@ public class Canvas extends Pane {
     }
 
     public void loadGraph(Graph graph) {
+        clearElements();
+
         // Compute the layout of the graph
         ForceDirectedPlacement placement =
                 new ForceDirectedPlacement(graph, new Point2D(this.getWidth(), this.getHeight()), 10000, 0.8);
         Map<Long, Point2D> layout = placement.layout();
-        // Create the vertices and edges
-        for (Node node : graph.nodes())
-            createVertex(node, layout.get(node.getId()));
-        for (Relation relation : graph.relations())
-            createEdge(relation);
+
+        vertices.putAll(graph.nodes()
+                             .stream()
+                             .collect(Collectors.toMap(Node::getId,
+                                                       node -> new Vertex(this,
+                                                                          node,
+                                                                          layout.get(node.getId())))));
+        edges.putAll(graph.relations()
+                          .stream()
+                          .collect(Collectors.toMap(Relation::getId,
+                                                    relation -> new Edge(this,
+                                                                         relation))));
+
+        getChildren().addAll(getEdges());
+        getChildren().addAll(getVertices());
+
+        highlightAll();
     }
 
     public void simulateLayout(Graph graph) {
@@ -282,6 +297,8 @@ public class Canvas extends Pane {
     }
 
     public void clearElements() {
+        vertices.clear();
+        edges.clear();
         getChildren().clear();
         clearHighlights();
     }
@@ -302,12 +319,18 @@ public class Canvas extends Pane {
                vertex : null;
     }
 
-    public void addHighlight(GraphElement e) {
-        highlights.add(e);
+    public void addHighlight(GraphElement element) {
+        highlights.add(element);
+    }
+    public void addHighlights(Collection<GraphElement> elements) {
+        highlights.addAll(elements);
+    }
+    public void highlightAll() {
+        addHighlights(getChildren().stream().map(node -> (GraphElement) node).toList());
     }
 
-    public void removeHighlight(GraphElement e) {
-        highlights.remove(e);
+    public void removeHighlight(GraphElement element) {
+        highlights.remove(element);
     }
 
     public void clearHighlights() {
