@@ -5,7 +5,6 @@ import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableMap;
 import javafx.collections.SetChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
@@ -31,10 +30,10 @@ public class Vertex extends GraphElement {
     private final DoubleProperty selfLoopAngle =
             new SimpleDoubleProperty(this, "selfLoopAngle", DEFAULT_ANGLE);
 
-    private final ObservableMap<Vertex, SetProperty<Edge>> neighborhood =
+    private final MapProperty<Vertex, SetProperty<Edge>> neighborhood =
             new SimpleMapProperty<>(this, "neighborhood", FXCollections.observableHashMap());
-//    private final ObservableMap<Vertex, SetProperty<Edge>> unmodifiableNeighborhood =
-//            FXCollections.unmodifiableObservableMap(neighborhood);
+//    private final MapProperty<Vertex, SetProperty<Edge>> unmodifiableNeighborhood =
+//            FXCollections.unmodifiableMapProperty(neighborhood);
 
     private final ChangeListener<Point2D> positionListener =  // For re-usability
             (observable, oldValue, newValue) -> updateSelfLoopAngle();
@@ -71,7 +70,7 @@ public class Vertex extends GraphElement {
         initializeGraphics();
 
         positionProperty().addListener(positionListener);
-        getNeighborhood().addListener(neighborhoodListener);
+        neighborhoodProperty().addListener(neighborhoodListener);
 
         // For debugging
         System.out.println("A new Vertex is created.");
@@ -84,7 +83,7 @@ public class Vertex extends GraphElement {
         initializeGraphics();
 
         positionProperty().addListener(positionListener);
-        getNeighborhood().addListener(neighborhoodListener);
+        neighborhoodProperty().addListener(neighborhoodListener);
 
         // Add the label and properties (if any)
         setLabel(node.getLabel());
@@ -165,8 +164,11 @@ public class Vertex extends GraphElement {
         if(edges != null) edges.remove(edge);
     }
 
-    public ObservableMap<Vertex, SetProperty<Edge>> getNeighborhood() {
+    public MapProperty<Vertex, SetProperty<Edge>> neighborhoodProperty() {
         return neighborhood;
+    }
+    public Map<Vertex, SetProperty<Edge>> getNeighborhood() {
+        return neighborhoodProperty().get();
     }
 
     public boolean hasNeighbor(Vertex neighbor) {

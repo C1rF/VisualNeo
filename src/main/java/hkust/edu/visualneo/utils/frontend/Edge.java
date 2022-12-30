@@ -337,6 +337,7 @@ public class Edge extends GraphElement {
     @Override
     public void erase() {
         canvas.erase(this);
+        canvas.getChildren().remove(this);
         startVertex.detach(this);
         endVertex.detach(this);
     }
