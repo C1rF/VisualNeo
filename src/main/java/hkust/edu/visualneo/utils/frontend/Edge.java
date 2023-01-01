@@ -207,6 +207,7 @@ public class Edge extends GraphElement {
         shape.setStroke(LINE_COLOR);
 
         highlightShape.setStrokeWidth(HIGHLIGHT_STROKE_WIDTH);
+        highlightShape.setStroke(Color.TRANSPARENT);
 
         getChildren().addAll(highlightShape, shape);
         text.toFront();

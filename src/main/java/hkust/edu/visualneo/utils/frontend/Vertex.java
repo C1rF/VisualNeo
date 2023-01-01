@@ -97,6 +97,7 @@ public class Vertex extends GraphElement {
         shape.setStroke(STROKE_COLOR);
 
         highlightShape = new Circle(HIGHLIGHT_RADIUS);
+        highlightShape.setFill(Color.TRANSPARENT);
 
         getChildren().addAll(highlightShape, shape);
 
