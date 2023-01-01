@@ -186,17 +186,11 @@ public class Canvas extends Pane {
     public void loadGraph(Graph graph) {
         clearElements();
 
-        // Compute the layout of the graph
-        ForceDirectedPlacement placement =
-                new ForceDirectedPlacement(graph, new Point2D(this.getWidth(), this.getHeight()), 10000, 0.8);
-        Map<Long, Point2D> layout = placement.layout();
-
         vertices.putAll(graph.nodes()
                              .stream()
                              .collect(Collectors.toMap(Node::getId,
                                                        node -> new Vertex(this,
-                                                                          node,
-                                                                          layout.get(node.getId())))));
+                                                                          node))));
         edges.putAll(graph.relations()
                           .stream()
                           .collect(Collectors.toMap(Relation::getId,
@@ -206,47 +200,38 @@ public class Canvas extends Pane {
         getChildren().addAll(getEdges());
         getChildren().addAll(getVertices());
 
-        highlightAll();
+        // Compute the layout of the graph
+        ForceDirectedPlacementStatic placement = new ForceDirectedPlacementStatic(this);
+        placement.simulate(10000);
+        placement.layout();
     }
 
-    public void simulateLayout(Graph graph) {
-        for (Node node : graph.nodes())
-            createVertex(node, Point2D.ZERO);
-        for (Relation relation : graph.relations())
-            createEdge(relation);
-        ForceDirectedPlacement placement =
-                new ForceDirectedPlacement(graph, new Point2D(this.getWidth(), this.getHeight()), 10000, 0.8);
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            int iterNum = 0;
-
-            public void run() {
-                placement.simulate(getVertices(), iterNum++);
-            }
-        }, 0, 300);
-    }
+//    public void layout(Graph graph, boolean softLayout) {
+//        for (Node node : graph.nodes())
+//            createVertex(node, Point2D.ZERO);
+//        for (Relation relation : graph.relations())
+//            createEdge(relation);
+//        ForceDirectedPlacementStatic placement =
+//                new ForceDirectedPlacementStatic(graph, new Point2D(this.getWidth(), this.getHeight()), 10000, 0.8);
+//        Timer timer = new Timer();
+//        timer.schedule(new TimerTask() {
+//            int iterNum = 0;
+//
+//            public void run() {
+//                placement.simulate(getVertices(), iterNum++);
+//            }
+//        }, 0, 300);
+//    }
 
     private void createVertex(Point2D position) {
-        Vertex vertex = new Vertex(this, position);
-        vertices.put(vertex.getElementId(), vertex);
-        addElement(vertex);
-    }
-
-    private void createVertex(Node node, Point2D position) {
-        Vertex vertex = new Vertex(this, node, position);
+        Vertex vertex = new Vertex(this);
+        vertex.setPositionInScreen(position);
         vertices.put(vertex.getElementId(), vertex);
         addElement(vertex);
     }
 
     private void createEdge(Vertex start, Vertex end, boolean directed) {
         Edge edge = new Edge(this, start, end, directed);
-        edges.put(edge.getElementId(), edge);
-        addElement(edge);
-        edge.toBack();
-    }
-
-    private void createEdge(Relation relation) {
-        Edge edge = new Edge(this, relation);
         edges.put(edge.getElementId(), edge);
         addElement(edge);
         edge.toBack();

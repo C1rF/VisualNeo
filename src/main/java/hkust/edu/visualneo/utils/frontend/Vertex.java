@@ -39,7 +39,7 @@ public class Vertex extends GraphElement {
             (observable, oldValue, newValue) -> updateSelfLoopAngle();
 
     private final SetChangeListener<Edge> neighborEdgesListener = change -> {  // For re-usability
-        if (change.getSet().size() == 0) {
+        if (change.getSet().isEmpty()) {
             getNeighborhood().remove(change.getElementRemoved().other(Vertex.this));
             return;
         }
@@ -63,10 +63,9 @@ public class Vertex extends GraphElement {
         updateSelfLoopAngle();
     };
 
-    public Vertex(Canvas canvas, Point2D position) {
+    public Vertex(Canvas canvas) {
         super(canvas, currentId++);
 
-        setPositionInScreen(position);
         initializeGraphics();
 
         positionProperty().addListener(positionListener);
@@ -76,10 +75,9 @@ public class Vertex extends GraphElement {
         System.out.println("A new Vertex is created.");
     }
 
-    public Vertex(Canvas canvas, Node node, Point2D position) {
+    public Vertex(Canvas canvas, Node node) {
         super(canvas, node.getId());
 
-        setPosition(position);
         initializeGraphics();
 
         positionProperty().addListener(positionListener);
@@ -105,6 +103,7 @@ public class Vertex extends GraphElement {
             shape.setStrokeWidth(newValue ? HIGHLIGHT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH);
             shape.setStroke(newValue ? HIGHLIGHT_COLOR : DEFAULT_COLOR);
         });
+        setHighlight(false);
     }
 
     @Override
