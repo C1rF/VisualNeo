@@ -78,6 +78,12 @@ public class VisualNeoController {
      */
     @FXML
     private TabPane tab_pane;
+    @FXML
+    private Tab tab_query_constructor;
+    @FXML
+    private Tab tab_query_result;
+    @FXML
+    private Tab tab_database_info;
     /**
      * Database Info Pane
      */
@@ -518,10 +524,20 @@ public class VisualNeoController {
     }
 
     @FXML
-    void handleZoomIn() { constructCanvas.camera.zoomIn();}
+    void handleZoomIn() {
+        if(tab_query_constructor.isSelected())
+            constructCanvas.camera.zoomIn();
+        else
+            resultCanvas.camera.zoomIn();
+    }
 
     @FXML
-    void handleZoomOut() { constructCanvas.camera.zoomOut();}
+    void handleZoomOut() {
+        if(tab_query_constructor.isSelected())
+            constructCanvas.camera.zoomOut();
+        else
+            resultCanvas.camera.zoomOut();
+    }
 
     // Functions in the Menu Bar
     /**

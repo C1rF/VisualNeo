@@ -81,8 +81,6 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     }
 
     public void setLabel(String label) {
-        // Add the new label
-        System.out.println("Add Label: " + label);
         labelProperty().set(label);
     }
 

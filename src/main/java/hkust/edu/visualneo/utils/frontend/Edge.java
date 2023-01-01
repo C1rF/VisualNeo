@@ -97,10 +97,6 @@ public class Edge extends GraphElement {
         // Add the label and properties (if any)
         setLabel(relation.getLabel());
         addProperties(relation.getProperties());
-
-        // For Debugging
-        System.out.println("An Edge from (" + startVertex.getX() + " , " + startVertex.getY() + ") to " +
-                "(" + endVertex.getX() + " , " + endVertex.getY() + ")" + " is created!");
     }
 
     @Override
