@@ -229,7 +229,6 @@ public class Edge extends GraphElement {
         double aX, aY;
 
         double tX = text.getLayoutBounds().getWidth() * 0.5 + TEXT_EPSILON;
-        text.setVisible(tX < d * 0.5 - VERTEX_RADIUS);
 
         if (atMiddle) {
             aX = d * 0.5 - VERTEX_RADIUS;
