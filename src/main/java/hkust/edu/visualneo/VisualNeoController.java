@@ -1,6 +1,9 @@
 package hkust.edu.visualneo;
 
 import hkust.edu.visualneo.utils.backend.DbMetadata;
+import hkust.edu.visualneo.utils.backend.Graph;
+import hkust.edu.visualneo.utils.backend.Node;
+import hkust.edu.visualneo.utils.backend.Relation;
 import hkust.edu.visualneo.utils.frontend.Canvas;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.GraphElement;
@@ -18,6 +21,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -142,12 +146,15 @@ public class VisualNeoController {
         });
         schemaCanvas.setType(Canvas.CanvasType.NAVIGABLE);
         schemaCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
-            GraphElement temp = resultCanvas.getSingleHighlight();
+            GraphElement temp = schemaCanvas.getSingleHighlight();
             if (temp != null)
                 refreshAllPane(temp, true);
             else
                 hideAllPane();
         });
+
+        Rectangle schemaContainer = new Rectangle(648, 321.5);
+        schemaCanvas.setClip(schemaContainer);
 
         tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
 
@@ -242,6 +249,21 @@ public class VisualNeoController {
         // Display the schema graph
         schemaCanvas.clearElements();
         schemaCanvas.loadGraph(metadata.schemaGraph());
+        Map<String, Map<String, String>> labelToNodeProperty = metadata.nodePropertiesByLabel();
+        Map<String, Map<String, String>> labelToRelationProperty = metadata.relationPropertiesByLabel();
+        for(Vertex v : schemaCanvas.getVertices()){
+            Map<String, String> nodeProperties = labelToNodeProperty.get(v.getLabel());
+            if(nodeProperties == null) continue;
+            for(Map.Entry<String,String> nodeProperty : nodeProperties.entrySet())
+                v.addProperty(nodeProperty.getKey(), new StringValue(nodeProperty.getValue()));
+        }
+        for(Edge e : schemaCanvas.getEdges()){
+            Map<String, String> relationProperties = labelToRelationProperty.get(e.getLabel());
+            if(relationProperties == null) continue;
+            for(Map.Entry<String,String> relationProperty : relationProperties.entrySet()){
+                e.addProperty(relationProperty.getKey(), new StringValue(relationProperty.getValue()));
+            }
+        }
 
         // Update the label choice box
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
@@ -508,10 +530,10 @@ public class VisualNeoController {
             outputText.append(e.toText()).append('\n');
         System.out.println(outputText);
         FileChooser fileChooser = new FileChooser();
-        //Set extension filter for text files
+        // Set extension filter for txt files
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
         fileChooser.getExtensionFilters().add(extFilter);
-        //Show save file dialog
+        // Show save file dialog
         File file = fileChooser.showSaveDialog(app.stage);
         if (file != null) {
             // save the outputText to the file
@@ -533,71 +555,81 @@ public class VisualNeoController {
     @FXML
     private void handleLoad() {
         FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+        fileChooser.getExtensionFilters().add(extFilter);
         File selectedFile = fileChooser.showOpenDialog(app.stage);
-        try
-        {
-            Scanner sc = new Scanner(selectedFile);
+        try {
+            if (selectedFile == null) return;
+            Graph pattern_graph = parsePattern(selectedFile);
             constructCanvas.clearElements();
-            while ( sc.hasNextLine() )
-            {
-                // For a single line
-                String s = sc.nextLine().trim();
-                if(!s.isEmpty()) {
-                    parseOneLine(s);
-                }
-            }
-        }
-        catch(FileNotFoundException fe){
-            System.out.println("Cannot find the file!");
-        }
-        catch( Exception ee ){
+            constructCanvas.loadGraph(pattern_graph);
+        } catch (FileNotFoundException fe) {
+        } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Load Data Error");
-            alert.setHeaderText("Cannot load the text file.");
-            alert.setContentText("Please check the format of the txt file!");
+            alert.setTitle("Load Pattern Error");
+            alert.setHeaderText("Cannot load the txt file.");
+            if(e.getMessage().equals("No Database")){
+                alert.setContentText("Your pattern contains labels/properties while no database is loaded.\nPlease load the database first!");
+            }
+            else{
+                alert.setContentText("The txt file has incorrect format!");
+            }
             alert.showAndWait();
         }
     }
 
-    // TODO: Change this
-    // Helper Function to parse one line
-    private void parseOneLine(String line){
-        if(line.isEmpty()) return;
-        String[] elements = line.split("\\s+");
-        if(elements[0].equals("v")){
-            // current line describes a Vertex
-            double x = Double.parseDouble(elements[2]);
-            double y = Double.parseDouble(elements[3]);
-            //constructCanvas.createVertex(x, y);
-        }
-        else if(elements[0].equals("e")){
-            // current line describes an Edge
-            Collection<Vertex> vertices = constructCanvas.getVertices();
-            int startVertexId = Integer.parseInt(elements[1]);
-            int endVertexId = Integer.parseInt(elements[2]);
-            boolean directed = Boolean.valueOf(elements[3]);
-            //constructCanvas.createEdge(vertices.get(startVertexId), vertices.get(endVertexId), directed);
-        }
-        GraphElement newElement = constructCanvas.getSingleHighlight();
-        // parse Label
-        String label = elements[4];
-        if(!label.equals("null")) newElement.setLabel(label);
-        // parse Properties
-        for(int i = 5; i < elements.length; i++){
-            String property = elements[i];
-            if(property.equals("null")) break;
-            String[] splitProperty = property.split(":");
-            String propertyName = splitProperty[0];
-            String propertyType;
-            if(newElement instanceof Vertex){
-                propertyType = metadata.nodeProperties().get(propertyName);
-            }else {
-                propertyType = metadata.relationProperties().get(propertyName);
+    // Helper function to parse the pattern
+    private Graph parsePattern(File pattern_file) throws Exception {
+        Scanner sc = new Scanner(pattern_file);
+
+        Collection<Node> nodes = new HashSet<>();
+        Collection<Relation> relations = new HashSet<>();
+        Map<Long, Node> nodeMap = new HashMap<>();
+        long currentId = GraphElement.getCurrentId();
+        boolean hasDatabase = (metadata != null);
+
+        while (sc.hasNextLine()) {
+            String s = sc.nextLine().trim();
+            if (!s.isEmpty()) {
+                // Parse a single line
+                String[] elements = s.split("\\s+");
+                boolean isVertex = elements[0].equals("v");
+                if (isVertex) {
+                    // Vertex
+                    if(!hasDatabase && (!elements[2].equals("null") || !elements[3].equals("null"))) throw new Exception("No Database");
+                    String label = elements[2].equals("null") ? null : elements[2];
+                    Map<String, Value> properties = new TreeMap<>();
+                    for (int i = 3; i < elements.length; i++) {
+                        String property = elements[i];
+                        if (property.equals("null")) break;
+                        String[] splitProperty = property.split(":");
+                        Value propertyValue = parsePropValue(metadata.nodeProperties().get(splitProperty[0]), splitProperty[1]);
+                        properties.put(splitProperty[0], propertyValue);
+                    }
+                    Node newNode = new Node(currentId++, label, properties);
+                    nodeMap.put(Long.parseLong(elements[1]), newNode);
+                    nodes.add(newNode);
+                } else {
+                    // Edge
+                    if(!hasDatabase && (!elements[4].equals("null") || !elements[5].equals("null"))) throw new Exception("No Database");
+                    boolean directed = Boolean.valueOf(elements[3]);
+                    String label = elements[4].equals("null") ? null : elements[4];
+                    Map<String, Value> properties = new TreeMap<>();
+                    for (int i = 5; i < elements.length; i++) {
+                        String property = elements[i];
+                        if (property.equals("null")) break;
+                        String[] splitProperty = property.split(":");
+                        Value propertyValue = parsePropValue(metadata.relationProperties().get(splitProperty[0]), splitProperty[1]);
+                        properties.put(splitProperty[0], propertyValue);
+                    }
+                    Node start = nodeMap.get(Long.parseLong(elements[1]));
+                    Node end = nodeMap.get(Long.parseLong(elements[2]));
+                    Relation newRelation = new Relation(currentId++, directed, start, end, label, properties);
+                    relations.add(newRelation);
+                }
             }
-            String propertyValueText = splitProperty[1];
-            Value propertyValue = parsePropValue(propertyType, propertyValueText);
-            newElement.addProperty(propertyName, propertyValue);
         }
+        return new Graph(nodes, relations, false);
     }
 
 }

@@ -100,7 +100,7 @@ public class Edge extends GraphElement {
 
         // Add the label and properties (if any)
         setLabel(relation.getLabel());
-        properties = relation.getProperties();
+        addProperties(relation.getProperties());
 
         // For Debugging
         System.out.println("An Edge from (" + startVertex.getX() + " , " + startVertex.getY() + ") to " +
@@ -399,8 +399,8 @@ public class Edge extends GraphElement {
     public String toText() {
         String[] temp = new String[]{
                 "e",
-                String.valueOf(startVertex.getId()),
-                String.valueOf(endVertex.getId()),
+                String.valueOf(startVertex.getElementId()),
+                String.valueOf(endVertex.getElementId()),
                 String.valueOf(isDirected()),
                 text.getText(),
                 propertyToText(),
