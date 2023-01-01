@@ -63,7 +63,7 @@ public class Vertex extends GraphElement {
     };
 
     public Vertex(Canvas canvas) {
-        super(canvas, UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
+        super(canvas);
 
         initializeGraphics();
 
