@@ -23,7 +23,11 @@ public class Vertex extends GraphElement {
     static final double HIGHLIGHT_RADIUS = VERTEX_RADIUS + 5.0;
     private static final double STROKE_WIDTH = 1.0;
     private static final double DEFAULT_ANGLE = -PI / 2;
-    private static final Color CIRCLE_COLOR = Color.LIGHTGRAY;
+    public static final Color DEFAULT_COLOR = Color.LIGHTGRAY;
+
+    public static final double ORIGIN_HUE = 30.0;
+    public static final double ORIGIN_SATURATION = 0.8;
+    public static final double ORIGIN_BRIGHTNESS = 0.9;
     private static final Color STROKE_COLOR = Color.DARKGREY;
 
     private final DoubleProperty selfLoopAngle =
@@ -92,7 +96,8 @@ public class Vertex extends GraphElement {
 
     @Override
     protected void initializeGraphics() {
-        shape = new Circle(VERTEX_RADIUS, CIRCLE_COLOR);
+        shape = new Circle(VERTEX_RADIUS);
+        shape.setFill(canvas.getColor(getLabel()));
         shape.setStrokeWidth(STROKE_WIDTH);
         shape.setStroke(STROKE_COLOR);
 
@@ -104,7 +109,11 @@ public class Vertex extends GraphElement {
         highlightProperty().addListener((observable, oldValue, newValue) ->
                                                 highlightShape.setFill(newValue ? HIGHLIGHT_COLOR : Color.TRANSPARENT));
 
+        labelProperty().addListener((observable, oldValue, newValue) -> shape.setFill(canvas.getColor(newValue)));
+
         super.initializeGraphics();
+
+        text.setFill(Color.WHITE);
     }
 
     @Override
