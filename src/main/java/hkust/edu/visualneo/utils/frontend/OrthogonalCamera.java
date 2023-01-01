@@ -12,9 +12,9 @@ import java.util.Objects;
 public class OrthogonalCamera {
 
     private static final double DEFAULT_RATIO = 1.0;
-    private static final double MIN_RATIO = 0.5;
-    private static final double MAX_RATIO  = 1.5;
-    private static final double UNIT_RATIO = 0.05;
+    private static final double MIN_RATIO = 0.2;
+    private static final double MAX_RATIO  = 2.0;
+    private static final double UNIT_RATIO = 0.1;
     private static final double ZOOM_UNITS = 2.5;
 
     private final Canvas canvas;
@@ -108,7 +108,7 @@ public class OrthogonalCamera {
     // The input pivot is in Screen coordinate system
     public void zoomWithPivot(double delta, Point2D pivot) {
         double originalInverseRatio = getInverseRatio();
-        setRatio(getRatio() + delta * UNIT_RATIO);
+        zoom(delta);
         translate(pivot.subtract(getCanvasCenter()).multiply(originalInverseRatio - getInverseRatio()));
     }
     public void zoomWithPivot(double delta, double pivotX, double pivotY) {
@@ -122,6 +122,10 @@ public class OrthogonalCamera {
     }
     public void zoomOut() {
         zoom(-ZOOM_UNITS);
+    }
+    public void fit(Point2D min, Point2D max) {
+        setPosition(min.midpoint(max));
+        setRatio(canvas.getWidth() / (max.getX() - min.getX()));
     }
 
     public double getCanvasWidth() {

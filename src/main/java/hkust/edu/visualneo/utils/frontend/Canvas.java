@@ -243,21 +243,32 @@ public class Canvas extends Pane {
     public void navigateTo(Collection<Long> vertexIds, Collection<Long> edgeIds) {
         clearHighlights();
 
-        int numVertices = vertexIds.size();
-        Point2D centroid = vertexIds
-                .stream()
-                .map(id -> {
-                    Vertex vertex = getVertex(id);
-                    addHighlight(vertex);
-                    return vertex.getPosition();
-                })
-                .reduce(Point2D::add)
-                .get()
-                .multiply(1.0 / numVertices);
-
         edgeIds.forEach(id -> addHighlight(getEdge(id)));
+        
+        Iterator<Long> it = vertexIds.iterator();
+        Vertex first = getVertex(it.next());
+        
+        double minX = first.getX();
+        double minY = first.getY();
+        double maxX = first.getX();
+        double maxY = first.getY();
+        
+        while (it.hasNext()) {
+            Vertex vertex = getVertex(it.next());
+            addHighlight(vertex);
 
-        camera.setPosition(centroid);
+            Point2D pos = vertex.getPosition();
+            if (pos.getX() < minX)
+                minX = pos.getX();
+            else if (pos.getX() > maxX)
+                maxX = pos.getX();
+            if (pos.getY() < minY)
+                minY = pos.getY();
+            else if (pos.getY() > maxY)
+                maxY = pos.getY();
+        }
+
+        camera.fit(new Point2D(minX, minY), new Point2D(maxX, maxY));
     }
 
     private void createVertex(Point2D position) {
