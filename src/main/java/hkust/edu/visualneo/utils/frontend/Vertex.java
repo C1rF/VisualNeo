@@ -89,9 +89,6 @@ public class Vertex extends GraphElement {
         // Add the label and properties (if any)
         setLabel(node.getLabel());
         addProperties(node.getProperties());
-
-        // For debugging
-        System.out.println("A new Vertex is created.");
     }
 
     @Override
