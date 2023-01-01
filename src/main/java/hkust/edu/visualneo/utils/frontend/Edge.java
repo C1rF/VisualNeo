@@ -5,6 +5,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
@@ -26,10 +27,9 @@ public class Edge extends GraphElement {
     private static final double ARROWHEAD_LENGTH = 5.0;
     private static final double TEXT_GAP = 10.0;
     private static final double TEXT_EPSILON = 4.0;
-    private static final double DEFAULT_STROKE_WIDTH = 1.5;
-    private static final double HIGHLIGHT_STROKE_WIDTH = 2.0;
-    private static final Color DEFAULT_COLOR = new Color(0.0, 0.0, 0.0, 0.4);
-    private static final Color HIGHLIGHT_COLOR = new Color(0.0, 0.0, 0.0, 0.7);
+    private static final double LINE_STROKE_WIDTH = 1.5;
+    private static final double HIGHLIGHT_STROKE_WIDTH = 10.0;
+    private static final Color LINE_COLOR = new Color(0.0, 0.0, 0.0, 0.4);
 
     public final Vertex startVertex;
     public final Vertex endVertex;
@@ -46,7 +46,7 @@ public class Edge extends GraphElement {
     private final List<PathElement> arrowHead = new ArrayList<>();
 
     public Edge(Canvas canvas, Vertex startVertex, Vertex endVertex, boolean directed) {
-        super(canvas, currentId++);
+        super(canvas);
         this.startVertex = startVertex;
         this.endVertex = endVertex;
         setDirected(directed);
@@ -110,8 +110,9 @@ public class Edge extends GraphElement {
     @Override
     protected void initializeGraphics() {
         super.initializeGraphics();
-
+        
         shape = new Path();
+        highlightShape = new Path();
 
         if (isSelfLoop()) {  // Self-loop case
             positionProperty().bind(startVertex.positionProperty());
@@ -138,11 +139,12 @@ public class Edge extends GraphElement {
             double lFX = LINE_LENGTH * sCos;
             double lFY = LINE_LENGTH * sSin;
 
-            arc().getElements().addAll(
-                    new MoveTo(lNX, lNY),
-                    new LineTo(lFX, lFY),
-                    new ArcTo(r, r, 0.0, lFX, -lFY, true, false),
-                    new LineTo(lNX, -lNY));
+            arc().getElements().addAll(new MoveTo(lNX, lNY),
+                                       new LineTo(lFX, lFY),
+                                       new ArcTo(r, r, 0.0, lFX, -lFY, true, false),
+                                       new LineTo(lNX, -lNY));
+            
+            shade().getElements().addAll(arc().getElements());
 
             if (isDirected()) {
                 double h1Cos = Math.cos((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
@@ -200,19 +202,24 @@ public class Edge extends GraphElement {
 
             updateCrossingArc(d, offsetAngle);
         }
+        
+        shape.setStrokeWidth(LINE_STROKE_WIDTH);
+        shape.setStroke(LINE_COLOR);
 
-        getChildren().add(shape);
-        shape.toBack();
+        highlightShape.setStrokeWidth(HIGHLIGHT_STROKE_WIDTH);
 
-        highlightProperty().addListener((observable, oldValue, newValue) -> {
-            shape.setStrokeWidth(newValue ? HIGHLIGHT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH);
-            shape.setStroke(newValue ? HIGHLIGHT_COLOR : DEFAULT_COLOR);
-        });
-        setHighlight(false);
+        getChildren().addAll(highlightShape, shape);
+        text.toFront();
+
+        highlightProperty().addListener((observable, oldValue, newValue) ->
+                                                highlightShape.setStroke(newValue ?
+                                                                         HIGHLIGHT_COLOR :
+                                                                         Color.TRANSPARENT));
     }
 
     private void updateCrossingArc(DoubleBinding dBinding, DoubleBinding offsetAngleBinding) {
         arc().getElements().clear();
+        shade().getElements().clear();
 
         double d = dBinding.get();
         double offsetAngle = offsetAngleBinding.get();
@@ -228,10 +235,11 @@ public class Edge extends GraphElement {
             aX = d / 2 - VERTEX_RADIUS;
             aY = 0.0;
 
-            if (text.getLayoutBounds().getWidth() < TEXT_EPSILON)
+            if (text.getLayoutBounds().getWidth() < TEXT_EPSILON) {
                 arc().getElements().addAll(
                         new MoveTo(-aX, 0.0),
                         new LineTo(aX, 0.0));
+            }
             else {
                 double tX = text.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
                 if (tX > d / 2)
@@ -278,6 +286,8 @@ public class Edge extends GraphElement {
             }
         }
 
+        shade().getElements().addAll(arc().getElements());
+
         if (isDirected()) {
             double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE / 2);
             double h1Sin = Math.sin(offsetAngle + ARROWHEAD_ANGLE / 2);
@@ -301,6 +311,19 @@ public class Edge extends GraphElement {
             arc().getElements().addAll(arrowHead);
         else
             arc().getElements().removeAll(arrowHead);
+    }
+
+    @Override
+    protected void entered(MouseEvent e) {
+        super.entered(e);
+        if (!isHighlighted())
+            highlightShape.setStroke(HOVER_COLOR);
+    }
+    @Override
+    protected void exited(MouseEvent e) {
+        super.exited(e);
+        if (!isHighlighted())
+            highlightShape.setStroke(Color.TRANSPARENT);
     }
 
     public BooleanProperty directedProperty() {
@@ -363,6 +386,10 @@ public class Edge extends GraphElement {
 
     private Path arc() {
         return (Path) shape;
+    }
+    
+    private Path shade() {
+        return (Path) highlightShape;
     }
 
     /**

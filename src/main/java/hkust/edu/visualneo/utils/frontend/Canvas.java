@@ -1,5 +1,6 @@
 package hkust.edu.visualneo.utils.frontend;
 
+import hkust.edu.visualneo.utils.backend.Entity;
 import hkust.edu.visualneo.utils.backend.Graph;
 import hkust.edu.visualneo.utils.backend.Node;
 import hkust.edu.visualneo.utils.backend.Relation;
@@ -14,6 +15,7 @@ import javafx.scene.layout.Pane;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Canvas extends Pane {
 
@@ -185,6 +187,12 @@ public class Canvas extends Pane {
 
     public void loadGraph(Graph graph) {
         clearElements();
+
+        Long maxId = Stream.concat(graph.nodes().stream(), graph.relations().stream())
+                           .map(Entity::getId)
+                           .max(Long::compareTo)
+                           .get();
+        GraphElement.raiseIdTo(maxId);
 
         vertices.putAll(graph.nodes()
                              .stream()

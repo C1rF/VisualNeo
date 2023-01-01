@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-abstract class Entity implements Comparable<Entity>, Mappable {
+public abstract class Entity implements Comparable<Entity>, Mappable {
 
     protected static final int INITIAL_PRIME = 17;
     protected static final int MULTIPLIER_PRIME = 37;
