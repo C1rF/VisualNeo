@@ -235,21 +235,23 @@ public class Edge extends GraphElement {
             aX = d / 2 - VERTEX_RADIUS;
             aY = 0.0;
 
-            if (text.getLayoutBounds().getWidth() < TEXT_EPSILON) {
-                arc().getElements().addAll(
-                        new MoveTo(-aX, 0.0),
-                        new LineTo(aX, 0.0));
-            }
+            MoveTo move = new MoveTo(-aX, 0.0);
+            LineTo line = new LineTo(aX, 0.0);
+
+            shade().getElements().addAll(move, line);
+
+            if (text.getLayoutBounds().getWidth() < TEXT_EPSILON)
+                arc().getElements().addAll(move, line);
             else {
                 double tX = text.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
                 if (tX > d / 2)
                     tX = d / 2;
 
                 arc().getElements().addAll(
-                        new MoveTo(-aX, 0.0),
+                        move,
                         new LineTo(-tX, 0.0),
                         new MoveTo(tX, 0.0),
-                        new LineTo(aX, 0.0));
+                        line);
 
                 text.setLayoutY(0.0);
             }
@@ -265,10 +267,13 @@ public class Edge extends GraphElement {
             double r = aX / Math.abs(sin);
             double fY = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d / 2, 2));
 
+            MoveTo move = new MoveTo(-aX, aY);
+            ArcTo arc = new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf);
+
+            shade().getElements().addAll(move, arc);
+
             if (text.getText() == null || text.getText().equals(""))
-                arc().getElements().addAll(
-                        new MoveTo(-aX, aY),
-                        new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
+                arc().getElements().addAll(move, arc);
             else {
                 double tX = text.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
                 if (tX > d / 2)
@@ -277,16 +282,14 @@ public class Edge extends GraphElement {
                 double tY = lowerHalf ? -fY + offY : fY - offY;
 
                 arc().getElements().addAll(
-                        new MoveTo(-aX, aY),
+                        move,
                         new ArcTo(r, r, 0.0, -tX, tY, cos < 0.0, lowerHalf),
                         new MoveTo(tX, tY),
-                        new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf));
+                        arc);
 
                 text.setLayoutY(tY);
             }
         }
-
-        shade().getElements().addAll(arc().getElements());
 
         if (isDirected()) {
             double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE / 2);
