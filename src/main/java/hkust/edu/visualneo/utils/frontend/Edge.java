@@ -68,10 +68,6 @@ public class Edge extends GraphElement {
         // Notify two vertices to attach it
         attach();
         initializeGraphics();
-
-        // For Debugging
-        System.out.println("An Edge from (" + startVertex.getX() + " , " + startVertex.getY() + ") to " +
-                "(" + endVertex.getX() + " , " + endVertex.getY() + ")" + " is created!");
     }
 
     public Edge(Canvas canvas, Relation relation) {
