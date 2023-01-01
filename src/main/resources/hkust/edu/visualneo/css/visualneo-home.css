@@ -1,0 +1,17 @@
+.scrollpane {
+-fx-box-border: transparent;
+}
+
+.match_record {
+-fx-pref-width: 281;
+-fx-font-size: 14;
+-fx-font-family: 'sans-serif';
+}
+
+.match_record:hover {
+-fx-background-color: lightgrey;
+}
+
+.match_record_first_line {
+-fx-font-weight: bold
+}

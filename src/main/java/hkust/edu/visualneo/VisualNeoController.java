@@ -1,13 +1,7 @@
 package hkust.edu.visualneo;
 
-import hkust.edu.visualneo.utils.backend.DbMetadata;
-import hkust.edu.visualneo.utils.backend.Graph;
-import hkust.edu.visualneo.utils.backend.Node;
-import hkust.edu.visualneo.utils.backend.Relation;
-import hkust.edu.visualneo.utils.frontend.Canvas;
-import hkust.edu.visualneo.utils.frontend.Edge;
-import hkust.edu.visualneo.utils.frontend.GraphElement;
-import hkust.edu.visualneo.utils.frontend.Vertex;
+import hkust.edu.visualneo.utils.backend.*;
+import hkust.edu.visualneo.utils.frontend.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -21,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -114,6 +109,19 @@ public class VisualNeoController {
     private Canvas schemaCanvas;
     DbMetadata metadata;
 
+    // The pattern recommendation panel
+    @FXML
+    private TabPane tabpane_pattern;
+    @FXML
+    private Tab tab_basic_pattern;
+    @FXML
+    private Tab tab_canned_pattern;
+    @FXML
+    private Tab tab_result_record;
+    @FXML
+    private VBox vbox_record;
+
+
     /**
      * The constructor.
      * The constructor is called before initialize() method.
@@ -155,6 +163,7 @@ public class VisualNeoController {
         schemaCanvas.setClip(schemaContainer);
 
         tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
+        tabpane_pattern.getTabs().remove(tab_result_record);
 
         property_change_listener = new ChangeListener<String>() {
             @Override
@@ -192,18 +201,23 @@ public class VisualNeoController {
                         schemaCanvas.clearHighlights();
                         tab_pane.onKeyPressedProperty().unbind();
                         tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
+                        tabpane_pattern.getTabs().remove(tab_result_record);
+                        tabpane_pattern.getTabs().addAll(tab_basic_pattern, tab_canned_pattern);
                     }
                     case 1 -> {
                         constructCanvas.clearHighlights();
                         schemaCanvas.clearHighlights();
                         tab_pane.onKeyPressedProperty().unbind();
                         tab_pane.onKeyPressedProperty().bind(resultCanvas.onKeyPressedProperty());
+                        tabpane_pattern.getTabs().removeAll(tab_basic_pattern, tab_canned_pattern);
+                        tabpane_pattern.getTabs().add(tab_result_record);
                     }
                     case 2 -> {
                         constructCanvas.clearHighlights();
                         resultCanvas.clearHighlights();
                         tab_pane.onKeyPressedProperty().unbind();
                         tab_pane.onKeyPressedProperty().bind(schemaCanvas.onKeyPressedProperty());
+                        tabpane_pattern.getTabs().removeAll(tab_basic_pattern, tab_canned_pattern, tab_result_record);
                     }
                 }
             }
@@ -296,18 +310,35 @@ public class VisualNeoController {
         Collection<Vertex> listOfVertices = constructCanvas.getVertices();
         Collection<Edge> listOfEdges = constructCanvas.getEdges();
         QueryHandler.Results results = null;
-        try{
-            results = app.queryHandler.exactSearch(listOfVertices,listOfEdges);
-        }catch (Exception e){
+        try {
+            results = app.queryHandler.exactSearch(listOfVertices, listOfEdges);
+        } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Exact Search Error");
             alert.setHeaderText("Cannot perform the exact search!");
             alert.setContentText(e.getMessage());
             alert.showAndWait();
         }
-        if(results != null) {
+        if (results != null) {
             resultCanvas.clearElements();
             resultCanvas.loadGraph(results.graph());
+            vbox_record.getChildren().clear();
+            int matchIdx = 1;
+            for (int i = 0; i < results.ids().size(); i++) {
+                Pair<List<Long>> match = results.ids().get(i);
+                MatchRecord record = new MatchRecord(match, matchIdx++);
+
+                record.setOnMouseEntered(e -> handleMouseEnterButton(e));
+                record.setOnMouseExited(e -> handleMouseLeaveButton(e));
+                record.setOnMouseClicked(e -> {
+                    MatchRecord currentRecord = (MatchRecord) e.getSource();
+                    if (currentRecord != null)
+                        resultCanvas.navigateTo(currentRecord.getMatch().head(), currentRecord.getMatch().tail());
+                });
+
+                vbox_record.getChildren().add(record);
+                if (i < results.ids().size() - 1) vbox_record.getChildren().add(new Separator());
+            }
         }
     }
 
