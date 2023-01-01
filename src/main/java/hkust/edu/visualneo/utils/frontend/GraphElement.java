@@ -181,7 +181,7 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     public static double angle(Vertex start, Vertex end) {
         Point2D delta = end.getPosition().subtract(start.getPosition());
         return delta.getX() == 0.0 ?
-                delta.getY() < 0.0 ? -PI / 2 : PI / 2 :
+                delta.getY() > 0.0 ? PI / 2 : -PI / 2 :
                 Math.atan2(delta.getY(), delta.getX());
     }
 
