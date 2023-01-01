@@ -20,8 +20,6 @@ import static java.lang.Math.PI;
 
 public abstract class GraphElement extends Group implements Comparable<GraphElement> {
 
-    protected static long currentId = 0;
-
     protected final Canvas canvas;
 
     private final long id;
