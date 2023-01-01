@@ -326,21 +326,13 @@ public class VisualNeoController {
             int matchIdx = 1;
             for (int i = 0; i < results.ids().size(); i++) {
                 Pair<List<Long>> match = results.ids().get(i);
-                String line1 = "Match " + matchIdx++ + ":";
-                String line2 = "Node ID(s): ";
-                for (Long id : match.head()) line2 += id + ", ";
-                line2 = line2.substring(0, line2.length() - 2);
-                String line3 = "Relation ID(s): ";
-                for (Long id : match.tail()) line3 += id + ", ";
-                line3 = line3.substring(0, line3.length() - 2);
-
-                MatchRecord record = new MatchRecord(line1, line2, line3, match.head());
+                MatchRecord record = new MatchRecord(match, matchIdx++);
 
                 record.setOnMouseEntered(e -> handleMouseEnterButton(e));
                 record.setOnMouseExited(e -> handleMouseLeaveButton(e));
                 record.setOnMouseClicked(e -> {
                     MatchRecord currentRecord = (MatchRecord) e.getSource();
-//                    if(currentRecord != null) resultCanvas.;
+                    if(currentRecord != null) resultCanvas.navigateTo(currentRecord.getMatch());
                 });
 
                 vbox_record.getChildren().add(record);
