@@ -22,12 +22,12 @@ public class Edge extends GraphElement {
     private static final double LOOP_SPAN_ANGLE = PI / 6;
     private static final double LOOP_GAP_ANGLE = PI / 18;
     private static final double ARROWHEAD_ANGLE = PI / 3;
-    private static final double LINE_LENGTH = VERTEX_RADIUS + 25.0;
-    private static final double ARROWHEAD_LENGTH = 8.0;
+    private static final double LINE_LENGTH = 2.0 * VERTEX_RADIUS;
+    private static final double ARROWHEAD_LENGTH = 5.0;
     private static final double TEXT_GAP = 10.0;
     private static final double TEXT_EPSILON = 4.0;
-    private static final double DEFAULT_STROKE_WIDTH = 2.0;
-    private static final double HIGHLIGHT_STROKE_WIDTH = 3.0;
+    private static final double DEFAULT_STROKE_WIDTH = 1.5;
+    private static final double HIGHLIGHT_STROKE_WIDTH = 2.0;
     private static final Color DEFAULT_COLOR = new Color(0.0, 0.0, 0.0, 0.4);
     private static final Color HIGHLIGHT_COLOR = new Color(0.0, 0.0, 0.0, 0.7);
 
@@ -208,6 +208,7 @@ public class Edge extends GraphElement {
             shape.setStrokeWidth(newValue ? HIGHLIGHT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH);
             shape.setStroke(newValue ? HIGHLIGHT_COLOR : DEFAULT_COLOR);
         });
+        setHighlight(false);
     }
 
     private void updateCrossingArc(DoubleBinding dBinding, DoubleBinding offsetAngleBinding) {
