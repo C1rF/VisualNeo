@@ -28,7 +28,7 @@ public class Edge extends GraphElement {
     private static final double TEXT_GAP = 10.0;
     private static final double TEXT_EPSILON = 4.0;
     private static final double LINE_STROKE_WIDTH = 1.5;
-    private static final double HIGHLIGHT_STROKE_WIDTH = 10.0;
+    private static final double HIGHLIGHT_STROKE_WIDTH = 15.0;
     private static final Color LINE_COLOR = new Color(0.0, 0.0, 0.0, 0.4);
 
     public final Vertex startVertex;
