@@ -233,7 +233,7 @@ public class Vertex extends GraphElement {
     public String toText() {
         String[] temp = new String[]{
                 "v",
-                String.valueOf(getId()),
+                String.valueOf(getElementId()),
                 getLabel(),
                 propertyToText()};
         return String.join(" ", Arrays.asList(temp));

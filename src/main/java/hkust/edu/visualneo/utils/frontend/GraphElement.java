@@ -106,6 +106,8 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
 
     public long getElementId() { return id; }
 
+    public static long getCurrentId() { return currentId; }
+
     public void setPosition(Point2D p) {
         if (!getPosition().equals(p))  // To function with ObjectProperty
             positionProperty().set(p);

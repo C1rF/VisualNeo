@@ -372,8 +372,8 @@ public class Edge extends GraphElement {
     public String toText() {
         String[] temp = new String[]{
                 "e",
-                String.valueOf(startVertex.getId()),
-                String.valueOf(endVertex.getId()),
+                String.valueOf(startVertex.getElementId()),
+                String.valueOf(endVertex.getElementId()),
                 String.valueOf(isDirected()),
                 text.getText(),
                 propertyToText(),
