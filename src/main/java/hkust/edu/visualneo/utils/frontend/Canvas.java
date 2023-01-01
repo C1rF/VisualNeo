@@ -240,14 +240,23 @@ public class Canvas extends Pane {
     }
 
     // TODO: Improve this
-    public void navigateTo(Collection<Long> vertexIds) {
-        int num = vertexIds.size();
+    public void navigateTo(Collection<Long> vertexIds, Collection<Long> edgeIds) {
+        clearHighlights();
+
+        int numVertices = vertexIds.size();
         Point2D centroid = vertexIds
                 .stream()
-                .map(id -> getVertex(id).getPosition())
+                .map(id -> {
+                    Vertex vertex = getVertex(id);
+                    addHighlight(vertex);
+                    return vertex.getPosition();
+                })
                 .reduce(Point2D::add)
                 .get()
-                .multiply(1.0 / num);
+                .multiply(1.0 / numVertices);
+
+        edgeIds.forEach(id -> addHighlight(getEdge(id)));
+
         camera.setPosition(centroid);
     }
 
