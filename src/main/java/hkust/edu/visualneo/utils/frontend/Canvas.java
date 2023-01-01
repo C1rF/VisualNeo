@@ -239,6 +239,18 @@ public class Canvas extends Pane {
         placement.layout();
     }
 
+    // TODO: Improve this
+    public void navigateTo(Collection<Long> vertexIds) {
+        int num = vertexIds.size();
+        Point2D centroid = vertexIds
+                .stream()
+                .map(id -> getVertex(id).getPosition())
+                .reduce(Point2D::add)
+                .get()
+                .multiply(1.0 / num);
+        camera.setPosition(centroid);
+    }
+
     private void createVertex(Point2D position) {
         Vertex vertex = new Vertex(this);
         vertex.setPositionInScreen(position);
