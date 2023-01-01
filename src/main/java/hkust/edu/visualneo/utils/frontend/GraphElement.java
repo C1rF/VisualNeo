@@ -45,6 +45,10 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     // Label shown on the GraphElement
     protected Text text;
 
+    GraphElement(Canvas canvas) {
+        this(canvas, currentId++);
+    }
+
     GraphElement(Canvas canvas, long id) {
         this.canvas = canvas;
         this.id = id;
@@ -214,5 +218,9 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     @Override
     public int compareTo(GraphElement other) {
         return (int) (id - other.id);
+    }
+
+    public static void raiseIdTo(Long id) {
+        currentId = id + 1;
     }
 }
