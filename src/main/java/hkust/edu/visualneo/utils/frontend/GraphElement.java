@@ -157,8 +157,6 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
             text.setTranslateX(-newValue.getWidth() / 2);
             text.setTranslateY(newValue.getHeight() / 2);
         });
-
-        setHighlight(false);
     }
 
     protected void initializeHandlers() {
