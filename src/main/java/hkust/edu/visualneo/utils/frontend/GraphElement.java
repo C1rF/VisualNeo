@@ -6,6 +6,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
@@ -19,11 +20,12 @@ import static java.lang.Math.PI;
 
 public abstract class GraphElement extends Group implements Comparable<GraphElement> {
 
-    protected static long currentId = 0;
-
     protected final Canvas canvas;
 
     private final long id;
+
+    protected static final Color HOVER_COLOR = Color.color(0.0f, 0.1f, 0.4f, 0.1f);
+    protected static final Color HIGHLIGHT_COLOR = Color.color(0.0f, 0.1f, 0.4f, 0.3f);
 
     // String of the label
     private final StringProperty label =
@@ -37,6 +39,7 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     private final ObjectProperty<Point2D> position =
             new SimpleObjectProperty<>(this, "position", Point2D.ZERO);
     protected Shape shape;
+    protected Shape highlightShape;
     // Label shown on the GraphElement
     protected Text text;
 
@@ -143,11 +146,15 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
             text.setTranslateX(-newValue.getWidth() / 2);
             text.setTranslateY(newValue.getHeight() / 2);
         });
+
+        setHighlight(false);
     }
 
     protected void initializeHandlers() {
         setOnMouseEntered(this::entered);
         setOnMouseExited(this::exited);
+        setOnMouseDragged(this::dragged);
+        setOnMouseReleased(this::released);
     }
 
     public abstract void erase();
@@ -155,10 +162,11 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     protected void entered(MouseEvent e) {
         getScene().setCursor(Cursor.HAND);
     }
-
     protected void exited(MouseEvent e) {
         getScene().setCursor(Cursor.DEFAULT);
     }
+    protected void dragged(MouseEvent e) {}
+    protected void released(MouseEvent e) {}
 
     public abstract String toText();
 

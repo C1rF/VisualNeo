@@ -8,6 +8,7 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -18,14 +19,12 @@ import static java.lang.Math.PI;
 
 public class Vertex extends GraphElement {
 
-    // Radius of the Vertex
     static final double VERTEX_RADIUS = 25.0;
-    private static final double DEFAULT_STROKE_WIDTH = 1.0;
-    private static final double HIGHLIGHT_STROKE_WIDTH = 2.0;
+    static final double HIGHLIGHT_RADIUS = VERTEX_RADIUS + 5.0;
+    private static final double STROKE_WIDTH = 1.0;
     private static final double DEFAULT_ANGLE = -PI / 2;
-    private static final Color DEFAULT_COLOR = Color.DARKGREY;
-    private static final Color HIGHLIGHT_COLOR = Color.BLACK;
     private static final Color CIRCLE_COLOR = Color.LIGHTGRAY;
+    private static final Color STROKE_COLOR = Color.DARKGREY;
 
     private final DoubleProperty selfLoopAngle =
             new SimpleDoubleProperty(this, "selfLoopAngle", DEFAULT_ANGLE);
@@ -64,7 +63,7 @@ public class Vertex extends GraphElement {
     };
 
     public Vertex(Canvas canvas) {
-        super(canvas, currentId++);
+        super(canvas, UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
 
         initializeGraphics();
 
@@ -93,24 +92,39 @@ public class Vertex extends GraphElement {
 
     @Override
     protected void initializeGraphics() {
-        super.initializeGraphics();
-
         shape = new Circle(VERTEX_RADIUS, CIRCLE_COLOR);
-        getChildren().add(shape);
-        shape.toBack();
+        shape.setStrokeWidth(STROKE_WIDTH);
+        shape.setStroke(STROKE_COLOR);
 
-        highlightProperty().addListener((observable, oldValue, newValue) -> {
-            shape.setStrokeWidth(newValue ? HIGHLIGHT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH);
-            shape.setStroke(newValue ? HIGHLIGHT_COLOR : DEFAULT_COLOR);
-        });
-        setHighlight(false);
+        highlightShape = new Circle(HIGHLIGHT_RADIUS);
+
+        getChildren().addAll(highlightShape, shape);
+
+        highlightProperty().addListener((observable, oldValue, newValue) ->
+                                                highlightShape.setFill(newValue ? HIGHLIGHT_COLOR : Color.TRANSPARENT));
+
+        super.initializeGraphics();
     }
 
     @Override
-    protected void initializeHandlers() {
-        super.initializeHandlers();
-        setOnMouseDragged(e -> getScene().setCursor(Cursor.CLOSED_HAND));
-        setOnMouseReleased(e -> getScene().setCursor(Cursor.HAND));
+    protected void entered(MouseEvent e) {
+        super.entered(e);
+        if (!isHighlighted())
+            highlightShape.setFill(HOVER_COLOR);
+    }
+    @Override
+    protected void exited(MouseEvent e) {
+        super.exited(e);
+        if (!isHighlighted())
+            highlightShape.setFill(Color.TRANSPARENT);
+    }
+    @Override
+    protected void dragged(MouseEvent e) {
+        getScene().setCursor(Cursor.CLOSED_HAND);
+    }
+    @Override
+    protected void released(MouseEvent e) {
+        getScene().setCursor(Cursor.HAND);
     }
 
     public boolean hasSelfLoop() {
