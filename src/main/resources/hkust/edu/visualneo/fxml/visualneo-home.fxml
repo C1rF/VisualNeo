@@ -168,7 +168,7 @@
                   </VBox>
                   <TabPane fx:id="tab_pane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
                     <tabs>
-                      <Tab text="Query Constructor">
+                      <Tab fx:id="tab_query_constructor" text="Query Constructor">
                         <content>
                           <AnchorPane style="-fx-background-color: white;">
                                  <children>
@@ -187,7 +187,7 @@
                       </AnchorPane>
                 </content>
               </Tab>
-              <Tab text="Query Result">
+              <Tab fx:id="tab_query_result" text="Query Result">
                 <content>
                   <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: white;">
                                  <children>
@@ -205,7 +205,7 @@
                                  </children></AnchorPane>
                         </content>
                       </Tab>
-                        <Tab text="Database Info">
+                        <Tab fx:id="tab_database_info" text="Database Info">
                            <content>
                               <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: white;">
                                  <children>

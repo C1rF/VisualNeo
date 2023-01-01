@@ -73,9 +73,6 @@ public class Vertex extends GraphElement {
 
         positionProperty().addListener(positionListener);
         neighborhoodProperty().addListener(neighborhoodListener);
-
-        // For debugging
-        System.out.println("A new Vertex is created.");
     }
 
     public Vertex(Canvas canvas, Node node) {
