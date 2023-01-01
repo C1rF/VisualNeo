@@ -46,7 +46,7 @@ public class Edge extends GraphElement {
     private final List<PathElement> arrowHead = new ArrayList<>();
 
     public Edge(Canvas canvas, Vertex startVertex, Vertex endVertex, boolean directed) {
-        super(canvas);
+        super(canvas, currentId++);
         this.startVertex = startVertex;
         this.endVertex = endVertex;
         setDirected(directed);
