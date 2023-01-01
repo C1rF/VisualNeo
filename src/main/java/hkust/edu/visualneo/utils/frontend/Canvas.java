@@ -1,9 +1,6 @@
 package hkust.edu.visualneo.utils.frontend;
 
-import hkust.edu.visualneo.utils.backend.Entity;
-import hkust.edu.visualneo.utils.backend.Graph;
-import hkust.edu.visualneo.utils.backend.Node;
-import hkust.edu.visualneo.utils.backend.Relation;
+import hkust.edu.visualneo.utils.backend.*;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -12,9 +9,12 @@ import javafx.event.EventTarget;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Canvas extends Pane {
@@ -27,6 +27,8 @@ public class Canvas extends Pane {
     }
 
     private static final double UNIT_SCROLL = 32.0;
+
+    private static Map<String, Color> colorTable;
 
     private CanvasType type = CanvasType.NONE;
 
@@ -42,6 +44,29 @@ public class Canvas extends Pane {
 
     private final Map<Long, Vertex> vertices = new TreeMap<>();
     private final Map<Long, Edge> edges = new TreeMap<>();
+
+    public static void computeColors(DbMetadata metadata) {
+        int numColors = metadata.nodeLabels().size();
+        double step = 360.0 / numColors;
+        List<Double> colors = IntStream.range(0, numColors)
+                                       .boxed()
+                                       .map(i -> Vertex.ORIGIN_HUE + i * step)
+                                       .collect(Collectors.toCollection(ArrayList::new));
+        Collections.shuffle(colors);
+        Iterator<Double> colorIt = colors.iterator();
+        colorTable = metadata.nodeLabels()
+                         .stream()
+                         .collect(Collectors.toMap(Function.identity(),
+                                                   label -> Color.hsb(colorIt.next(),
+                                                                      Vertex.ORIGIN_SATURATION,
+                                                                      Vertex.ORIGIN_BRIGHTNESS)));
+    }
+
+    public Color getColor(String label) {
+        return colorTable == null ?
+               Vertex.DEFAULT_COLOR :
+               colorTable.getOrDefault(label, Vertex.DEFAULT_COLOR);
+    }
 
     public void setType(CanvasType type) {
         if (this.type != CanvasType.NONE || type == CanvasType.NONE)
@@ -214,22 +239,17 @@ public class Canvas extends Pane {
         placement.layout();
     }
 
-//    public void layout(Graph graph, boolean softLayout) {
-//        for (Node node : graph.nodes())
-//            createVertex(node, Point2D.ZERO);
-//        for (Relation relation : graph.relations())
-//            createEdge(relation);
-//        ForceDirectedPlacementStatic placement =
-//                new ForceDirectedPlacementStatic(graph, new Point2D(this.getWidth(), this.getHeight()), 10000, 0.8);
-//        Timer timer = new Timer();
-//        timer.schedule(new TimerTask() {
-//            int iterNum = 0;
-//
-//            public void run() {
-//                placement.simulate(getVertices(), iterNum++);
-//            }
-//        }, 0, 300);
-//    }
+    // TODO: Improve this
+    public void navigateTo(Collection<Long> vertexIds) {
+        int num = vertexIds.size();
+        Point2D centroid = vertexIds
+                .stream()
+                .map(id -> getVertex(id).getPosition())
+                .reduce(Point2D::add)
+                .get()
+                .multiply(1.0 / num);
+        camera.setPosition(centroid);
+    }
 
     private void createVertex(Point2D position) {
         Vertex vertex = new Vertex(this);

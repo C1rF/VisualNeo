@@ -250,6 +250,9 @@ public class VisualNeoController {
     public void updateUIWithMetaInfo() {
         metadata = app.queryHandler.getMeta();
 
+        // Compute label colors
+        Canvas.computeColors(metadata);
+
         // Switch the info pane
         pane_with_database.setVisible(true);
         pane_no_database.setVisible(false);

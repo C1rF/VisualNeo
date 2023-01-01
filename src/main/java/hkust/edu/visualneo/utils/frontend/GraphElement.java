@@ -8,8 +8,7 @@ import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextBoundsType;
+import javafx.scene.text.*;
 import javafx.scene.transform.Scale;
 import org.neo4j.driver.Value;
 
@@ -26,8 +25,10 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
 
     private final long id;
 
-    protected static final Color HOVER_COLOR = Color.color(0.0f, 0.1f, 0.4f, 0.1f);
-    protected static final Color HIGHLIGHT_COLOR = Color.color(0.0f, 0.1f, 0.4f, 0.3f);
+    private static final Font TEXT_FONT = Font.font("Arial", FontWeight.SEMI_BOLD, Font.getDefault().getSize());
+
+    protected static final Color HOVER_COLOR = Color.web("#001966", 0.1);
+    protected static final Color HIGHLIGHT_COLOR = Color.web("#001966", 0.2);
 
     // String of the label
     private final StringProperty label =
@@ -150,6 +151,8 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
 
         text = new Text();
         text.setBoundsType(TextBoundsType.VISUAL);
+        text.setFontSmoothingType(FontSmoothingType.LCD);
+        text.setFont(TEXT_FONT);
         getChildren().add(text);
 
         text.textProperty().bind(labelProperty());
