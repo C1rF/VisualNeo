@@ -28,7 +28,7 @@ public class Edge extends GraphElement {
     private static final double TEXT_GAP = 10.0;
     private static final double TEXT_EPSILON = 4.0;
     private static final double LINE_STROKE_WIDTH = 1.5;
-    private static final double HIGHLIGHT_STROKE_WIDTH = 10.0;
+    private static final double HIGHLIGHT_STROKE_WIDTH = 15.0;
     private static final Color LINE_COLOR = new Color(0.0, 0.0, 0.0, 0.4);
 
     public final Vertex startVertex;
@@ -120,20 +120,20 @@ public class Edge extends GraphElement {
                     () -> Math.toDegrees(
                             startVertex.getSelfLoopAngle() +
                             ((2 * getIdx() - startVertex.getNumEdgesBetween(endVertex) + 1) *
-                             (LOOP_GAP_ANGLE + LOOP_SPAN_ANGLE)) / 2),
+                             (LOOP_GAP_ANGLE + LOOP_SPAN_ANGLE)) * 0.5),
                     startVertex.selfLoopAngleProperty(),
                     startVertex.numEdgesPropertyBetween(endVertex),
                     idxProperty()));
 
-            double r = LINE_LENGTH * Math.tan(Edge.LOOP_SPAN_ANGLE / 2);
+            double r = LINE_LENGTH * Math.tan(Edge.LOOP_SPAN_ANGLE * 0.5);
 
-            text.setLayoutX(LINE_LENGTH / Math.cos(LOOP_SPAN_ANGLE / 2) + r + TEXT_GAP);
+            text.setLayoutX(LINE_LENGTH / Math.cos(LOOP_SPAN_ANGLE * 0.5) + r + TEXT_GAP);
             text.rotateProperty().bind(Bindings.createDoubleBinding(
                     () -> Math.sin(Math.toRadians(getAngle())) < 0.0 ? 90.0 : -90.0,
                     angleProperty()));
 
-            double sCos = Math.cos(LOOP_SPAN_ANGLE / 2);
-            double sSin = Math.sin(LOOP_SPAN_ANGLE / 2);
+            double sCos = Math.cos(LOOP_SPAN_ANGLE * 0.5);
+            double sSin = Math.sin(LOOP_SPAN_ANGLE * 0.5);
             double lNX = VERTEX_RADIUS * sCos;
             double lNY = VERTEX_RADIUS * sSin;
             double lFX = LINE_LENGTH * sCos;
@@ -147,12 +147,12 @@ public class Edge extends GraphElement {
             shade().getElements().addAll(arc().getElements());
 
             if (isDirected()) {
-                double h1Cos = Math.cos((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
-                double h1Sin = Math.sin((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) / 2);
+                double h1Cos = Math.cos((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) * 0.5);
+                double h1Sin = Math.sin((-LOOP_SPAN_ANGLE + ARROWHEAD_ANGLE) * 0.5);
                 double h1X = lNX + ARROWHEAD_LENGTH * h1Cos;
                 double h1Y = -lNY + ARROWHEAD_LENGTH * h1Sin;
-                double h2Cos = Math.cos((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) / 2);
-                double h2Sin = Math.sin((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) / 2);
+                double h2Cos = Math.cos((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) * 0.5);
+                double h2Sin = Math.sin((-LOOP_SPAN_ANGLE - ARROWHEAD_ANGLE) * 0.5);
                 double h2X = lNX + ARROWHEAD_LENGTH * h2Cos;
                 double h2Y = -lNY + ARROWHEAD_LENGTH * h2Sin;
 
@@ -188,7 +188,7 @@ public class Edge extends GraphElement {
             final DoubleBinding offsetAngle = Bindings.createDoubleBinding(
                     () -> 2 * getIdx() + 1 == primaryVertex.getNumEdgesBetween(secondaryVertex) ?
                           0.0 : (isReverted() ? -1 : 1) *
-                                (getIdx() - (primaryVertex.getNumEdgesBetween(secondaryVertex) - 1) / 2.0) *
+                                (getIdx() - (primaryVertex.getNumEdgesBetween(secondaryVertex) - 1) * 0.5) *
                                 GAP_ANGLE,
                     idxProperty(), primaryVertex.numEdgesPropertyBetween(secondaryVertex));
 
@@ -198,7 +198,7 @@ public class Edge extends GraphElement {
             directedProperty().addListener(updateListener);
             d.addListener(updateListener);
             offsetAngle.addListener(updateListener);
-            text.layoutBoundsProperty().addListener(updateListener);
+            labelProperty().addListener(updateListener);
 
             updateCrossingArc(d, offsetAngle);
         }
@@ -232,8 +232,11 @@ public class Edge extends GraphElement {
 
         double aX, aY;
 
+        double tX = text.getLayoutBounds().getWidth() * 0.5 + TEXT_EPSILON;
+        text.setVisible(tX < d * 0.5 - VERTEX_RADIUS);
+
         if (atMiddle) {
-            aX = d / 2 - VERTEX_RADIUS;
+            aX = d * 0.5 - VERTEX_RADIUS;
             aY = 0.0;
 
             MoveTo move = new MoveTo(-aX, 0.0);
@@ -241,13 +244,7 @@ public class Edge extends GraphElement {
 
             shade().getElements().addAll(move, line);
 
-            if (text.getLayoutBounds().getWidth() < TEXT_EPSILON)
-                arc().getElements().addAll(move, line);
-            else {
-                double tX = text.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
-                if (tX > d / 2)
-                    tX = d / 2;
-
+            if (hasLabel() && text.isVisible()) {
                 arc().getElements().addAll(
                         move,
                         new LineTo(-tX, 0.0),
@@ -256,29 +253,26 @@ public class Edge extends GraphElement {
 
                 text.setLayoutY(0.0);
             }
+            else
+                arc().getElements().addAll(move, line);
         }
         else {
-            boolean lowerHalf = (idx < num / 2) != isReverted();
+            boolean lowerHalf = (idx < num * 0.5) != isReverted();
 
             double cos = Math.cos(offsetAngle);
             double sin = Math.sin(offsetAngle);
-            aX = d / 2 - VERTEX_RADIUS * cos;
+            aX = d * 0.5 - VERTEX_RADIUS * cos;
             aY = VERTEX_RADIUS * sin;
 
             double r = aX / Math.abs(sin);
-            double fY = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d / 2, 2));
+            double fY = r - Math.sqrt(Math.pow(r, 2) + Math.pow(VERTEX_RADIUS, 2) - Math.pow(d * 0.5, 2));
 
             MoveTo move = new MoveTo(-aX, aY);
             ArcTo arc = new ArcTo(r, r, 0.0, aX, aY, cos < 0.0, lowerHalf);
 
             shade().getElements().addAll(move, arc);
 
-            if (text.getText() == null || text.getText().equals(""))
-                arc().getElements().addAll(move, arc);
-            else {
-                double tX = text.getLayoutBounds().getWidth() / 2 + TEXT_EPSILON;
-                if (tX > d / 2)
-                    tX = d / 2;
+            if (hasLabel() && text.isVisible()) {
                 double offY = r - Math.sqrt(Math.pow(r, 2) - Math.pow(tX, 2));
                 double tY = lowerHalf ? -fY + offY : fY - offY;
 
@@ -290,15 +284,17 @@ public class Edge extends GraphElement {
 
                 text.setLayoutY(tY);
             }
+            else
+                arc().getElements().addAll(move, arc);
         }
 
         if (isDirected()) {
-            double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE / 2);
-            double h1Sin = Math.sin(offsetAngle + ARROWHEAD_ANGLE / 2);
+            double h1Cos = Math.cos(offsetAngle + ARROWHEAD_ANGLE * 0.5);
+            double h1Sin = Math.sin(offsetAngle + ARROWHEAD_ANGLE * 0.5);
             double h1X = aX - ARROWHEAD_LENGTH * h1Cos;
             double h1Y = aY + ARROWHEAD_LENGTH * h1Sin;
-            double h2Cos = Math.cos(offsetAngle - ARROWHEAD_ANGLE / 2);
-            double h2Sin = Math.sin(offsetAngle - ARROWHEAD_ANGLE / 2);
+            double h2Cos = Math.cos(offsetAngle - ARROWHEAD_ANGLE * 0.5);
+            double h2Sin = Math.sin(offsetAngle - ARROWHEAD_ANGLE * 0.5);
             double h2X = aX - ARROWHEAD_LENGTH * h2Cos;
             double h2Y = aY + ARROWHEAD_LENGTH * h2Sin;
 
