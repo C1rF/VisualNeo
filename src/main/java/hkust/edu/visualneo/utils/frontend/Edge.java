@@ -13,6 +13,7 @@ import javafx.scene.transform.Rotate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static hkust.edu.visualneo.utils.frontend.Vertex.VERTEX_RADIUS;
 import static java.lang.Math.PI;
@@ -46,7 +47,7 @@ public class Edge extends GraphElement {
     private final List<PathElement> arrowHead = new ArrayList<>();
 
     public Edge(Canvas canvas, Vertex startVertex, Vertex endVertex, boolean directed) {
-        super(canvas, currentId++);
+        super(canvas, UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
         this.startVertex = startVertex;
         this.endVertex = endVertex;
         setDirected(directed);
