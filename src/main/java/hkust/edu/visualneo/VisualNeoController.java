@@ -27,9 +27,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.neo4j.driver.Value;
-import org.neo4j.driver.internal.value.FloatValue;
-import org.neo4j.driver.internal.value.IntegerValue;
-import org.neo4j.driver.internal.value.StringValue;
+import org.neo4j.driver.Values;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -255,13 +253,13 @@ public class VisualNeoController {
             Map<String, String> nodeProperties = labelToNodeProperty.get(v.getLabel());
             if(nodeProperties == null) continue;
             for(Map.Entry<String,String> nodeProperty : nodeProperties.entrySet())
-                v.addProperty(nodeProperty.getKey(), new StringValue(nodeProperty.getValue()));
+                v.addProperty(nodeProperty.getKey(), Values.value(nodeProperty.getValue()));
         }
         for(Edge e : schemaCanvas.getEdges()){
             Map<String, String> relationProperties = labelToRelationProperty.get(e.getLabel());
             if(relationProperties == null) continue;
             for(Map.Entry<String,String> relationProperty : relationProperties.entrySet()){
-                e.addProperty(relationProperty.getKey(), new StringValue(relationProperty.getValue()));
+                e.addProperty(relationProperty.getKey(), Values.value(relationProperty.getValue()));
             }
         }
 
@@ -355,15 +353,15 @@ public class VisualNeoController {
     private Value parsePropValue(String type, String input) {
         try{
             if(type.equals("String")){
-                return new StringValue(input);
+                return Values.value(input);
             }
             else if(type.equals("Long")){
                 long num = Long.parseLong(input);
-                return new IntegerValue(num);
+                return Values.value(num);
             }
             else if(type.equals("Float")){
                 double num = Double.parseDouble(input);
-                return new FloatValue(num);
+                return Values.value(num);
             }
         }catch(Exception e){
             return null;
