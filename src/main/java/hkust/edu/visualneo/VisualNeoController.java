@@ -322,7 +322,7 @@ public class VisualNeoController {
         if (results != null) {
             resultCanvas.clearElements();
             resultCanvas.loadGraph(results.graph());
-            vbox_record.getChildren().removeAll();
+            vbox_record.getChildren().clear();
             int matchIdx = 1;
             for (int i = 0; i < results.ids().size(); i++) {
                 Pair<List<Long>> match = results.ids().get(i);
@@ -332,7 +332,8 @@ public class VisualNeoController {
                 record.setOnMouseExited(e -> handleMouseLeaveButton(e));
                 record.setOnMouseClicked(e -> {
                     MatchRecord currentRecord = (MatchRecord) e.getSource();
-                    if(currentRecord != null) resultCanvas.navigateTo(currentRecord.getMatch());
+                    if (currentRecord != null)
+                        resultCanvas.navigateTo(currentRecord.getMatch().head(), currentRecord.getMatch().tail());
                 });
 
                 vbox_record.getChildren().add(record);

@@ -3,6 +3,7 @@ package hkust.edu.visualneo;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class VisualNeoApp extends Application {
         VisualNeoController controller = fxmlLoader.<VisualNeoController>getController();
         controller.setApp(this);
         this.stage = stage;
+        stage.getIcons().add(new Image(VisualNeoApp.class.getResource("icon/icon1.png").toExternalForm()));
         stage.setTitle("VisualNeo");
         stage.setScene(scene);
         stage.show();
