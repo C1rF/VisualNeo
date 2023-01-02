@@ -129,9 +129,13 @@ public class OrthogonalCamera {
     }
     public void fit(Point2D min, Point2D max, boolean force) {
         setPosition(min.midpoint(max));
-        double ratio = FIT_PORTION * Math.min(canvas.getWidth() / (max.getX() - min.getX()),
-                                              canvas.getHeight() / (max.getY() - min.getY()));
-        setRatio(ratio, force);
+        if (min.equals(max))
+            setRatio(MAX_RATIO);
+        else {
+            double ratio = FIT_PORTION * Math.min(canvas.getWidth() / (max.getX() - min.getX()),
+                                                  canvas.getHeight() / (max.getY() - min.getY()));
+            setRatio(ratio, force);
+        }
     }
 
     public double getCanvasWidth() {
