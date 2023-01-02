@@ -9,11 +9,11 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="280.0" prefWidth="292.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hkust.edu.visualneo.LoadDatabaseController">
+<AnchorPane prefHeight="280.0" prefWidth="292.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hkust.edu.visualneo.LoadDatabaseController">
     <children>
         <Text layoutX="42.0" layoutY="40.0" stroke="BLACK" strokeLineCap="ROUND" strokeLineJoin="ROUND" strokeType="OUTSIDE" strokeWidth="0.5" text="Load Database" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
             <font>
-                <Font size="33.0" />
+                <Font name="Helvetica" size="33.0" />
             </font>
         </Text>
         <VBox layoutX="17.0" layoutY="96.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="90.0">

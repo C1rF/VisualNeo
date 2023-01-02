@@ -26,7 +26,7 @@ public class GraphParser {
         readGraphFile(GRAPH_DATA);
     }
 
-    public static void readGraphFile(String file)
+    private static void readGraphFile(String file)
     {
         try {
             // Read the graph file
