@@ -12,16 +12,10 @@ import java.util.stream.IntStream;
 
 public class QueryHandler {
 
-    private final VisualNeoApp app;
-
     private final QueryBuilder translator = new QueryBuilder();
 
     private Driver driver;
     private DbMetadata meta;
-
-    QueryHandler(VisualNeoApp app) {
-        this.app = app;
-    }
 
     void loadDatabase(String uri, String user, String password) {
         initDriver(uri, user, password);
