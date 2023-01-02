@@ -8,6 +8,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.transform.Rotate;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class Edge extends GraphElement {
     private static final double LINE_STROKE_WIDTH = 1.5;
     private static final double HIGHLIGHT_STROKE_WIDTH = 15.0;
     private static final Color LINE_COLOR = new Color(0.0, 0.0, 0.0, 0.4);
+    private static final Font TEXT_FONT = Font.font("Verdana", FontWeight.THIN, 8.0);
 
     public final Vertex startVertex;
     public final Vertex endVertex;
@@ -200,6 +203,8 @@ public class Edge extends GraphElement {
 
         highlightShape.setStrokeWidth(HIGHLIGHT_STROKE_WIDTH);
         highlightShape.setStroke(Color.TRANSPARENT);
+
+        text.setFont(TEXT_FONT);
 
         getChildren().addAll(highlightShape, shape);
         text.toFront();

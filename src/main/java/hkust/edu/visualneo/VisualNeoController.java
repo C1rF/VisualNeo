@@ -31,6 +31,9 @@ import java.io.PrintWriter;
 import java.util.*;
 
 public class VisualNeoController {
+
+    public final QueryHandler queryHandler = new QueryHandler();
+    
     /**
      * Buttons and Labels in the Label and Property Pane (9 in total)
      */
@@ -141,6 +144,10 @@ public class VisualNeoController {
     @FXML
     private void initialize() {
         constructCanvas.setType(Canvas.CanvasType.MODIFIABLE);
+        Graph graph = new Graph();
+        // TODO: Fix this
+        constructCanvas.bind(graph);
+        graph.bind(queryHandler.getTranslator());
         constructCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
             GraphElement temp = constructCanvas.getSingleHighlight();
             if (temp != null)
@@ -251,11 +258,11 @@ public class VisualNeoController {
     }
 
     public void submitDBInfo(String uri, String user, String password) {
-        app.queryHandler.loadDatabase(uri, user, password);
+        queryHandler.loadDatabase(uri, user, password);
     }
 
     public void updateUIWithMetaInfo() {
-        metadata = app.queryHandler.getMeta();
+        metadata = queryHandler.getMeta();
 
         // Compute label colors
         Canvas.computeColors(metadata);
@@ -326,11 +333,9 @@ public class VisualNeoController {
      */
     @FXML
     private void handleExactSearch() {
-        Collection<Vertex> listOfVertices = constructCanvas.getVertices();
-        Collection<Edge> listOfEdges = constructCanvas.getEdges();
         QueryHandler.Results results = null;
         try {
-            results = app.queryHandler.exactSearch(listOfVertices, listOfEdges);
+            results = queryHandler.exactSearch(constructCanvas);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Exact Search Error");
@@ -691,7 +696,7 @@ public class VisualNeoController {
                 }
             }
         }
-        return new Graph(nodes, relations, false);
+        return new Graph(nodes, relations);
     }
 
     public Graph parsePatternFromText(List<String> text) throws Exception{

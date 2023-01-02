@@ -11,6 +11,8 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,14 +23,16 @@ public class Vertex extends GraphElement {
 
     static final double VERTEX_RADIUS = 25.0;
     static final double HIGHLIGHT_RADIUS = VERTEX_RADIUS + 5.0;
-    private static final double STROKE_WIDTH = 1.0;
     private static final double DEFAULT_ANGLE = -PI / 2;
     public static final Color DEFAULT_COLOR = Color.LIGHTGRAY;
-
     public static final double ORIGIN_HUE = 30.0;
     public static final double ORIGIN_SATURATION = 0.8;
     public static final double ORIGIN_BRIGHTNESS = 0.9;
+    private static final double CIRCLE_STROKE_WIDTH = 1.5;
+    private static final double TEXT_STROKE_WIDTH = 0.3;
     private static final Color STROKE_COLOR = Color.DARKGREY;
+    private static final Color TEXT_COLOR = Color.WHITE;
+    private static final Font TEXT_FONT = Font.font("Verdana", FontWeight.BOLD, 12.0);
 
     private final DoubleProperty selfLoopAngle =
             new SimpleDoubleProperty(this, "selfLoopAngle", DEFAULT_ANGLE);
@@ -92,7 +96,7 @@ public class Vertex extends GraphElement {
     protected void initializeGraphics() {
         shape = new Circle(VERTEX_RADIUS);
         shape.setFill(canvas.getColor(getLabel()));
-        shape.setStrokeWidth(STROKE_WIDTH);
+        shape.setStrokeWidth(CIRCLE_STROKE_WIDTH);
         shape.setStroke(STROKE_COLOR);
 
         highlightShape = new Circle(HIGHLIGHT_RADIUS);
@@ -107,7 +111,10 @@ public class Vertex extends GraphElement {
 
         super.initializeGraphics();
 
-        text.setFill(Color.WHITE);
+        text.setFill(TEXT_COLOR);
+        text.setFont(TEXT_FONT);
+        text.setStroke(STROKE_COLOR);
+        text.setStrokeWidth(TEXT_STROKE_WIDTH);
     }
 
     @Override

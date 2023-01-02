@@ -16,6 +16,7 @@ public class OrthogonalCamera {
     private static final double MAX_RATIO  = 2.0;
     private static final double UNIT_RATIO = 0.1;
     private static final double ZOOM_UNITS = 2.5;
+    private static final double FIT_PORTION = 0.8;
 
     private final Canvas canvas;
 
@@ -92,10 +93,13 @@ public class OrthogonalCamera {
         return ratioProperty().get();
     }
     public void setRatio(double ratio) {
-        ratioProperty().set(
-                ratio < MIN_RATIO ? MIN_RATIO :
-                ratio > MAX_RATIO ? MAX_RATIO :
-                ratio);
+        setRatio(ratio, false);
+    }
+    public void setRatio(double ratio, boolean force) {
+        ratioProperty().set(force ? ratio :
+                            ratio < MIN_RATIO ? MIN_RATIO :
+                            ratio > MAX_RATIO ? MAX_RATIO :
+                            ratio);
     }
 
     public DoubleProperty inverseRatioProperty() {
@@ -123,9 +127,11 @@ public class OrthogonalCamera {
     public void zoomOut() {
         zoom(-ZOOM_UNITS);
     }
-    public void fit(Point2D min, Point2D max) {
+    public void fit(Point2D min, Point2D max, boolean force) {
         setPosition(min.midpoint(max));
-        setRatio(canvas.getWidth() / (max.getX() - min.getX()));
+        double ratio = FIT_PORTION * Math.min(canvas.getWidth() / (max.getX() - min.getX()),
+                                              canvas.getHeight() / (max.getY() - min.getY()));
+        setRatio(ratio, force);
     }
 
     public double getCanvasWidth() {

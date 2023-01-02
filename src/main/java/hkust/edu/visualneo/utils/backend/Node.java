@@ -56,12 +56,6 @@ public class Node extends Entity {
         relations.add(relation);
     }
 
-    void close() {
-        Collection<Relation> copy = Collections.unmodifiableCollection(relations);
-        if (relations != copy)
-            relations = copy;
-    }
-
     //    // Two distinct node are indistinguishable in the neighborhood of this node
     //    // iff they and the relations between them and this node can match the same node
     //    ArrayList<Pair<Node>> getDuplicateNeighborPairs() {

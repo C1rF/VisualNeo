@@ -4,8 +4,6 @@ import java.util.Arrays;
 
 public class Queries {
 
-    public static final String NEW_LINE = System.lineSeparator();
-
     public static final String NODE_COUNT_QUERY = """
             MATCH
               ()
