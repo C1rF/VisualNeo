@@ -699,6 +699,15 @@ public class VisualNeoController {
         return new Graph(nodes, relations);
     }
 
+    public void displayPatterns(List<Graph> patterns){
+        for(Graph pattern : patterns){
+            Canvas patternCanvas = new Canvas();
+            patternCanvas.setType(Canvas.CanvasType.STATIC);
+            patternCanvas.loadGraph(pattern);
+
+        }
+    }
+
     public Graph parsePatternFromText(List<String> text) throws Exception{
 
         if (metadata == null) throw new Exception("No Database");
@@ -739,7 +748,7 @@ public class VisualNeoController {
                 }
             }
         }
-        return new Graph(nodes, relations, false);
+        return new Graph(nodes, relations);
     }
 
 }

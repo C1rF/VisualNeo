@@ -1,0 +1,5 @@
+0:Tournament
+1:Team
+2:Squad
+3:Person
+4:Match

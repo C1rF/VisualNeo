@@ -44,8 +44,7 @@ public class LoadPatternController {
             List<Graph> pattern_graphs = new ArrayList<>();
             for(List<String> single_pattern : all_patterns)
                 pattern_graphs.add(controller.parsePatternFromText(single_pattern));
-
-
+            controller.displayPatterns(pattern_graphs);
 
         } catch (FileNotFoundException fe) {
         } catch (Exception e) {
