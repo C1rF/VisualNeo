@@ -9,14 +9,13 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -34,7 +33,7 @@ import java.util.*;
 public class VisualNeoController {
 
     public final QueryHandler queryHandler = new QueryHandler();
-    
+
     /**
      * Buttons and Labels in the Label and Property Pane (9 in total)
      */
@@ -134,6 +133,8 @@ public class VisualNeoController {
     private VBox vbox_basic_patterns;
     @FXML
     private VBox vbox_canned_patterns;
+
+    private static double PATTERN_CANVAS_HEIGHT = 200.0;
 
 
     /**
@@ -704,35 +705,35 @@ public class VisualNeoController {
     }
 
     public void displayPatterns(List<Graph> patterns) {
-//        Graph test = patterns.get(0);
-//        constructCanvas.loadGraph(test);
-//        constructCanvas.frameAllElements();
-        Canvas[] canvases = new Canvas[5];
-        for (int i = 0; i < patterns.size(); i++) {
-            Graph pattern = patterns.get(i);
-            AnchorPane patternAnchorPane = new AnchorPane();
-            patternAnchorPane.setBackground(new Background(new BackgroundFill(Color.PINK, new CornerRadii(0), Insets.EMPTY)));
-            patternAnchorPane.setPrefSize(281, 281);
-            patternAnchorPane.setMinSize(281, 281);
-            patternAnchorPane.setMaxSize(281, 281);
+        Iterator<Graph> it = patterns.iterator();
+        while (it.hasNext()) {
+            Graph pattern = it.next();
+
             Canvas patternCanvas = new Canvas();
             patternCanvas.setType(Canvas.CanvasType.STATIC);
-            patternCanvas.setBackground(new Background(new BackgroundFill(Color.GREEN, new CornerRadii(0), Insets.EMPTY)));
-            patternAnchorPane.setTopAnchor(patternCanvas,0.0);
-            patternAnchorPane.setBottomAnchor(patternCanvas,0.0);
-            patternAnchorPane.setLeftAnchor(patternCanvas,0.0);
-            patternAnchorPane.setRightAnchor(patternCanvas,0.0);
-            patternAnchorPane.getChildren().add(patternCanvas);
-            canvases[i] = patternCanvas;
-            vbox_canned_patterns.getChildren().add(patternAnchorPane);
             patternCanvas.loadGraph(pattern);
-            patternCanvas.frameAllElements();
-            if (i < patterns.size() - 1) vbox_canned_patterns.getChildren().add(new Separator());
-        }
-        for (int i = 0; i < patterns.size(); i++){
-            System.out.println(canvases[i].getWidth() + " " + canvases[i].getHeight());
-        }
 
+            ChangeListener<Number> updateCamera =
+                    (observable, oldValue, newValue) -> patternCanvas.frameAllElements();
+            patternCanvas.widthProperty().addListener(updateCamera);
+            patternCanvas.heightProperty().addListener(updateCamera);
+
+            AnchorPane.setTopAnchor(patternCanvas, 0.0);
+            AnchorPane.setBottomAnchor(patternCanvas, 0.0);
+            AnchorPane.setLeftAnchor(patternCanvas,0.0);
+            AnchorPane.setRightAnchor(patternCanvas,0.0);
+
+            AnchorPane patternAnchorPane = new AnchorPane();
+            patternAnchorPane.setMinHeight(PATTERN_CANVAS_HEIGHT);
+            patternAnchorPane.setPrefHeight(PATTERN_CANVAS_HEIGHT);
+            patternAnchorPane.setMaxHeight(PATTERN_CANVAS_HEIGHT);
+
+            patternAnchorPane.getChildren().add(patternCanvas);
+            vbox_canned_patterns.getChildren().add(patternAnchorPane);
+
+            if (it.hasNext())
+                vbox_canned_patterns.getChildren().add(new Separator());
+        }
     }
 
     public Graph parsePatternFromText(List<String> text) throws Exception {
