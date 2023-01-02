@@ -240,7 +240,7 @@ public class Canvas extends Pane {
 
         // Compute the layout of the graph
         ForceDirectedPlacementStatic placement = new ForceDirectedPlacementStatic(this);
-        placement.simulate(10000);
+        placement.simulate(0);
         placement.layout();
     }
 
@@ -288,7 +288,7 @@ public class Canvas extends Pane {
                 maxY = pos.getY();
         }
 
-        camera.fit(new Point2D(minX, minY), new Point2D(maxX, maxY));
+        camera.fit(new Point2D(minX, minY), new Point2D(maxX, maxY), false);
     }
 
     private void createVertex(Point2D position) {

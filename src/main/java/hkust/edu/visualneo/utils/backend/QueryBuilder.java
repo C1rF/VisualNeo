@@ -6,24 +6,25 @@ import org.neo4j.driver.Value;
 
 import java.util.*;
 
-import static hkust.edu.visualneo.utils.backend.Queries.NEW_LINE;
 import static hkust.edu.visualneo.utils.backend.Queries.singletonQuery;
 
 // Class representing a Cypher query statement
 public class QueryBuilder {
 
-    private final StringBuilder buffer = new StringBuilder();
+    private static final String NEW_LINE = System.lineSeparator();
+    private static final String TAB = "  ";
+    private static final String NEW_LINE_INDENT = NEW_LINE + TAB;
 
-    private int indent;
+    private final StringBuilder buffer = new StringBuilder();
 
     private final StringProperty translation = new SimpleStringProperty(this, "translation", null);
 
     // TODO: Modify this
     public String translate(Graph graph, boolean simple) {
         if (graph.isEmpty())
-            throw new IllegalArgumentException("Graph is empty!");
+            throw new Graph.BadTopologyException(Graph.BadTopologyException.TopologyType.EMPTY);
         if (!graph.isConnected())
-            throw new IllegalArgumentException("Graph is not connected!");
+            throw new Graph.BadTopologyException(Graph.BadTopologyException.TopologyType.DISCONNECTED);
         graph.index();
 
         if (graph.getRelations().isEmpty()) {
@@ -38,22 +39,26 @@ public class QueryBuilder {
         Collection<String> nodeNames = graph.getNodes().stream().map(Node::getName).toList();
         Collection<String> relationNames = graph.getRelations().stream().map(Relation::getName).toList();
 
+        String keywordSeparator = simple ? " " : NEW_LINE_INDENT;
+        String commaSeparator = simple ? ", " : "," + NEW_LINE_INDENT;
+        String andSeparator = simple ? " AND " : " AND" + NEW_LINE_INDENT;
+
         // MATCH clause
-        increaseIndent();
         buffer.append("MATCH");
+        buffer.append(keywordSeparator);
+
         Iterator<Relation> relationIt = graph.getRelations().iterator();
         while (true) {
             Relation relation = relationIt.next();
-            newLine();
             translate(relation.start, unusedNodes);
             translate(relation);
             translate(relation.end, unusedNodes);
             if (!relationIt.hasNext())
                 break;
-            buffer.append(',');
+            buffer.append(commaSeparator);
         }
-        decreaseIndent();
-        newLine();
+
+        buffer.append(NEW_LINE);
 
         // WHERE clause
         // TODO: Modify this naive approach
@@ -64,62 +69,61 @@ public class QueryBuilder {
                 dupPairs.add(Pair.ordered(nodes.get(i), nodes.get(j)));
             }
         }
+
         if (!dupPairs.isEmpty()) {
-            increaseIndent();
             buffer.append("WHERE");
+            buffer.append(keywordSeparator);
+
             Iterator<Pair<Node>> pairIt = dupPairs.iterator();
             while (true) {
                 Pair<Node> pair = pairIt.next();
-                newLine();
                 buffer.append(pair.head().getName());
                 buffer.append(" <> ");
                 buffer.append(pair.tail().getName());
                 if (!pairIt.hasNext())
                     break;
-                buffer.append(" AND");
+                buffer.append(andSeparator);
             }
-            decreaseIndent();
-            newLine();
+            buffer.append(NEW_LINE);
         }
 
-        if (simple) {
+        if (simple)
             buffer.append("RETURN *");
-        }
         else {
             // WITH and UNWIND clauses (for grouping distinct nodes and relations)
-            increaseIndent();
             buffer.append("WITH");
-            newLine();
-            buffer.append('[');
-            buffer.append(String.join(", ", nodeNames));
-            buffer.append(']');
-            buffer.append(" AS allNodes");
-            buffer.append(',');
-            newLine();
-            buffer.append('[');
-            buffer.append(String.join(", ", relationNames));
-            buffer.append(']');
-            buffer.append(" AS allRelationships");
-            decreaseIndent();
-            newLine();
+            buffer.append(NEW_LINE_INDENT);
 
-            buffer.append("UNWIND allNodes AS n");
-            newLine();
-            buffer.append("UNWIND allRelationships AS r");
-            newLine();
+            buffer.append("[");
+            buffer.append(String.join(", ", nodeNames));
+            buffer.append("] AS allNodes");
+            buffer.append(commaSeparator);
+            buffer.append("[");
+            buffer.append(String.join(", ", relationNames));
+            buffer.append("] AS allRelationships");
+            buffer.append(NEW_LINE);
+
+            buffer.append("UNWIND");
+            buffer.append(NEW_LINE_INDENT);
+
+            buffer.append("allNodes AS n");
+            buffer.append(NEW_LINE);
+
+            buffer.append("UNWIND");
+            buffer.append(NEW_LINE_INDENT);
+
+            buffer.append("allRelationships AS r");
+            buffer.append(NEW_LINE);
 
             // RETURN clause
-            increaseIndent();
             buffer.append("RETURN");
-            newLine();
+            buffer.append(NEW_LINE_INDENT);
+
             buffer.append("collect(DISTINCT n) AS nodes");
-            buffer.append(',');
-            newLine();
+            buffer.append(commaSeparator);
             buffer.append("collect(DISTINCT r) AS relationships");
-            buffer.append(',');
-            newLine();
+            buffer.append(commaSeparator);
             buffer.append("collect(DISTINCT [[n IN allNodes | ID(n)], [r IN allRelationships | ID(r)]]) AS resultIds");
-            decreaseIndent();
         }
 
         String query = buffer.toString();
@@ -135,8 +139,11 @@ public class QueryBuilder {
         try {
             setTranslation(translate(graph, true));
         }
-        catch (IllegalArgumentException e) {
-            setTranslation(e.toString());
+        catch (Graph.BadTopologyException e) {
+            if (e.getType() == Graph.BadTopologyException.TopologyType.DISCONNECTED)
+                setTranslation(e.toString());
+            else
+                setTranslation("");
         }
     }
 
@@ -160,18 +167,6 @@ public class QueryBuilder {
 
     private void clear() {
         buffer.setLength(0);
-        indent = 0;
-    }
-
-    private void increaseIndent() {
-        indent++;
-    }
-
-    private void newLine() {
-        buffer.append(NEW_LINE);
-        char[] tabs = new char[2 * indent];
-        Arrays.fill(tabs, ' ');
-        buffer.append(tabs);
     }
 
     private void translate(Node node, Set<Node> unusedNodes) {
@@ -189,11 +184,6 @@ public class QueryBuilder {
         buffer.append("]-");
         if (relation.directed)
             buffer.append('>');
-    }
-
-    private void decreaseIndent() {
-        if (--indent < 0)
-            indent = 0;
     }
 
     private void translateEntity(Entity entity) {

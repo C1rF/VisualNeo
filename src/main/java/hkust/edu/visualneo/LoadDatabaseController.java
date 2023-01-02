@@ -54,7 +54,7 @@ public class LoadDatabaseController {
                 try {
                     // Try to connect to the database
                     //controller.submitDBInfo(uri, user, password);
-                    controller.submitDBInfo("bolt://34.230.39.117:7687", "neo4j", "quotas-decks-horsepower");
+                    controller.submitDBInfo("bolt://3.227.23.1:7687", "neo4j", "basis-desires-seamanship");
                     connect_success = true;
                 } catch (AuthenticationException e) {
                     connect_success = false;

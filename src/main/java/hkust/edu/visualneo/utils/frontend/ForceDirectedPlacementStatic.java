@@ -15,15 +15,16 @@ public class ForceDirectedPlacementStatic {
 
     private static final Random rand = new Random();
 
-    private static final double OPT_DIST = 150.0;  // Optimal distance
+    private static final double OPT_DIST = 200.0;  // Optimal distance
     private static final double INV_OPT_DIST = 1.0 / OPT_DIST;
     private static final double SQR_OPT_DIST = OPT_DIST * OPT_DIST;
 
-    private static final double MAX_REP_DIST = 1.5 * OPT_DIST;  // Maximum distance for applying repulsive force
-
     private static final double GRAV_COEF = 0.05;  // Gravity coefficient
 
-    private static final double INIT_TEMP = 100.0;  // Initial temperature
+    private static final double INIT_TEMP = 20.0;  // Initial temperature
+
+    private static final double STOP_AVG_DISP = 100.0;  // Average displacement threshold for stopping simulation
+    private static final int MAX_TIME = 10000;  // Max duration of simulation;
 
     private final Canvas canvas;
 
@@ -36,6 +37,8 @@ public class ForceDirectedPlacementStatic {
 
     private final Point2D[] positions;
     private final Point2D[] displacements;
+
+    private final double maxRepDist;  // Maximum distance for applying repulsive force
 
     private int time = 0;
 
@@ -57,19 +60,27 @@ public class ForceDirectedPlacementStatic {
                       .map(edge -> new Pair<>(indices.get(edge.startVertex.getElementId()), indices.get(edge.endVertex.getElementId())))
                       .collect(Collectors.toSet());
 
-//        double max = OPT_DIST * Math.min(Math.sqrt(vertexCount), 10.0) * 0.5;
-        double max = OPT_DIST * Math.sqrt(vertexCount) * 0.5;
+        double scale = Math.sqrt(vertexCount);
+
+        maxRepDist = OPT_DIST * scale;
+
+        //        double max = OPT_DIST * Math.min(Math.sqrt(vertexCount), 10.0) * 0.5;
+        double max = OPT_DIST * scale * 0.5;
         double min = -max;
 
         positions = new Point2D[vertexCount];
         displacements = new Point2D[vertexCount];
         Arrays.setAll(positions, i -> randomPoint(min, max));
-        Arrays.fill(displacements, Point2D.ZERO);
     }
 
     public void layout() {
+        Point2D sum = Point2D.ZERO;
+        for (Point2D pos : positions)
+            sum = sum.add(pos);
+        Point2D centroid = sum.multiply(1.0 / vertexCount);
+
         for (int i = 0; i < vertexCount; ++i)
-            canvas.getVertex(ids[i]).setPosition(positions[i]);
+            canvas.getVertex(ids[i]).setPosition(positions[i].subtract(centroid));
     }
 
     public Map<Long, Point2D> getPositionMap() {
@@ -77,11 +88,27 @@ public class ForceDirectedPlacementStatic {
     }
 
     public void simulate(int duration) {
-        for (int i = 0; i < duration; ++i)
-            simulate();
+        if (duration == 0) {
+            int equilibriumCount = 0;
+            while (equilibriumCount < 5 && time < MAX_TIME) {
+                simulate();
+                if (time% 100 == 0 && computeAvgDisp() < STOP_AVG_DISP)
+                    ++equilibriumCount;
+            }
+        }
+        else {
+            for (int i = 0; i < duration && time < MAX_TIME; ++i)
+                simulate();
+        }
+
+        System.out.println(time);
+        System.out.println(computeAvgDisp());
     }
 
     public void simulate() {
+        // Clear all displacements
+        Arrays.fill(displacements, Point2D.ZERO);
+
         // Compute repulsive displacements
         for (int i = 0; i < vertexCount; ++i) {
             for (int j = i + 1; j < vertexCount; ++j) {
@@ -103,10 +130,6 @@ public class ForceDirectedPlacementStatic {
             displacements[j] = displacements[j].subtract(disp);
         }
 
-        // Compute gravities
-        for (int i = 0; i < vertexCount; ++i)
-            displacements[i] = displacements[i].add(gravity(positions[i]));
-
         // Apply displacements
         for (int i = 0; i < vertexCount; ++i) {
             Point2D disp = displacements[i];
@@ -115,9 +138,6 @@ public class ForceDirectedPlacementStatic {
 
         // Cooling
         cool();
-
-        // Clear all displacements
-        Arrays.fill(displacements, Point2D.ZERO);
 
         // Increment iteration count
         ++time;
@@ -132,7 +152,7 @@ public class ForceDirectedPlacementStatic {
     }
     private Point2D repDisp(Point2D diff) {
         double dist = diff.magnitude();
-        if (dist > MAX_REP_DIST)
+        if (dist > maxRepDist)
             return Point2D.ZERO;
         return diff.multiply(SQR_OPT_DIST / (dist * dist));
     }
@@ -143,6 +163,14 @@ public class ForceDirectedPlacementStatic {
 
     private void cool() {
         temp = INIT_TEMP / (1 + Math.log(1 + time));
+    }
+
+    private double computeAvgDisp() {
+        double sum = 0.0;
+        for (Point2D disp : displacements) {
+            sum += disp.magnitude();
+        }
+        return sum / vertexCount;
     }
 
     private static Point2D randomPoint(double min, double max) {
