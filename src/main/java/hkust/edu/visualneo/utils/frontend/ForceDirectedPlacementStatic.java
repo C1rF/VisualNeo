@@ -23,7 +23,7 @@ public class ForceDirectedPlacementStatic {
 
     private static final double INIT_TEMP = 20.0;  // Initial temperature
 
-    private static final double STOP_AVG_DISP = 100.0;  // Average displacement threshold for stopping simulation
+    private static final double STOP_AVG_DISP = 80.0;  // Average displacement threshold for stopping simulation
     private static final int MAX_TIME = 10000;  // Max duration of simulation;
 
     private final Canvas canvas;
