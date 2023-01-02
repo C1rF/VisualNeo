@@ -1,5 +1,7 @@
 package hkust.edu.visualneo.utils.backend;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import org.neo4j.driver.Value;
 
 import java.util.*;
@@ -14,24 +16,32 @@ public class QueryBuilder {
 
     private int indent;
 
+    private final StringProperty translation = new SimpleStringProperty(this, "translation", null);
+
     // TODO: Modify this
-    public String translate(Graph graph) {
-        if (graph.relations().isEmpty()) {
-            Node singleton = graph.nodes().iterator().next();
+    public String translate(Graph graph, boolean simple) {
+        if (graph.isEmpty())
+            throw new IllegalArgumentException("Graph is empty!");
+        if (!graph.isConnected())
+            throw new IllegalArgumentException("Graph is not connected!");
+        graph.index();
+
+        if (graph.getRelations().isEmpty()) {
+            Node singleton = graph.getNodes().iterator().next();
             translateEntity(singleton);
             String translation = buffer.toString();
             clear();
             return singletonQuery(singleton.getName(), translation);
         }
 
-        Set<Node> unusedNodes = new HashSet<>(graph.nodes());
-        Collection<String> nodeNames = graph.nodes().stream().map(Node::getName).toList();
-        Collection<String> relationNames = graph.relations().stream().map(Relation::getName).toList();
+        Set<Node> unusedNodes = new HashSet<>(graph.getNodes());
+        Collection<String> nodeNames = graph.getNodes().stream().map(Node::getName).toList();
+        Collection<String> relationNames = graph.getRelations().stream().map(Relation::getName).toList();
 
         // MATCH clause
         increaseIndent();
         buffer.append("MATCH");
-        Iterator<Relation> relationIt = graph.relations().iterator();
+        Iterator<Relation> relationIt = graph.getRelations().iterator();
         while (true) {
             Relation relation = relationIt.next();
             newLine();
@@ -48,7 +58,7 @@ public class QueryBuilder {
         // WHERE clause
         // TODO: Modify this naive approach
         List<Pair<Node>> dupPairs = new ArrayList<>();
-        List<Node> nodes = new ArrayList<>(graph.nodes());
+        List<Node> nodes = new ArrayList<>(graph.getNodes());
         for (int i = 0; i < nodes.size(); ++i) {
             for (int j = i + 1; j < nodes.size(); ++j) {
                 dupPairs.add(Pair.ordered(nodes.get(i), nodes.get(j)));
@@ -72,46 +82,78 @@ public class QueryBuilder {
             newLine();
         }
 
-        // WITH and UNWIND clauses (for grouping distinct nodes and relations)
-        increaseIndent();
-        buffer.append("WITH");
-        newLine();
-        buffer.append('[');
-        buffer.append(String.join(", ", nodeNames));
-        buffer.append(']');
-        buffer.append(" AS allNodes");
-        buffer.append(',');
-        newLine();
-        buffer.append('[');
-        buffer.append(String.join(", ", relationNames));
-        buffer.append(']');
-        buffer.append(" AS allRelationships");
-        decreaseIndent();
-        newLine();
+        if (simple) {
+            buffer.append("RETURN *");
+        }
+        else {
+            // WITH and UNWIND clauses (for grouping distinct nodes and relations)
+            increaseIndent();
+            buffer.append("WITH");
+            newLine();
+            buffer.append('[');
+            buffer.append(String.join(", ", nodeNames));
+            buffer.append(']');
+            buffer.append(" AS allNodes");
+            buffer.append(',');
+            newLine();
+            buffer.append('[');
+            buffer.append(String.join(", ", relationNames));
+            buffer.append(']');
+            buffer.append(" AS allRelationships");
+            decreaseIndent();
+            newLine();
 
-        buffer.append("UNWIND allNodes AS n");
-        newLine();
-        buffer.append("UNWIND allRelationships AS r");
-        newLine();
+            buffer.append("UNWIND allNodes AS n");
+            newLine();
+            buffer.append("UNWIND allRelationships AS r");
+            newLine();
 
-        // RETURN clause
-        increaseIndent();
-        buffer.append("RETURN");
-        newLine();
-        buffer.append("collect(DISTINCT n) AS nodes");
-        buffer.append(',');
-        newLine();
-        buffer.append("collect(DISTINCT r) AS relationships");
-        buffer.append(',');
-        newLine();
-        buffer.append("collect(DISTINCT [[n IN allNodes | ID(n)], [r IN allRelationships | ID(r)]]) AS resultIds");
-        decreaseIndent();
+            // RETURN clause
+            increaseIndent();
+            buffer.append("RETURN");
+            newLine();
+            buffer.append("collect(DISTINCT n) AS nodes");
+            buffer.append(',');
+            newLine();
+            buffer.append("collect(DISTINCT r) AS relationships");
+            buffer.append(',');
+            newLine();
+            buffer.append("collect(DISTINCT [[n IN allNodes | ID(n)], [r IN allRelationships | ID(r)]]) AS resultIds");
+            decreaseIndent();
+        }
 
         System.out.println(graph);
 
         String query = buffer.toString();
         clear();
         return query;
+    }
+
+    public void update(Graph graph) {
+        try {
+            setTranslation(translate(graph, true));
+        }
+        catch (IllegalArgumentException e) {
+            setTranslation(e.toString());
+        }
+    }
+
+    public void unbind() {
+        setTranslation(null);
+    }
+
+    public boolean isBound() {
+        return getTranslation() == null;
+    }
+
+    public StringProperty translationProperty() {
+        return translation;
+    }
+    public String getTranslation() {
+        return translationProperty().get();
+    }
+    private void setTranslation(String translation) {
+        translationProperty().set(translation);
     }
 
     private void clear() {

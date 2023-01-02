@@ -44,6 +44,8 @@ public class Canvas extends Pane {
 
     private final Map<Long, Vertex> vertices = new TreeMap<>();
     private final Map<Long, Edge> edges = new TreeMap<>();
+    
+    private Graph listenerGraph;
 
     public static void computeColors(DbMetadata metadata) {
         int numColors = metadata.nodeLabels().size();
@@ -213,18 +215,21 @@ public class Canvas extends Pane {
     public void loadGraph(Graph graph) {
         clearElements();
 
-        Long maxId = Stream.concat(graph.nodes().stream(), graph.relations().stream())
+        if (isBound())
+            listenerGraph.set(graph);
+
+        Long maxId = Stream.concat(graph.getNodes().stream(), graph.getRelations().stream())
                            .map(Entity::getId)
                            .max(Long::compareTo)
                            .get();
         GraphElement.raiseIdTo(maxId);
 
-        vertices.putAll(graph.nodes()
+        vertices.putAll(graph.getNodes()
                              .stream()
                              .collect(Collectors.toMap(Node::getId,
                                                        node -> new Vertex(this,
                                                                           node))));
-        edges.putAll(graph.relations()
+        edges.putAll(graph.getRelations()
                           .stream()
                           .collect(Collectors.toMap(Relation::getId,
                                                     relation -> new Edge(this,
@@ -237,6 +242,21 @@ public class Canvas extends Pane {
         ForceDirectedPlacementStatic placement = new ForceDirectedPlacementStatic(this);
         placement.simulate(10000);
         placement.layout();
+    }
+
+    public Graph getGraph() {
+        return listenerGraph;
+    }
+    public void bind(Graph graph) {
+        listenerGraph = Objects.requireNonNull(graph);
+    }
+    
+    public void unbind() {
+        listenerGraph = null;
+    }
+    
+    public boolean isBound() {
+        return listenerGraph != null;
     }
 
     // TODO: Improve this
@@ -276,6 +296,9 @@ public class Canvas extends Pane {
         vertex.setPositionInScreen(position);
         vertices.put(vertex.getElementId(), vertex);
         addElement(vertex);
+        
+        if (isBound())
+            listenerGraph.addNode(new Node(vertex));
     }
 
     private void createEdge(Vertex start, Vertex end, boolean directed) {
@@ -283,6 +306,11 @@ public class Canvas extends Pane {
         edges.put(edge.getElementId(), edge);
         addElement(edge);
         edge.toBack();
+
+        if (isBound())
+            listenerGraph.addRelation(new Relation(edge,
+                                                   listenerGraph.getNode(start.getElementId()),
+                                                   listenerGraph.getNode(end.getElementId())));
     }
 
     public Collection<Vertex> getVertices() {
@@ -304,11 +332,15 @@ public class Canvas extends Pane {
     // Should only be called in Edge:erase
     public void erase(Vertex vertex) {
         vertices.remove(vertex.getElementId());
+        if (isBound())
+            listenerGraph.removeNode(vertex.getElementId());
     }
 
     // Should only be called in Vertex:erase
     public void erase(Edge edge) {
         edges.remove(edge.getElementId());
+        if (isBound())
+            listenerGraph.removeRelation(edge.getElementId());
     }
 
     public void addElement(GraphElement element) {
@@ -334,6 +366,8 @@ public class Canvas extends Pane {
         edges.clear();
         getChildren().clear();
         clearHighlights();
+        if (isBound())
+            listenerGraph.clear();
     }
 
     public ObservableSet<GraphElement> getHighlights() {

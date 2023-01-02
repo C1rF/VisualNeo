@@ -135,6 +135,10 @@ public class VisualNeoController {
     @FXML
     private void initialize() {
         constructCanvas.setType(Canvas.CanvasType.MODIFIABLE);
+        Graph graph = new Graph();
+        // TODO: Fix this
+//        constructCanvas.bind(new Graph());
+//        graph.bind(app.queryHandler.getTranslator());
         constructCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
             GraphElement temp = constructCanvas.getSingleHighlight();
             if (temp != null)
@@ -307,11 +311,9 @@ public class VisualNeoController {
      */
     @FXML
     private void handleExactSearch() {
-        Collection<Vertex> listOfVertices = constructCanvas.getVertices();
-        Collection<Edge> listOfEdges = constructCanvas.getEdges();
         QueryHandler.Results results = null;
         try {
-            results = app.queryHandler.exactSearch(listOfVertices, listOfEdges);
+            results = app.queryHandler.exactSearch(constructCanvas);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Exact Search Error");
@@ -661,7 +663,7 @@ public class VisualNeoController {
                 }
             }
         }
-        return new Graph(nodes, relations, false);
+        return new Graph(nodes, relations);
     }
 
 }

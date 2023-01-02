@@ -1,5 +1,6 @@
 package hkust.edu.visualneo.utils.backend;
 
+import hkust.edu.visualneo.utils.frontend.Canvas;
 import hkust.edu.visualneo.utils.frontend.Edge;
 import hkust.edu.visualneo.utils.frontend.Vertex;
 
@@ -9,70 +10,77 @@ import java.util.stream.Collectors;
 
 public class Graph implements Mappable {
 
-    private final Map<Long, Node> nodes;
-    private final Map<Long, Relation> relations;
+    private Map<Long, Node> nodes;
+    private Map<Long, Relation> relations;
 
-    public Graph(Collection<Node> nodes, Collection<Relation> relations, boolean checkConnectivity) {
+    private QueryBuilder translator;
+
+    public Graph() {
+        nodes = new TreeMap<>();
+        relations = new TreeMap<>();
+    }
+
+    public Graph(Collection<Node> nodes, Collection<Relation> relations) {
         this.nodes = nodes
                 .stream()
                 .collect(Collectors.toMap(Node::getId, Function.identity(), (e1, e2) -> e1, TreeMap::new));
         this.relations = relations
                 .stream()
                 .collect(Collectors.toMap(Relation::getId, Function.identity(), (e1, e2) -> e1, TreeMap::new));
-
-        validate(checkConnectivity);
     }
 
-    // Construct a graph from vertices and edges, generated nodes and relations are sorted
-    public static Graph fromDrawing(Collection<Vertex> vertices, Collection<Edge> edges) {
-        Map<Vertex, Node> nodes = vertices
+    public Graph(Canvas canvas) {
+        nodes = canvas.getVertices()
                 .stream()
-                .collect(Collectors.toMap(Function.identity(), Node::new));
+                .collect(Collectors.toMap(Vertex::getElementId, Node::new, (e1, e2) -> e1, TreeMap::new));
 
-        Collection<Relation> relations = edges
+        relations = canvas.getEdges()
                 .stream()
-                .map(edge -> new Relation(edge,
-                                          nodes.get(edge.startVertex),
-                                          nodes.get(edge.endVertex)))
-                .collect(Collectors.toSet());
-
-        Graph graph = new Graph(nodes.values(), relations, true);
-        graph.index();
-
-        return graph;
+                .collect(Collectors.toMap(Edge::getElementId,
+                                          edge ->new Relation(edge,
+                                                              nodes.get(edge.startVertex.getElementId()),
+                                                              nodes.get(edge.endVertex.getElementId())),
+                                                              (e1, e2) -> e1,
+                                                              TreeMap::new));
     }
 
-    private void validate(boolean checkConnectivity) {
-        if (!isNonNull())
-            throw new NullPointerException("Null/Empty Entity!");
-        if (!isComplete())
-            throw new IllegalArgumentException("Node/Relation list is not complete!");
-        if (checkConnectivity && !isConnected())
-            throw new IllegalArgumentException("Graph is not connected!");
+    public void set(Graph graph) {
+        nodes = graph.nodes;
+        relations = graph.relations;
+        if (isBound())
+            translator.update(this);
     }
 
-    private boolean isNonNull() {
-        return !(nodes() == null || relations() == null || nodes().isEmpty());
+    public void clear() {
+        nodes.clear();
+        relations.clear();
+        if (isBound())
+            translator.update(this);
     }
 
-    private boolean isComplete() {
-        for (Node node : nodes())
-            if (!relations().containsAll(node.relations()))
-                return false;
-
-        for (Relation relation : relations())
-            if (!nodes().contains(relation.start) || !nodes().contains(relation.end))
-                return false;
-
-        return true;
+    public void bind(QueryBuilder builder) {
+        translator = Objects.requireNonNull(builder);
     }
 
-    private boolean isConnected() {
-        if (nodes().size() == 1)
+    public void unbind() {
+        translator.unbind();
+        translator = null;
+    }
+
+    public boolean isBound() {
+        return translator != null;
+    }
+
+    public boolean isEmpty() {
+        return nodes.isEmpty();
+    }
+
+    public boolean isConnected() {
+        if (nodeCount() <= 1)
             return true;
 
-        Collection<Node> uncoloredNodes = new HashSet<>(nodes());
-        color(uncoloredNodes, nodes().iterator().next());
+        Collection<Node> uncoloredNodes = new HashSet<>(getNodes());
+        color(uncoloredNodes, getNodes().iterator().next());
 
         return uncoloredNodes.isEmpty();
     }
@@ -87,27 +95,49 @@ public class Graph implements Mappable {
         });
     }
 
-    private void index() {
+    public void index() {
         int nodeIndex = 0;
-        for (Node node : nodes())
+        for (Node node : getNodes())
             node.setIndex(nodeIndex++);
         int relationIndex = 0;
-        for (Relation relation : relations())
+        for (Relation relation : getRelations())
             relation.setIndex(relationIndex++);
     }
 
-    public Collection<Node> nodes() {
+    public void addNode(Node node) {
+        nodes.put(node.getId(), node);
+        if (isBound())
+            translator.update(this);
+    }
+    public void addRelation(Relation relation) {
+        relations.put(relation.getId(), relation);
+        if (isBound())
+            translator.update(this);
+    }
+
+    public void removeNode(Long id) {
+        nodes.remove(id);
+        if (isBound())
+            translator.update(this);
+    }
+    public void removeRelation(Long id) {
+        relations.remove(id);
+        if (isBound())
+            translator.update(this);
+    }
+
+    public Collection<Node> getNodes() {
         return nodes.values();
     }
-    public Collection<Relation> relations() {
+    public Collection<Relation> getRelations() {
         return relations.values();
     }
 
     public int nodeCount() {
-        return nodes().size();
+        return nodes.size();
     }
     public int relationCount() {
-        return relations().size();
+        return relations.size();
     }
 
     public Collection<Long> nodeIds() {
@@ -137,13 +167,13 @@ public class Graph implements Mappable {
     @Override
     public Map<Object, Object> toMap() {
         Map<Object, Object> map = new LinkedHashMap<>();
-        map.put("Nodes", nodes().stream()
-                                .collect(Collectors.toMap(Node::getName,
+        map.put("Nodes", getNodes().stream()
+                                   .collect(Collectors.toMap(Node::getName,
                                                         Node::toMap,
                                                         (e1, e2) -> e2,
                                                         LinkedHashMap::new)));
-        map.put("Relations", relations().stream()
-                                        .collect(Collectors.toMap(Relation::getName,
+        map.put("Relations", getRelations().stream()
+                                           .collect(Collectors.toMap(Relation::getName,
                                                                 Relation::toMap,
                                                                 (e1, e2) -> e2,
                                                                 LinkedHashMap::new)));

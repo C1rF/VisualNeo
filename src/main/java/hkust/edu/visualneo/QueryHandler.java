@@ -1,8 +1,7 @@
 package hkust.edu.visualneo;
 
 import hkust.edu.visualneo.utils.backend.*;
-import hkust.edu.visualneo.utils.frontend.Edge;
-import hkust.edu.visualneo.utils.frontend.Vertex;
+import hkust.edu.visualneo.utils.frontend.Canvas;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.*;
 
@@ -15,7 +14,7 @@ public class QueryHandler {
 
     private final VisualNeoApp app;
 
-    private final QueryBuilder builder = new QueryBuilder();
+    private final QueryBuilder translator = new QueryBuilder();
 
     private Driver driver;
     private DbMetadata meta;
@@ -134,7 +133,7 @@ public class QueryHandler {
                         .map(relationship -> new Relation(relationship, schemaNodes, true))
                         .collect(Collectors.toSet());
 
-                return new Graph(new HashSet<>(schemaNodes.values()), schemaRelations, false);
+                return new Graph(new HashSet<>(schemaNodes.values()), schemaRelations);
             });
 
             meta = new DbMetadata(
@@ -146,9 +145,9 @@ public class QueryHandler {
         }
     }
 
-    Results exactSearch(Collection<Vertex> vertices, Collection<Edge> edges) {
-        Graph queryGraph = Graph.fromDrawing(vertices, edges);
-        String query = builder.translate(queryGraph);
+    Results exactSearch(Canvas canvas) {
+        Graph queryGraph = new Graph(canvas);
+        String query = translator.translate(queryGraph, false);
         System.out.println(query);
 
         try (Session session = driver.session(SessionConfig.builder()
@@ -172,7 +171,7 @@ public class QueryHandler {
                         .map(relationship -> new Relation(relationship, nodes, false))
                         .collect(Collectors.toSet());
 
-                Graph resultGraph = new Graph(new HashSet<>(nodes.values()), relations, false);
+                Graph resultGraph = new Graph(new HashSet<>(nodes.values()), relations);
 
                 List<Pair<List<Long>>> resultIds = new ArrayList<>(record
                         .get("resultIds")
@@ -189,6 +188,10 @@ public class QueryHandler {
             System.out.println(results);
             return results;
         }
+    }
+
+    public QueryBuilder getTranslator() {
+        return translator;
     }
 
     DbMetadata getMeta() {
