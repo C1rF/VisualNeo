@@ -21,9 +21,9 @@ public class QueryBuilder {
     // TODO: Modify this
     public String translate(Graph graph, boolean simple) {
         if (graph.isEmpty())
-            throw new IllegalArgumentException("Graph is empty!");
+            throw new Graph.BadTopologyException(Graph.BadTopologyException.TopologyType.EMPTY);
         if (!graph.isConnected())
-            throw new IllegalArgumentException("Graph is not connected!");
+            throw new Graph.BadTopologyException(Graph.BadTopologyException.TopologyType.DISCONNECTED);
         graph.index();
 
         if (graph.getRelations().isEmpty()) {
@@ -135,8 +135,11 @@ public class QueryBuilder {
         try {
             setTranslation(translate(graph, true));
         }
-        catch (IllegalArgumentException e) {
-            setTranslation(e.toString());
+        catch (Graph.BadTopologyException e) {
+            if (e.getType() == Graph.BadTopologyException.TopologyType.DISCONNECTED)
+                setTranslation(e.toString());
+            else
+                setTranslation("");
         }
     }
 

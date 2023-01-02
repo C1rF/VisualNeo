@@ -179,4 +179,34 @@ public class Graph implements Mappable {
                                                                 LinkedHashMap::new)));
         return map;
     }
+
+    public static class BadTopologyException extends IllegalArgumentException {
+
+        public enum TopologyType {
+            EMPTY,
+            DISCONNECTED,
+            DEFAULT
+        }
+
+        private static final String EMPTY_ERROR_MESSAGE = "Graph is empty!";
+        private static final String DISCONNECTED_ERROR_MESSAGE = "Graph is disconnected!";
+
+        private final TopologyType type;
+
+        public BadTopologyException() {
+            this(TopologyType.DEFAULT);
+        }
+
+        public BadTopologyException(TopologyType type) {
+            super(type == TopologyType.EMPTY ? EMPTY_ERROR_MESSAGE :
+                  type == TopologyType.DISCONNECTED ? DISCONNECTED_ERROR_MESSAGE :
+                  "");
+
+            this.type = type;
+        }
+
+        public TopologyType getType() {
+            return type;
+        }
+    }
 }
