@@ -101,8 +101,8 @@ public class ForceDirectedPlacementStatic {
                 simulate();
         }
 
-        System.out.println(time);
-        System.out.println(computeAvgDisp());
+//        System.out.println(time);
+//        System.out.println(computeAvgDisp());
     }
 
     public void simulate() {

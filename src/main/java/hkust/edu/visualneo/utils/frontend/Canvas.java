@@ -11,7 +11,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
 import java.util.*;
 import java.util.function.Function;
@@ -287,8 +286,6 @@ public class Canvas extends Pane {
         double maxX = Double.NEGATIVE_INFINITY;
         double maxY = Double.NEGATIVE_INFINITY;
 
-        System.out.println(this);
-
         for (GraphElement element : elements) {
             Bounds bounds = element.getBoundsInParent();
 
@@ -296,20 +293,6 @@ public class Canvas extends Pane {
             double boundMinY = bounds.getMinY();
             double boundMaxX = bounds.getMaxX();
             double boundMaxY = bounds.getMaxY();
-
-            System.out.println(element.getClass());
-            System.out.println(String.join(", ",
-                                           Stream.of(boundMinX, boundMinY, boundMaxX, boundMaxY)
-                                                 .map(String::valueOf)
-                                                 .toList()));
-            System.out.println(String.join(", ",
-                                           Stream.of(camera.screenToWorldX(bounds.getCenterX()),
-                                                     camera.screenToWorldY(bounds.getCenterY()),
-                                                     element.getX(),
-                                                     element.getY())
-                                                 .map(String::valueOf)
-                                                 .toList()));
-            System.out.println();
 
             if (boundMinX < minX)
                 minX = boundMinX;
@@ -380,51 +363,6 @@ public class Canvas extends Pane {
         getChildren().add(element);
         clearHighlights();
         addHighlight(element);
-
-        Bounds bounds = element.getBoundsInParent();
-
-        double boundMinX = bounds.getMinX();
-        double boundMinY = bounds.getMinY();
-        double boundMaxX = bounds.getMaxX();
-        double boundMaxY = bounds.getMaxY();
-
-        System.out.println(String.join(", ",
-                                       Stream.of(boundMinX, boundMinY, boundMaxX, boundMaxY)
-                                             .map(String::valueOf)
-                                             .toList()));
-
-        Rectangle rect = new Rectangle();
-
-        rect.setLayoutX(bounds.getMinX());
-        rect.setLayoutY(bounds.getMinY());
-        rect.setWidth(bounds.getWidth());
-        rect.setHeight(bounds.getHeight());
-
-        element.boundsInParentProperty().addListener((observable, oldValue, newValue) -> {
-            rect.setLayoutX(newValue.getMinX());
-            rect.setLayoutY(newValue.getMinY());
-            rect.setWidth(newValue.getWidth());
-            rect.setHeight(newValue.getHeight());
-
-            System.out.println(String.join(", ",
-                                           Stream.of(newValue.getMinX(),
-                                                     newValue.getMinY(),
-                                                     newValue.getMaxX(),
-                                                     newValue.getMaxY())
-                                                 .map(String::valueOf)
-                                                 .toList()));
-            System.out.println(String.join(", ",
-                                           Stream.of(camera.screenToWorldX(newValue.getCenterX()),
-                                                     camera.screenToWorldY(newValue.getCenterY()),
-                                                     element.getX(),
-                                                     element.getY())
-                                                 .map(String::valueOf)
-                                                 .toList()));
-        });
-        rect.setStroke(Color.RED);
-        rect.setFill(null);
-
-        getChildren().add(rect);
     }
 
     public void removeElement(GraphElement element) {
