@@ -45,7 +45,7 @@ public record DbMetadata(
     public Collection<String> sourcesOf(String relationLabel) {
         if (!relationLabels().contains(relationLabel))
             return Collections.emptySet();
-        return schemaGraph.relations()
+        return schemaGraph.getRelations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.getLabel(), relationLabel))
                 .map(relation -> relation.start.getLabel())
@@ -55,7 +55,7 @@ public record DbMetadata(
     public Collection<String> targetsOf(String relationLabel) {
         if (!relationLabels().contains(relationLabel))
             return Collections.emptySet();
-        return schemaGraph.relations()
+        return schemaGraph.getRelations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.getLabel(), relationLabel))
                 .map(relation -> relation.end.getLabel())
@@ -65,7 +65,7 @@ public record DbMetadata(
     public Collection<String> relationsFrom(String sourceLabel) {
         if (!nodeLabels().contains(sourceLabel))
             return Collections.emptySet();
-        return schemaGraph.relations()
+        return schemaGraph.getRelations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.start.getLabel(), sourceLabel))
                 .map(relation -> relation.getLabel())
@@ -75,7 +75,7 @@ public record DbMetadata(
     public Collection<String> targetsFrom(String sourceLabel) {
         if (!nodeLabels().contains(sourceLabel))
             return Collections.emptySet();
-        return schemaGraph.relations()
+        return schemaGraph.getRelations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.start.getLabel(), sourceLabel))
                 .map(relation -> relation.end.getLabel())
@@ -85,7 +85,7 @@ public record DbMetadata(
     public Collection<String> sourcesTo(String targetLabel) {
         if (!nodeLabels().contains(targetLabel))
             return Collections.emptySet();
-        return schemaGraph.relations()
+        return schemaGraph.getRelations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.end.getLabel(), targetLabel))
                 .map(relation -> relation.start.getLabel())
@@ -95,7 +95,7 @@ public record DbMetadata(
     public Collection<String> relationsTo(String targetLabel) {
         if (!nodeLabels().contains(targetLabel))
             return Collections.emptySet();
-        return schemaGraph.relations()
+        return schemaGraph.getRelations()
                 .stream()
                 .filter(relation -> Objects.equals(relation.end.getLabel(), targetLabel))
                 .map(relation -> relation.getLabel())
