@@ -34,25 +34,25 @@ public class QueryHandler {
                                                            .withDefaultAccessMode(AccessMode.READ)
                                                            .build())) {
             // Retrieve labels and corresponding counts
-            Function<Record, String> labelCount = record -> record.get(0).asString();
+            Function<Record, String> recordToLabel = record -> record.get(0).asString();
 
-            Set<String> nodeLabels = session.readTransaction(tx -> tx
+            Set<String> nodeLabels = session.executeRead(tx -> tx
                     .run(Queries.LABELS_QUERY)
                     .stream()
-                    .map(labelCount)
+                    .map(recordToLabel)
                     .collect(Collectors.toCollection(TreeSet::new)));
 
-            Set<String> relationLabels = session.readTransaction(tx -> tx
+            Set<String> relationLabels = session.executeRead(tx -> tx
                     .run(Queries.RELATIONSHIP_TYPES_QUERY)
                     .stream()
-                    .map(labelCount)
+                    .map(recordToLabel)
                     .collect(Collectors.toCollection(TreeSet::new)));
 
             Map<String, Integer> nodeCountsByLabel = nodeLabels
                     .stream()
                     .collect(Collectors.toMap(
                             Function.identity(),
-                            label -> session.readTransaction(tx ->
+                            label -> session.executeRead(tx ->
                                     tx.run(Queries.nodeCountByLabelQuery(label))
                                       .single()
                                       .get(0)
@@ -64,7 +64,7 @@ public class QueryHandler {
                     .stream()
                     .collect(Collectors.toMap(
                             Function.identity(),
-                            type -> session.readTransaction(tx ->
+                            type -> session.executeRead(tx ->
                                     tx.run(Queries.relationshipCountByTypeQuery(type))
                                       .single()
                                       .get(0)
@@ -74,7 +74,7 @@ public class QueryHandler {
 
             // Retrieve property keys and types
 
-            Map<String, Map<String, String>> nodePropertiesByLabel = session.readTransaction(tx -> tx
+            Map<String, Map<String, String>> nodePropertiesByLabel = session.executeRead(tx -> tx
                     .run(Queries.NODE_TYPE_PROPERTIES_QUERY)
                     .stream()
                     .collect(Collectors.toMap(
@@ -91,7 +91,7 @@ public class QueryHandler {
                                 return properties;
                             })));
 
-            Map<String, Map<String, String>> relationPropertiesByLabel = session.readTransaction(tx -> tx
+            Map<String, Map<String, String>> relationPropertiesByLabel = session.executeRead(tx -> tx
                     .run(Queries.REL_TYPE_PROPERTIES_QUERY)
                     .stream()
                     .collect(Collectors.toMap(
@@ -109,7 +109,7 @@ public class QueryHandler {
                             })));
 
             // Retrieve schema information
-            Graph schemaGraph = session.readTransaction(tx -> {
+            Graph schemaGraph = session.executeRead(tx -> {
                 Record record = tx.run(Queries.SCHEMA_QUERY).single();
 
                 Map<Long, Node> schemaNodes = record
@@ -147,7 +147,7 @@ public class QueryHandler {
         try (Session session = driver.session(SessionConfig.builder()
                                                            .withDefaultAccessMode(AccessMode.READ)
                                                            .build())) {
-            Results results = session.readTransaction(tx -> {
+            Results results = session.executeRead(tx -> {
                 Record record = tx.run(query).single();
                 
                 Map<Long, Node> nodes = record
