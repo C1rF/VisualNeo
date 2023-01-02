@@ -25,8 +25,6 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
 
     private final long id;
 
-    private static final Font TEXT_FONT = Font.font("Arial", FontWeight.SEMI_BOLD, Font.getDefault().getSize());
-
     protected static final Color HOVER_COLOR = Color.web("#001966", 0.1);
     protected static final Color HIGHLIGHT_COLOR = Color.web("#001966", 0.2);
 
@@ -152,7 +150,6 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
         text = new Text();
         text.setBoundsType(TextBoundsType.VISUAL);
         text.setFontSmoothingType(FontSmoothingType.LCD);
-        text.setFont(TEXT_FONT);
         getChildren().add(text);
 
         text.textProperty().bind(labelProperty());
