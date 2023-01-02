@@ -122,10 +122,12 @@ public class QueryBuilder {
             decreaseIndent();
         }
 
-        System.out.println(graph);
-
         String query = buffer.toString();
         clear();
+
+        System.out.println(graph);
+        System.out.println(query);
+
         return query;
     }
 

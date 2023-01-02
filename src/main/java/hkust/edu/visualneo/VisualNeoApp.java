@@ -10,13 +10,7 @@ import java.io.IOException;
 
 public class VisualNeoApp extends Application {
 
-    final QueryHandler queryHandler;
     Stage stage;
-
-    public VisualNeoApp() {
-        super();
-        queryHandler = new QueryHandler(this);
-    }
 
     @Override
     public void start(Stage stage) throws IOException {
