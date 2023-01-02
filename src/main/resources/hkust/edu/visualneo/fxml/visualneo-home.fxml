@@ -268,7 +268,14 @@
                               <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="200.0">
                                        <children>
-                                          <ScrollPane prefHeight="738.5" prefWidth="300.0" styleClass="scrollpane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                          <ScrollPane prefHeight="738.5" prefWidth="300.0" styleClass="scrollpane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <content>
+                                                <VBox fx:id="vbox_basic_patterns" prefHeight="507.0" prefWidth="281.0" spacing="5.0">
+                                                   <padding>
+                                                      <Insets left="5.0" right="5.0" />
+                                                   </padding>
+                                                </VBox>
+                                             </content></ScrollPane>
                                        </children>
                                     </AnchorPane>
                               </content>
@@ -277,7 +284,14 @@
                               <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-border-width: 0;">
                                        <children>
-                                          <ScrollPane layoutX="39.0" layoutY="140.0" prefHeight="738.5" prefWidth="300.0" styleClass="scrollpane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                          <ScrollPane layoutX="39.0" layoutY="140.0" prefHeight="738.5" prefWidth="300.0" styleClass="scrollpane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <content>
+                                                <VBox fx:id="vbox_canned_patterns" prefHeight="507.0" prefWidth="281.0" spacing="5.0">
+                                                   <padding>
+                                                      <Insets left="5.0" right="5.0" />
+                                                   </padding>
+                                                </VBox>
+                                             </content></ScrollPane>
                                        </children>
                                     </AnchorPane>
                               </content>

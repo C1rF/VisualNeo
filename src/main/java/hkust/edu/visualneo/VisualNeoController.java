@@ -9,13 +9,14 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -129,6 +130,10 @@ public class VisualNeoController {
     private Tab tab_result_record;
     @FXML
     private VBox vbox_record;
+    @FXML
+    private VBox vbox_basic_patterns;
+    @FXML
+    private VBox vbox_canned_patterns;
 
 
     /**
@@ -145,7 +150,6 @@ public class VisualNeoController {
     private void initialize() {
         constructCanvas.setType(Canvas.CanvasType.MODIFIABLE);
         Graph graph = new Graph();
-        // TODO: Fix this
         constructCanvas.bind(graph);
         graph.bind(queryHandler.getTranslator());
         constructCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
@@ -699,16 +703,39 @@ public class VisualNeoController {
         return new Graph(nodes, relations);
     }
 
-    public void displayPatterns(List<Graph> patterns){
-        for(Graph pattern : patterns){
+    public void displayPatterns(List<Graph> patterns) {
+//        Graph test = patterns.get(0);
+//        constructCanvas.loadGraph(test);
+//        constructCanvas.frameAllElements();
+        Canvas[] canvases = new Canvas[5];
+        for (int i = 0; i < patterns.size(); i++) {
+            Graph pattern = patterns.get(i);
+            AnchorPane patternAnchorPane = new AnchorPane();
+            patternAnchorPane.setBackground(new Background(new BackgroundFill(Color.PINK, new CornerRadii(0), Insets.EMPTY)));
+            patternAnchorPane.setPrefSize(281, 281);
+            patternAnchorPane.setMinSize(281, 281);
+            patternAnchorPane.setMaxSize(281, 281);
             Canvas patternCanvas = new Canvas();
             patternCanvas.setType(Canvas.CanvasType.STATIC);
+            patternCanvas.setBackground(new Background(new BackgroundFill(Color.GREEN, new CornerRadii(0), Insets.EMPTY)));
+            patternAnchorPane.setTopAnchor(patternCanvas,0.0);
+            patternAnchorPane.setBottomAnchor(patternCanvas,0.0);
+            patternAnchorPane.setLeftAnchor(patternCanvas,0.0);
+            patternAnchorPane.setRightAnchor(patternCanvas,0.0);
+            patternAnchorPane.getChildren().add(patternCanvas);
+            canvases[i] = patternCanvas;
+            vbox_canned_patterns.getChildren().add(patternAnchorPane);
             patternCanvas.loadGraph(pattern);
-
+            patternCanvas.frameAllElements();
+            if (i < patterns.size() - 1) vbox_canned_patterns.getChildren().add(new Separator());
         }
+        for (int i = 0; i < patterns.size(); i++){
+            System.out.println(canvases[i].getWidth() + " " + canvases[i].getHeight());
+        }
+
     }
 
-    public Graph parsePatternFromText(List<String> text) throws Exception{
+    public Graph parsePatternFromText(List<String> text) throws Exception {
 
         if (metadata == null) throw new Exception("No Database");
 
@@ -739,9 +766,11 @@ public class VisualNeoController {
                     Collection<String> sourceOfThisRelation = metadata.sourcesOf(label);
                     boolean startLabelCanBeSource = sourceOfThisRelation.contains(startLabel);
                     boolean endLabelCanBeSource = sourceOfThisRelation.contains(endLabel);
-                    if(endLabelCanBeSource && !startLabelCanBeSource) {
+                    if (endLabelCanBeSource && !startLabelCanBeSource) {
                         // This relation must go from end to start, so we switch them
-                        Node temp = start; start = end; end = temp;
+                        Node temp = start;
+                        start = end;
+                        end = temp;
                     }
                     Relation newRelation = new Relation(currentId++, true, start, end, label, new TreeMap<>());
                     relations.add(newRelation);
