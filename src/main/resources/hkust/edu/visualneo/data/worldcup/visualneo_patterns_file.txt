@@ -1,0 +1,45 @@
+Final t # 0 * 0
+v 0 Squad
+v 1 Person
+v 2 Match
+e 0 1 IN_SQUAD
+e 1 2 PLAYED_IN
+Final t # 1 * 0
+v 0 Squad
+v 1 Person
+e 0 1 IN_SQUAD
+Final t # 2 * 0
+v 0 Team
+v 1 Squad
+v 2 Person
+v 3 Match
+v 4 Person
+e 0 1 NAMED
+e 0 2 REPRESENTS
+e 0 3 PLAYED_IN
+e 1 2 IN_SQUAD
+e 2 3 PLAYED_IN
+e 3 4 PLAYED_IN
+Final t # 3 * 0
+v 0 Tournament
+v 1 Squad
+v 2 Person
+v 3 Match
+v 4 Person
+e 0 1 FOR
+e 0 3 IN_TOURNAMENT
+e 1 2 IN_SQUAD
+e 2 3 PLAYED_IN
+e 3 4 PLAYED_IN
+Final t # 4 * 0
+v 0 Team
+v 1 Squad
+v 2 Person
+v 3 Match
+v 4 Person
+e 0 1 NAMED
+e 0 2 REPRESENTS
+e 0 3 PLAYED_IN
+e 1 2 IN_SQUAD
+e 2 3 PLAYED_IN
+e 3 4 SCORED_GOAL

@@ -9,13 +9,14 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -129,6 +130,10 @@ public class VisualNeoController {
     private Tab tab_result_record;
     @FXML
     private VBox vbox_record;
+    @FXML
+    private VBox vbox_basic_patterns;
+    @FXML
+    private VBox vbox_canned_patterns;
 
 
     /**
@@ -145,7 +150,6 @@ public class VisualNeoController {
     private void initialize() {
         constructCanvas.setType(Canvas.CanvasType.MODIFIABLE);
         Graph graph = new Graph();
-        // TODO: Fix this
         constructCanvas.bind(graph);
         graph.bind(queryHandler.getTranslator());
         constructCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
@@ -245,13 +249,14 @@ public class VisualNeoController {
     @FXML
     private void handleLoadDB() throws IOException {
         // Set the scene
-        FXMLLoader fxmlLoader = new FXMLLoader(VisualNeoController.class.getResource("fxml/load-database.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("fxml/load-database.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 292, 280);
-        LoadDatabaseController db_controller = fxmlLoader.<LoadDatabaseController>getController();
+        var db_controller = fxmlLoader.<LoadDatabaseController>getController();
         db_controller.setVisualNeoController(this);
         // Set the stage
         Stage stage = new Stage();
         stage.setTitle("Load Database");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }
@@ -312,7 +317,19 @@ public class VisualNeoController {
      * Called when the user click on Generate Patterns button
      */
     @FXML
-    private void handleGeneratePatterns() {
+    private void handleGeneratePatterns() throws IOException {
+        // Set the scene
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("fxml/load-pattern.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 292, 280);
+        var patternController = fxmlLoader.<LoadPatternController>getController();
+        patternController.setVisualNeoController(this);
+        // Set the stage
+        Stage stage = new Stage();
+        stage.setTitle("Load Patterns");
+        stage.setResizable(false);
+        patternController.setStage(stage);
+        stage.setScene(scene);
+        stage.show();
     }
 
     /**
@@ -613,7 +630,7 @@ public class VisualNeoController {
         File selectedFile = fileChooser.showOpenDialog(app.stage);
         try {
             if (selectedFile == null) return;
-            Graph pattern_graph = parsePattern(selectedFile);
+            Graph pattern_graph = parsePatternFromFile(selectedFile);
             constructCanvas.clearElements();
             constructCanvas.loadGraph(pattern_graph);
         } catch (FileNotFoundException fe) {
@@ -632,7 +649,8 @@ public class VisualNeoController {
     }
 
     // Helper function to parse the pattern
-    private Graph parsePattern(File pattern_file) throws Exception {
+    private Graph parsePatternFromFile(File pattern_file) throws Exception {
+
         Scanner sc = new Scanner(pattern_file);
 
         Collection<Node> nodes = new HashSet<>();
@@ -678,6 +696,83 @@ public class VisualNeoController {
                     Node start = nodeMap.get(Long.parseLong(elements[1]));
                     Node end = nodeMap.get(Long.parseLong(elements[2]));
                     Relation newRelation = new Relation(currentId++, directed, start, end, label, properties);
+                    relations.add(newRelation);
+                }
+            }
+        }
+        return new Graph(nodes, relations);
+    }
+
+    public void displayPatterns(List<Graph> patterns) {
+//        Graph test = patterns.get(0);
+//        constructCanvas.loadGraph(test);
+//        constructCanvas.frameAllElements();
+        Canvas[] canvases = new Canvas[5];
+        for (int i = 0; i < patterns.size(); i++) {
+            Graph pattern = patterns.get(i);
+            AnchorPane patternAnchorPane = new AnchorPane();
+            patternAnchorPane.setBackground(new Background(new BackgroundFill(Color.PINK, new CornerRadii(0), Insets.EMPTY)));
+            patternAnchorPane.setPrefSize(281, 281);
+            patternAnchorPane.setMinSize(281, 281);
+            patternAnchorPane.setMaxSize(281, 281);
+            Canvas patternCanvas = new Canvas();
+            patternCanvas.setType(Canvas.CanvasType.STATIC);
+            patternCanvas.setBackground(new Background(new BackgroundFill(Color.GREEN, new CornerRadii(0), Insets.EMPTY)));
+            patternAnchorPane.setTopAnchor(patternCanvas,0.0);
+            patternAnchorPane.setBottomAnchor(patternCanvas,0.0);
+            patternAnchorPane.setLeftAnchor(patternCanvas,0.0);
+            patternAnchorPane.setRightAnchor(patternCanvas,0.0);
+            patternAnchorPane.getChildren().add(patternCanvas);
+            canvases[i] = patternCanvas;
+            vbox_canned_patterns.getChildren().add(patternAnchorPane);
+            patternCanvas.loadGraph(pattern);
+            patternCanvas.frameAllElements();
+            if (i < patterns.size() - 1) vbox_canned_patterns.getChildren().add(new Separator());
+        }
+        for (int i = 0; i < patterns.size(); i++){
+            System.out.println(canvases[i].getWidth() + " " + canvases[i].getHeight());
+        }
+
+    }
+
+    public Graph parsePatternFromText(List<String> text) throws Exception {
+
+        if (metadata == null) throw new Exception("No Database");
+
+        Collection<Node> nodes = new HashSet<>();
+        Collection<Relation> relations = new HashSet<>();
+        Map<Long, Node> nodeMap = new HashMap<>();
+        long currentId = GraphElement.getCurrentId();
+
+        for (String s : text) {
+            s = s.trim();
+            if (!s.isEmpty()) {
+                // Parse a single line
+                String[] elements = s.split("\\s+");
+                boolean isVertex = elements[0].equals("v");
+                if (isVertex) {
+                    // Vertex
+                    String label = elements[2].equals("null") ? null : elements[2];
+                    Node newNode = new Node(currentId++, label, new TreeMap<>());
+                    nodeMap.put(Long.parseLong(elements[1]), newNode);
+                    nodes.add(newNode);
+                } else {
+                    // Edge
+                    String label = elements[3].equals("null") ? null : elements[3];
+                    Node start = nodeMap.get(Long.parseLong(elements[1]));
+                    Node end = nodeMap.get(Long.parseLong(elements[2]));
+                    String startLabel = start.getLabel();
+                    String endLabel = end.getLabel();
+                    Collection<String> sourceOfThisRelation = metadata.sourcesOf(label);
+                    boolean startLabelCanBeSource = sourceOfThisRelation.contains(startLabel);
+                    boolean endLabelCanBeSource = sourceOfThisRelation.contains(endLabel);
+                    if (endLabelCanBeSource && !startLabelCanBeSource) {
+                        // This relation must go from end to start, so we switch them
+                        Node temp = start;
+                        start = end;
+                        end = temp;
+                    }
+                    Relation newRelation = new Relation(currentId++, true, start, end, label, new TreeMap<>());
                     relations.add(newRelation);
                 }
             }
