@@ -16,7 +16,7 @@ public class OrthogonalCamera {
     private static final double MAX_RATIO  = 2.0;
     private static final double UNIT_RATIO = 0.1;
     private static final double ZOOM_UNITS = 2.5;
-    private static final double FIT_PORTION = 0.8;
+    private static final double FIT_PORTION = 0.95;
 
     private final Canvas canvas;
 

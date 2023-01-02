@@ -134,6 +134,8 @@ public class VisualNeoController {
     @FXML
     private VBox vbox_canned_patterns;
 
+    private static double PATTERN_CANVAS_HEIGHT = 200.0;
+
 
     /**
      * The constructor.
@@ -722,7 +724,9 @@ public class VisualNeoController {
             AnchorPane.setRightAnchor(patternCanvas,0.0);
 
             AnchorPane patternAnchorPane = new AnchorPane();
-            patternAnchorPane.setMinHeight(200.0);
+            patternAnchorPane.setMinHeight(PATTERN_CANVAS_HEIGHT);
+            patternAnchorPane.setPrefHeight(PATTERN_CANVAS_HEIGHT);
+            patternAnchorPane.setMaxHeight(PATTERN_CANVAS_HEIGHT);
 
             patternAnchorPane.getChildren().add(patternCanvas);
             vbox_canned_patterns.getChildren().add(patternAnchorPane);

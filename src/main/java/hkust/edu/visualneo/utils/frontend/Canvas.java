@@ -6,10 +6,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.event.EventTarget;
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.util.*;
 import java.util.function.Function;
@@ -260,66 +262,66 @@ public class Canvas extends Pane {
     }
 
     public void frameAllElements() {
-        clearHighlights();
-
-        if (vertices.isEmpty())
-            return;
-
-        Iterator<Vertex> it = getVertices().iterator();
-        Vertex first = it.next();
-
-        double minX = first.getX();
-        double minY = first.getY();
-        double maxX = first.getX();
-        double maxY = first.getY();
-
-        while (it.hasNext()) {
-            Vertex vertex = it.next();
-
-            Point2D pos = vertex.getPosition();
-            if (pos.getX() < minX)
-                minX = pos.getX();
-            else if (pos.getX() > maxX)
-                maxX = pos.getX();
-            if (pos.getY() < minY)
-                minY = pos.getY();
-            else if (pos.getY() > maxY)
-                maxY = pos.getY();
-        }
-
-        camera.fit(new Point2D(minX, minY), new Point2D(maxX, maxY), true);
+        navigateTo(getChildren().stream().map(node -> (GraphElement) node).toList(), false, true);
     }
 
-    // TODO: Improve this
     public void navigateTo(Collection<Long> vertexIds, Collection<Long> edgeIds) {
+        navigateTo(Stream.concat(vertexIds.stream().map(this::getVertex),
+                                 edgeIds.stream().map(this::getEdge))
+                         .toList(),
+                   true,
+                   false);
+    }
+
+    public void navigateTo(Collection<GraphElement> elements, boolean highlighting, boolean force) {
         clearHighlights();
 
-        edgeIds.forEach(id -> addHighlight(getEdge(id)));
-        
-        Iterator<Long> it = vertexIds.iterator();
-        Vertex first = getVertex(it.next());
-        
-        double minX = first.getX();
-        double minY = first.getY();
-        double maxX = first.getX();
-        double maxY = first.getY();
-        
-        while (it.hasNext()) {
-            Vertex vertex = getVertex(it.next());
-            addHighlight(vertex);
+        if (elements.isEmpty() || Math.signum(getWidth()) == 0.0 || Math.signum(getHeight()) == 0.0)
+            return;
 
-            Point2D pos = vertex.getPosition();
-            if (pos.getX() < minX)
-                minX = pos.getX();
-            else if (pos.getX() > maxX)
-                maxX = pos.getX();
-            if (pos.getY() < minY)
-                minY = pos.getY();
-            else if (pos.getY() > maxY)
-                maxY = pos.getY();
+        if (highlighting)
+            addHighlights(elements);
+
+        double minX = Double.POSITIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+
+        System.out.println(this);
+
+        for (GraphElement element : elements) {
+            Bounds bounds = element.getBoundsInParent();
+
+            double boundMinX = bounds.getMinX();
+            double boundMinY = bounds.getMinY();
+            double boundMaxX = bounds.getMaxX();
+            double boundMaxY = bounds.getMaxY();
+
+            System.out.println(element.getClass());
+            System.out.println(String.join(", ",
+                                           Stream.of(boundMinX, boundMinY, boundMaxX, boundMaxY)
+                                                 .map(String::valueOf)
+                                                 .toList()));
+            System.out.println(String.join(", ",
+                                           Stream.of(camera.screenToWorldX(bounds.getCenterX()),
+                                                     camera.screenToWorldY(bounds.getCenterY()),
+                                                     element.getX(),
+                                                     element.getY())
+                                                 .map(String::valueOf)
+                                                 .toList()));
+            System.out.println();
+
+            if (boundMinX < minX)
+                minX = boundMinX;
+            if (boundMinY < minY)
+                minY = boundMinY;
+            if (boundMaxX > maxX)
+                maxX = boundMaxX;
+            if (boundMaxY > maxY)
+                maxY = boundMaxY;
         }
 
-        camera.fit(new Point2D(minX, minY), new Point2D(maxX, maxY), false);
+        camera.fit(camera.screenToWorld(minX, minY), camera.screenToWorld(maxX, maxY), force);
     }
 
     private void createVertex(Point2D position) {
@@ -378,6 +380,51 @@ public class Canvas extends Pane {
         getChildren().add(element);
         clearHighlights();
         addHighlight(element);
+
+        Bounds bounds = element.getBoundsInParent();
+
+        double boundMinX = bounds.getMinX();
+        double boundMinY = bounds.getMinY();
+        double boundMaxX = bounds.getMaxX();
+        double boundMaxY = bounds.getMaxY();
+
+        System.out.println(String.join(", ",
+                                       Stream.of(boundMinX, boundMinY, boundMaxX, boundMaxY)
+                                             .map(String::valueOf)
+                                             .toList()));
+
+        Rectangle rect = new Rectangle();
+
+        rect.setLayoutX(bounds.getMinX());
+        rect.setLayoutY(bounds.getMinY());
+        rect.setWidth(bounds.getWidth());
+        rect.setHeight(bounds.getHeight());
+
+        element.boundsInParentProperty().addListener((observable, oldValue, newValue) -> {
+            rect.setLayoutX(newValue.getMinX());
+            rect.setLayoutY(newValue.getMinY());
+            rect.setWidth(newValue.getWidth());
+            rect.setHeight(newValue.getHeight());
+
+            System.out.println(String.join(", ",
+                                           Stream.of(newValue.getMinX(),
+                                                     newValue.getMinY(),
+                                                     newValue.getMaxX(),
+                                                     newValue.getMaxY())
+                                                 .map(String::valueOf)
+                                                 .toList()));
+            System.out.println(String.join(", ",
+                                           Stream.of(camera.screenToWorldX(newValue.getCenterX()),
+                                                     camera.screenToWorldY(newValue.getCenterY()),
+                                                     element.getX(),
+                                                     element.getY())
+                                                 .map(String::valueOf)
+                                                 .toList()));
+        });
+        rect.setStroke(Color.RED);
+        rect.setFill(null);
+
+        getChildren().add(rect);
     }
 
     public void removeElement(GraphElement element) {
