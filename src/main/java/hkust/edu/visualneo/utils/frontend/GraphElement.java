@@ -9,7 +9,9 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
-import javafx.scene.text.*;
+import javafx.scene.text.FontSmoothingType;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 import javafx.scene.transform.Scale;
 import org.neo4j.driver.Value;
 
@@ -156,6 +158,10 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
             text.setTranslateX(-newValue.getWidth() / 2);
             text.setTranslateY(newValue.getHeight() / 2);
         });
+
+        Tooltip tooltip = new Tooltip();
+        tooltip.textProperty().bind(labelProperty());
+        Tooltip.install(this, tooltip);
     }
 
     protected void initializeHandlers() {
