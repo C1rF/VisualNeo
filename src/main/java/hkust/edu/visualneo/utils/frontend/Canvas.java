@@ -1,11 +1,15 @@
 package hkust.edu.visualneo.utils.frontend;
 
 import hkust.edu.visualneo.utils.backend.*;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.event.EventTarget;
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
@@ -13,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -29,6 +34,8 @@ public class Canvas extends Pane {
 
     private static final double UNIT_SCROLL = 32.0;
 
+    private static final int SEARCH_SAMPLES = 20;
+
     private static Map<String, Color> colorTable;
 
     private CanvasType type = CanvasType.NONE;
@@ -42,6 +49,9 @@ public class Canvas extends Pane {
 
     private Point2D cursor;
     private boolean dragged;
+
+    private final ObjectProperty<Point2D> size =
+            new SimpleObjectProperty<>(this, "size", Point2D.ZERO);
 
     private final Map<Long, Vertex> vertices = new TreeMap<>();
     private final Map<Long, Edge> edges = new TreeMap<>();
@@ -243,6 +253,8 @@ public class Canvas extends Pane {
         ForceDirectedPlacementStatic placement = new ForceDirectedPlacementStatic(this);
         placement.simulate(0);
         placement.layout();
+
+        frameAllElements(false, false);
     }
 
     public Graph getGraph() {
@@ -260,26 +272,72 @@ public class Canvas extends Pane {
         return listenerGraph != null;
     }
 
-    public void frameAllElements() {
-        navigateTo(getChildren().stream().map(node -> (GraphElement) node).toList(), false, true);
+    public void rotateSearch(Callable<Double> criteria) {
+        double stepAngle = Math.PI / SEARCH_SAMPLES;
+        double cos = Math.cos(stepAngle);
+        double sin = Math.sin(stepAngle);
+
+        int bestPos = 0;
+        double min = Double.POSITIVE_INFINITY;
+        try {
+            min = criteria.call();
+        }
+        catch (Exception ignored) {}
+
+        for (int i = 1; i < SEARCH_SAMPLES; ++i) {
+            rotate(cos, sin);
+
+            double current = Double.POSITIVE_INFINITY;
+            try {
+                current = criteria.call();
+            }
+            catch (Exception ignored) {}
+
+            if (current < min) {
+                bestPos = i;
+                min = current;
+            }
+        }
+
+        double diffAngle = (bestPos - SEARCH_SAMPLES + 1) * stepAngle;
+        rotate(Math.cos(diffAngle), Math.sin(diffAngle));
     }
 
-    public void navigateTo(Collection<Long> vertexIds, Collection<Long> edgeIds) {
-        navigateTo(Stream.concat(vertexIds.stream().map(this::getVertex),
-                                 edgeIds.stream().map(this::getEdge))
-                         .toList(),
-                   true,
-                   false);
+    private void rotate(double cos, double sin) {
+        for (Vertex vertex : getVertices()) {
+            double x = vertex.getX();
+            double y = vertex.getY();
+            vertex.setPosition(new Point2D(x * cos - y * sin, x * sin + y * cos));
+        }
+    }
+
+    public void frameAllElements(boolean highlighting, boolean force) {
+        navigateTo(getElements(), highlighting, force);
     }
 
     public void navigateTo(Collection<GraphElement> elements, boolean highlighting, boolean force) {
         clearHighlights();
 
-        if (elements.isEmpty() || Math.signum(getWidth()) == 0.0 || Math.signum(getHeight()) == 0.0)
+        if (Math.signum(getWidth()) == 0.0 || Math.signum(getHeight()) == 0.0)
+            return;
+
+        Bounds bounds = computeBounds(elements);
+        if (bounds == null)
             return;
 
         if (highlighting)
             addHighlights(elements);
+
+        camera.fit(bounds, force);
+    }
+
+    public Bounds computeBounds() {
+        return computeBounds(getElements());
+    }
+
+    public Bounds computeBounds(Collection<GraphElement> elements) {
+        if (elements.isEmpty())
+            return null;
 
         double minX = Double.POSITIVE_INFINITY;
         double minY = Double.POSITIVE_INFINITY;
@@ -304,7 +362,12 @@ public class Canvas extends Pane {
                 maxY = boundMaxY;
         }
 
-        camera.fit(camera.screenToWorld(minX, minY), camera.screenToWorld(maxX, maxY), force);
+        minX = camera.screenToWorldX(minX);
+        minY = camera.screenToWorldY(minY);
+        maxX = camera.screenToWorldX(maxX);
+        maxY = camera.screenToWorldY(maxY);
+
+        return new BoundingBox(minX, minY, maxX - minX, maxY - minY);
     }
 
     private void createVertex(Point2D position) {
@@ -327,6 +390,10 @@ public class Canvas extends Pane {
             listenerGraph.addRelation(new Relation(edge,
                                                    listenerGraph.getNode(start.getElementId()),
                                                    listenerGraph.getNode(end.getElementId())));
+    }
+
+    public Collection<GraphElement> getElements() {
+        return getChildren().stream().map(node -> (GraphElement) node).toList();
     }
 
     public Collection<Vertex> getVertices() {
@@ -418,5 +485,20 @@ public class Canvas extends Pane {
 
     public void clearHighlights() {
         highlights.clear();
+    }
+
+    public ReadOnlyObjectProperty<Point2D> sizeProperty() {
+        return size;
+    }
+    public Point2D getSize() {
+        return size.get();
+    }
+
+    @Override
+    public void resize(double width, double height) {
+        super.resize(width, height);
+        Point2D newSize = new Point2D(width, height);
+        if (!newSize.equals(getSize()))
+            size.set(newSize);
     }
 }

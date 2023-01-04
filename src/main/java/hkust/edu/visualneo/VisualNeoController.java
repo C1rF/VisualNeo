@@ -9,6 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -29,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class VisualNeoController {
 
@@ -134,7 +136,7 @@ public class VisualNeoController {
     @FXML
     private VBox vbox_canned_patterns;
 
-    private static double PATTERN_CANVAS_HEIGHT = 200.0;
+    private static double PATTERN_CANVAS_HEIGHT = 150.0;
 
 
     /**
@@ -361,8 +363,13 @@ public class VisualNeoController {
                 record.setOnMouseExited(e -> handleMouseLeaveButton(e));
                 record.setOnMouseClicked(e -> {
                     MatchRecord currentRecord = (MatchRecord) e.getSource();
-                    if (currentRecord != null)
-                        resultCanvas.navigateTo(currentRecord.getMatch().head(), currentRecord.getMatch().tail());
+                    if (currentRecord != null) {
+                        Collection<GraphElement> elements = Stream
+                                .concat(currentRecord.getMatch().head().stream().map(id -> resultCanvas.getVertex(id)),
+                                        currentRecord.getMatch().tail().stream().map(id -> resultCanvas.getEdge(id)))
+                                .toList();
+                        resultCanvas.navigateTo(elements, true, false);
+                    }
                 });
 
                 vbox_record.getChildren().add(record);
@@ -713,10 +720,14 @@ public class VisualNeoController {
             patternCanvas.setType(Canvas.CanvasType.STATIC);
             patternCanvas.loadGraph(pattern);
 
-            ChangeListener<Number> updateCamera =
-                    (observable, oldValue, newValue) -> patternCanvas.frameAllElements();
-            patternCanvas.widthProperty().addListener(updateCamera);
-            patternCanvas.heightProperty().addListener(updateCamera);
+            patternCanvas.sizeProperty().addListener((observable, oldValue, newValue) -> {
+                patternCanvas.rotateSearch(() -> {
+                    Bounds bounds = patternCanvas.computeBounds();
+                    return Math.max(bounds.getWidth() * patternCanvas.getHeight(),
+                                    bounds.getHeight() * patternCanvas.getWidth());
+                });
+                patternCanvas.frameAllElements(false, true);
+            });
 
             AnchorPane.setTopAnchor(patternCanvas, 0.0);
             AnchorPane.setBottomAnchor(patternCanvas, 0.0);
@@ -725,7 +736,6 @@ public class VisualNeoController {
 
             AnchorPane patternAnchorPane = new AnchorPane();
             patternAnchorPane.setMinHeight(PATTERN_CANVAS_HEIGHT);
-            patternAnchorPane.setPrefHeight(PATTERN_CANVAS_HEIGHT);
             patternAnchorPane.setMaxHeight(PATTERN_CANVAS_HEIGHT);
 
             patternAnchorPane.getChildren().add(patternCanvas);
