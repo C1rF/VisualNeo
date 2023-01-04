@@ -5,6 +5,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 
 import java.util.Objects;
@@ -127,13 +128,15 @@ public class OrthogonalCamera {
     public void zoomOut() {
         zoom(-ZOOM_UNITS);
     }
-    public void fit(Point2D min, Point2D max, boolean force) {
-        setPosition(min.midpoint(max));
-        if (min.equals(max))
+    public void fit(Bounds bounds, boolean force) {
+        setPosition(bounds.getCenterX(), bounds.getCenterY());
+
+        double width = bounds.getWidth();
+        double height = bounds.getHeight();
+        if (width <= 0 || height <= 0)
             setRatio(MAX_RATIO);
         else {
-            double ratio = FIT_PORTION * Math.min(canvas.getWidth() / (max.getX() - min.getX()),
-                                                  canvas.getHeight() / (max.getY() - min.getY()));
+            double ratio = FIT_PORTION * Math.min(canvas.getWidth() / width, canvas.getHeight() / height);
             setRatio(ratio, force);
         }
     }
