@@ -515,7 +515,7 @@ public class VisualNeoController {
         text_node_or_relation.setText(isVertex ? "Node Information" : "Relation Information");
         StringBuilder builder = new StringBuilder();
         text_label_info.setText(current_highlight.getLabel());
-        Map<String, Value> properties = current_highlight.getProp();
+        Map<String, Value> properties = current_highlight.getElementProperties();
         for (String propertyKey : properties.keySet())
             builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
         text_property_info.setText(builder.toString());
