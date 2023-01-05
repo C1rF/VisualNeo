@@ -65,7 +65,7 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
         this.properties.putAll(properties);
     }
 
-    public Map<String, Value> getProp() {
+    public Map<String, Value> getElementProperties() {
         return properties;
     }
 

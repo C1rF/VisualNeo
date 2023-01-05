@@ -15,7 +15,7 @@ public class Node extends Entity {
         super(id, label, properties);
     }
     public Node(Vertex vertex) {
-        this(vertex.getElementId(), vertex.getLabel(), vertex.getProp());
+        this(vertex.getElementId(), vertex.getLabel(), vertex.getElementProperties());
     }
     public Node(org.neo4j.driver.types.Node node, boolean schema) {
         this(node.id(),
