@@ -39,7 +39,7 @@ public class Relation extends Entity {
              start,
              end,
              edge.getLabel(),
-             edge.getProp());
+             edge.getElementProperties());
     }
     public Relation(Relationship relationship, Map<Long, Node> nodes, boolean schema) {
         this(relationship.id(),
