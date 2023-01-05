@@ -152,6 +152,8 @@ public class Canvas extends Pane {
                 });
 
                 setOnMousePressed(e -> {
+                    requestFocus();
+                    e.consume();
                     EventTarget target = e.getTarget();
 
                     if (target == this) {  // Clicked on Canvas
@@ -189,6 +191,8 @@ public class Canvas extends Pane {
                 });
 
                 setOnMousePressed(e -> {
+                    requestFocus();
+                    e.consume();
                     EventTarget target = e.getTarget();
 
                     if (target == this) {  // Clicked on Canvas

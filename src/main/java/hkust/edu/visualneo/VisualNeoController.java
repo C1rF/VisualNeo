@@ -89,10 +89,6 @@ public class VisualNeoController {
     private TabPane tab_pane;
     @FXML
     private Tab tab_query_constructor;
-    @FXML
-    private Tab tab_query_result;
-    @FXML
-    private Tab tab_database_info;
     /**
      * Database Info Pane
      */
@@ -190,9 +186,6 @@ public class VisualNeoController {
 
         Rectangle schemaContainer = new Rectangle(648, 321.5);
         schemaCanvas.setClip(schemaContainer);
-
-        tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
-        tab_pane.setOnMouseEntered(e -> tab_pane.requestFocus());
         tabpane_pattern.getTabs().remove(tab_result_record);
 
         property_change_listener = new ChangeListener<String>() {
@@ -229,24 +222,18 @@ public class VisualNeoController {
                     case 0 -> {
                         resultCanvas.clearHighlights();
                         schemaCanvas.clearHighlights();
-                        tab_pane.onKeyPressedProperty().unbind();
-                        tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
                         tabpane_pattern.getTabs().remove(tab_result_record);
                         tabpane_pattern.getTabs().addAll(tab_basic_pattern, tab_canned_pattern);
                     }
                     case 1 -> {
                         constructCanvas.clearHighlights();
                         schemaCanvas.clearHighlights();
-                        tab_pane.onKeyPressedProperty().unbind();
-                        tab_pane.onKeyPressedProperty().bind(resultCanvas.onKeyPressedProperty());
                         tabpane_pattern.getTabs().removeAll(tab_basic_pattern, tab_canned_pattern);
                         tabpane_pattern.getTabs().add(tab_result_record);
                     }
                     case 2 -> {
                         constructCanvas.clearHighlights();
                         resultCanvas.clearHighlights();
-                        tab_pane.onKeyPressedProperty().unbind();
-                        tab_pane.onKeyPressedProperty().bind(schemaCanvas.onKeyPressedProperty());
                         tabpane_pattern.getTabs().removeAll(tab_basic_pattern, tab_canned_pattern, tab_result_record);
                     }
                 }
@@ -255,7 +242,6 @@ public class VisualNeoController {
 
         // Bind the query code display textarea
         textarea_query.textProperty().bind(queryHandler.getTranslator().translationProperty());
-        textarea_query.onKeyPressedProperty().bind(resultCanvas.onKeyPressedProperty());
 
         // Load the basic patterns
         File basicPattern = new File(BASIC_PATTERN_PATH);
@@ -703,7 +689,8 @@ public class VisualNeoController {
                     if (!hasDatabase && (!elements[2].equals("null") || !elements[3].equals("null")))
                         throw new Exception("NoDB");
                     String label = elements[2].equals("null") ? null : elements[2];
-                    if(hasDatabase && label != null && !metadata.nodeLabels().contains(label)) throw new Exception("Wrong Label");
+                    if (hasDatabase && label != null && !metadata.nodeLabels().contains(label))
+                        throw new Exception("Wrong Label");
                     Map<String, Value> properties = new TreeMap<>();
                     for (int i = 3; i < elements.length; i++) {
                         String property = elements[i];
@@ -721,7 +708,8 @@ public class VisualNeoController {
                         throw new Exception("NoDB");
                     boolean directed = Boolean.valueOf(elements[3]);
                     String label = elements[4].equals("null") ? null : elements[4];
-                    if(hasDatabase && label != null && !metadata.relationLabels().contains(label)) throw new Exception("Wrong Label");
+                    if (hasDatabase && label != null && !metadata.relationLabels().contains(label))
+                        throw new Exception("Wrong Label");
                     Map<String, Value> properties = new TreeMap<>();
                     for (int i = 5; i < elements.length; i++) {
                         String property = elements[i];
@@ -812,14 +800,16 @@ public class VisualNeoController {
                 if (isVertex) {
                     // Vertex
                     String label = elements[2].equals("null") ? null : elements[2];
-                    if(metadata != null && label != null && !metadata.nodeLabels().contains(label)) throw new Exception("Wrong Label");
+                    if (metadata != null && label != null && !metadata.nodeLabels().contains(label))
+                        throw new Exception("Wrong Label");
                     Node newNode = new Node(currentId++, label, new TreeMap<>());
                     nodeMap.put(Long.parseLong(elements[1]), newNode);
                     nodes.add(newNode);
                 } else {
                     // Edge
                     String label = elements[3].equals("null") ? null : elements[3];
-                    if(metadata != null && label != null && !metadata.relationLabels().contains(label)) throw new Exception("Wrong Label");
+                    if (metadata != null && label != null && !metadata.relationLabels().contains(label))
+                        throw new Exception("Wrong Label");
                     Node start = nodeMap.get(Long.parseLong(elements[1]));
                     Node end = nodeMap.get(Long.parseLong(elements[2]));
                     String startLabel = start.getLabel();
