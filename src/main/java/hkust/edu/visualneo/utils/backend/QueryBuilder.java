@@ -32,7 +32,7 @@ public class QueryBuilder {
             translateEntity(singleton);
             String translation = buffer.toString();
             clear();
-            return singletonQuery(singleton.getName(), translation);
+            return singletonQuery(translation, simple);
         }
 
         Set<Node> unusedNodes = new HashSet<>(graph.getNodes());
@@ -140,10 +140,7 @@ public class QueryBuilder {
             setTranslation(translate(graph, true));
         }
         catch (Graph.BadTopologyException e) {
-            if (e.getType() == Graph.BadTopologyException.TopologyType.DISCONNECTED)
-                setTranslation(e.toString());
-            else
-                setTranslation("");
+            setTranslation("");
         }
     }
 
