@@ -138,10 +138,10 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     protected void initializeGraphics() {
         layoutXProperty().bind(Bindings.createDoubleBinding(
                 () -> camera().worldToScreenX(getX()),
-                positionProperty(), camera().positionProperty(), camera().ratioProperty()));
+                positionProperty(), camera().positionProperty(), camera().ratioProperty(), canvas.widthProperty()));
         layoutYProperty().bind(Bindings.createDoubleBinding(
                 () -> camera().worldToScreenY(getY()),
-                positionProperty(), camera().positionProperty(), camera().ratioProperty()));
+                positionProperty(), camera().positionProperty(), camera().ratioProperty(), canvas.heightProperty()));
 
         Scale scale = new Scale();
         scale.xProperty().bind(camera().ratioProperty());
