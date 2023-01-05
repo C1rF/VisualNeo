@@ -179,7 +179,7 @@ public class QueryHandler {
                 return new Results(resultGraph, resultIds);
             });
 
-            System.out.println(results);
+            // System.out.println(results);
             return results;
         }
     }

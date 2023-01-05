@@ -139,6 +139,8 @@ public class VisualNeoController {
     private VBox vbox_basic_patterns;
     @FXML
     private VBox vbox_canned_patterns;
+    @FXML
+    private TextArea textarea_query;
 
     private static double PATTERN_CANVAS_HEIGHT = 150.0;
 
@@ -190,6 +192,7 @@ public class VisualNeoController {
         schemaCanvas.setClip(schemaContainer);
 
         tab_pane.onKeyPressedProperty().bind(constructCanvas.onKeyPressedProperty());
+        tab_pane.setOnMouseEntered(e -> tab_pane.requestFocus());
         tabpane_pattern.getTabs().remove(tab_result_record);
 
         property_change_listener = new ChangeListener<String>() {
@@ -249,6 +252,10 @@ public class VisualNeoController {
                 }
             }
         });
+
+        // Bind the query code display textarea
+        textarea_query.textProperty().bind(queryHandler.getTranslator().translationProperty());
+        textarea_query.onKeyPressedProperty().bind(resultCanvas.onKeyPressedProperty());
 
         // Load the basic patterns
         File basicPattern = new File(BASIC_PATTERN_PATH);
