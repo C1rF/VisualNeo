@@ -36,6 +36,10 @@ public class VisualNeoController {
 
     public final QueryHandler queryHandler = new QueryHandler();
 
+    @FXML
+    private Button btn_exact_search;
+    @FXML
+    private Button btn_generate_patterns;
     /**
      * Buttons and Labels in the Label and Property Pane (9 in total)
      */
@@ -138,19 +142,22 @@ public class VisualNeoController {
 
     private static double PATTERN_CANVAS_HEIGHT = 150.0;
 
+    private final String BASIC_PATTERN_PATH = "src/main/resources/hkust/edu/visualneo/data/basic/basicPattern.txt";
+
 
     /**
      * The constructor.
      * The constructor is called before initialize() method.
      */
-    public VisualNeoController() {}
+    public VisualNeoController() {
+    }
 
     /**
      * Initializes the controller class. This method is automatically called
      * after the fxml file has been loaded.
      */
     @FXML
-    private void initialize() {
+    private void initialize() throws Exception {
         constructCanvas.setType(Canvas.CanvasType.MODIFIABLE);
         Graph graph = new Graph();
         constructCanvas.bind(graph);
@@ -191,11 +198,11 @@ public class VisualNeoController {
                 String type = current_property_map.get(newValue);
                 System.out.println("Current Selected Property Type: " + type);
                 String propmt_text = "New Case! Please debug!";
-                if(type.equals("String")){
+                if (type.equals("String")) {
                     propmt_text = "Please input a String";
-                } else if (type.equals("Long") ) {
+                } else if (type.equals("Long")) {
                     propmt_text = "Please input a Number";
-                } else if (type.equals("Double") ) {
+                } else if (type.equals("Double")) {
                     propmt_text = "Please input a Double";
                 }
                 textfield_property_value.setPromptText(propmt_text);
@@ -207,15 +214,15 @@ public class VisualNeoController {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 GraphElement current_highlight = constructCanvas.getSingleHighlight();
                 Edge highlight_edge = (Edge) current_highlight;
-                if(highlight_edge != null) highlight_edge.setDirected(newValue);
+                if (highlight_edge != null) highlight_edge.setDirected(newValue);
             }
         };
 
-        tab_pane.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number> (){
+        tab_pane.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 int selectedIndex = newValue.intValue();
-                switch (selectedIndex){
+                switch (selectedIndex) {
                     case 0 -> {
                         resultCanvas.clearHighlights();
                         schemaCanvas.clearHighlights();
@@ -242,9 +249,15 @@ public class VisualNeoController {
                 }
             }
         });
+
+        // Load the basic patterns
+        File basicPattern = new File(BASIC_PATTERN_PATH);
+        parseRecommendedPatternFromFile(basicPattern, false);
     }
 
-    public void setApp(VisualNeoApp app) { this.app = app; }
+    public void setApp(VisualNeoApp app) {
+        this.app = app;
+    }
 
     /**
      * Called when the user click on Load Database button
@@ -287,16 +300,16 @@ public class VisualNeoController {
         schemaCanvas.loadGraph(metadata.schemaGraph());
         Map<String, Map<String, String>> labelToNodeProperty = metadata.nodePropertiesByLabel();
         Map<String, Map<String, String>> labelToRelationProperty = metadata.relationPropertiesByLabel();
-        for(Vertex v : schemaCanvas.getVertices()){
+        for (Vertex v : schemaCanvas.getVertices()) {
             Map<String, String> nodeProperties = labelToNodeProperty.get(v.getLabel());
-            if(nodeProperties == null) continue;
-            for(Map.Entry<String,String> nodeProperty : nodeProperties.entrySet())
+            if (nodeProperties == null) continue;
+            for (Map.Entry<String, String> nodeProperty : nodeProperties.entrySet())
                 v.addProperty(nodeProperty.getKey(), Values.value(nodeProperty.getValue()));
         }
-        for(Edge e : schemaCanvas.getEdges()){
+        for (Edge e : schemaCanvas.getEdges()) {
             Map<String, String> relationProperties = labelToRelationProperty.get(e.getLabel());
-            if(relationProperties == null) continue;
-            for(Map.Entry<String,String> relationProperty : relationProperties.entrySet()){
+            if (relationProperties == null) continue;
+            for (Map.Entry<String, String> relationProperty : relationProperties.entrySet()) {
                 e.addProperty(relationProperty.getKey(), Values.value(relationProperty.getValue()));
             }
         }
@@ -313,7 +326,11 @@ public class VisualNeoController {
         choicebox_relation_label.getSelectionModel().selectFirst();
 
         // If there is a single highlight, refresh all panes
-        if(constructCanvas.getSingleHighlight() != null) refreshAllPane(constructCanvas.getSingleHighlight(), false);
+        if (constructCanvas.getSingleHighlight() != null) refreshAllPane(constructCanvas.getSingleHighlight(), false);
+
+        // Enable exact search function
+        btn_exact_search.setDisable(false);
+        btn_generate_patterns.setDisable(false);
     }
 
     /**
@@ -343,7 +360,7 @@ public class VisualNeoController {
         QueryHandler.Results results = null;
         try {
             results = queryHandler.exactSearch(constructCanvas);
-        } catch (Exception e) {
+        } catch (Graph.BadTopologyException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Exact Search Error");
             alert.setHeaderText("Cannot perform the exact search!");
@@ -421,19 +438,17 @@ public class VisualNeoController {
     }
 
     private Value parsePropValue(String type, String input) {
-        try{
-            if(type.equals("String")){
+        try {
+            if (type.equals("String")) {
                 return Values.value(input);
-            }
-            else if(type.equals("Long")){
+            } else if (type.equals("Long")) {
                 long num = Long.parseLong(input);
                 return Values.value(num);
-            }
-            else if(type.equals("Float")){
+            } else if (type.equals("Float")) {
                 double num = Double.parseDouble(input);
                 return Values.value(num);
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             return null;
         }
         return null;
@@ -446,6 +461,7 @@ public class VisualNeoController {
     private void handleMouseEnterButton(MouseEvent m) {
         constructCanvas.getScene().setCursor(Cursor.HAND);
     }
+
     /**
      * Called when the user's mouse leaves a button
      */
@@ -455,6 +471,7 @@ public class VisualNeoController {
     }
 
     private void UpdateNodeTable(DbMetadata metadata) {
+        tableview_node.getItems().clear();
         node_name_col.setCellValueFactory(new MapValueFactory("Label"));
         node_count_col.setCellValueFactory(new MapValueFactory("Count"));
         ObservableList<Map<String, Object>> items =
@@ -474,6 +491,7 @@ public class VisualNeoController {
     }
 
     private void UpdateRelationTable(DbMetadata metadata) {
+        tableview_relation.getItems().clear();
         relation_name_col.setCellValueFactory(new MapValueFactory("Label"));
         relation_count_col.setCellValueFactory(new MapValueFactory("Count"));
         ObservableList<Map<String, Object>> items =
@@ -555,7 +573,7 @@ public class VisualNeoController {
 
     @FXML
     void handleZoomIn() {
-        if(tab_query_constructor.isSelected())
+        if (tab_query_constructor.isSelected())
             constructCanvas.camera.zoomIn();
         else
             resultCanvas.camera.zoomIn();
@@ -563,13 +581,14 @@ public class VisualNeoController {
 
     @FXML
     void handleZoomOut() {
-        if(tab_query_constructor.isSelected())
+        if (tab_query_constructor.isSelected())
             constructCanvas.camera.zoomOut();
         else
             resultCanvas.camera.zoomOut();
     }
 
     // Functions in the Menu Bar
+
     /**
      * Display the "About Us" information
      */
@@ -586,6 +605,7 @@ public class VisualNeoController {
         dialog.setResizable(false);
         dialog.show();
     }
+
     /**
      * Clear the drawing board
      */
@@ -601,10 +621,10 @@ public class VisualNeoController {
     private void handleSave() {
         StringBuilder outputText = new StringBuilder();
         Collection<Vertex> vertices = constructCanvas.getVertices();
-        Collection<Edge> edges =  constructCanvas.getEdges();
-        for(Vertex v : vertices)
+        Collection<Edge> edges = constructCanvas.getEdges();
+        for (Vertex v : vertices)
             outputText.append(v.toText()).append('\n');
-        for(Edge e : edges)
+        for (Edge e : edges)
             outputText.append(e.toText()).append('\n');
         System.out.println(outputText);
         FileChooser fileChooser = new FileChooser();
@@ -631,14 +651,14 @@ public class VisualNeoController {
      * Load the drawing pattern
      */
     @FXML
-    private void handleLoad() {
+    private void handleUserLoad() {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
         fileChooser.getExtensionFilters().add(extFilter);
         File selectedFile = fileChooser.showOpenDialog(app.stage);
         try {
             if (selectedFile == null) return;
-            Graph pattern_graph = parsePatternFromFile(selectedFile);
+            Graph pattern_graph = parseUserPatternFromFile(selectedFile);
             constructCanvas.clearElements();
             constructCanvas.loadGraph(pattern_graph);
         } catch (FileNotFoundException fe) {
@@ -646,18 +666,16 @@ public class VisualNeoController {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Load Pattern Error");
             alert.setHeaderText("Cannot load the txt file.");
-            if(e.getMessage().equals("No Database")){
+            if (e.getMessage().equals("NoDB"))
                 alert.setContentText("Your pattern contains labels/properties while no database is loaded.\nPlease load the database first!");
-            }
-            else{
-                alert.setContentText("The txt file has incorrect format!");
-            }
+            else
+                alert.setContentText("Cannot parse the information from pattern file.\nPlease check your file!");
             alert.showAndWait();
         }
     }
 
     // Helper function to parse the pattern
-    private Graph parsePatternFromFile(File pattern_file) throws Exception {
+    private Graph parseUserPatternFromFile(File pattern_file) throws Exception {
 
         Scanner sc = new Scanner(pattern_file);
 
@@ -675,8 +693,10 @@ public class VisualNeoController {
                 boolean isVertex = elements[0].equals("v");
                 if (isVertex) {
                     // Vertex
-                    if(!hasDatabase && (!elements[2].equals("null") || !elements[3].equals("null"))) throw new Exception("No Database");
+                    if (!hasDatabase && (!elements[2].equals("null") || !elements[3].equals("null")))
+                        throw new Exception("NoDB");
                     String label = elements[2].equals("null") ? null : elements[2];
+                    if(hasDatabase && label != null && !metadata.nodeLabels().contains(label)) throw new Exception("Wrong Label");
                     Map<String, Value> properties = new TreeMap<>();
                     for (int i = 3; i < elements.length; i++) {
                         String property = elements[i];
@@ -690,9 +710,11 @@ public class VisualNeoController {
                     nodes.add(newNode);
                 } else {
                     // Edge
-                    if(!hasDatabase && (!elements[4].equals("null") || !elements[5].equals("null"))) throw new Exception("No Database");
+                    if (!hasDatabase && (!elements[4].equals("null") || !elements[5].equals("null")))
+                        throw new Exception("NoDB");
                     boolean directed = Boolean.valueOf(elements[3]);
                     String label = elements[4].equals("null") ? null : elements[4];
+                    if(hasDatabase && label != null && !metadata.relationLabels().contains(label)) throw new Exception("Wrong Label");
                     Map<String, Value> properties = new TreeMap<>();
                     for (int i = 5; i < elements.length; i++) {
                         String property = elements[i];
@@ -711,7 +733,9 @@ public class VisualNeoController {
         return new Graph(nodes, relations);
     }
 
-    public void displayPatterns(List<Graph> patterns) {
+    public void displayRecommendedPatterns(List<Graph> patterns, boolean isCannedPattern) {
+        VBox vbox_to_add_pattern = isCannedPattern ? vbox_canned_patterns : vbox_basic_patterns;
+        vbox_to_add_pattern.getChildren().clear();
         Iterator<Graph> it = patterns.iterator();
         while (it.hasNext()) {
             Graph pattern = it.next();
@@ -724,32 +748,49 @@ public class VisualNeoController {
                 patternCanvas.rotateSearch(() -> {
                     Bounds bounds = patternCanvas.computeBounds();
                     return Math.max(bounds.getWidth() * patternCanvas.getHeight(),
-                                    bounds.getHeight() * patternCanvas.getWidth());
+                            bounds.getHeight() * patternCanvas.getWidth());
                 });
                 patternCanvas.frameAllElements(false, true);
             });
 
             AnchorPane.setTopAnchor(patternCanvas, 0.0);
             AnchorPane.setBottomAnchor(patternCanvas, 0.0);
-            AnchorPane.setLeftAnchor(patternCanvas,0.0);
-            AnchorPane.setRightAnchor(patternCanvas,0.0);
+            AnchorPane.setLeftAnchor(patternCanvas, 0.0);
+            AnchorPane.setRightAnchor(patternCanvas, 0.0);
 
             AnchorPane patternAnchorPane = new AnchorPane();
             patternAnchorPane.setMinHeight(PATTERN_CANVAS_HEIGHT);
             patternAnchorPane.setMaxHeight(PATTERN_CANVAS_HEIGHT);
 
             patternAnchorPane.getChildren().add(patternCanvas);
-            vbox_canned_patterns.getChildren().add(patternAnchorPane);
+            vbox_to_add_pattern.getChildren().add(patternAnchorPane);
 
             if (it.hasNext())
-                vbox_canned_patterns.getChildren().add(new Separator());
+                vbox_to_add_pattern.getChildren().add(new Separator());
         }
     }
 
-    public Graph parsePatternFromText(List<String> text) throws Exception {
+    public void parseRecommendedPatternFromFile(File file, boolean isCannedPattern) throws Exception {
+        Scanner sc = new Scanner(file);
+        List<List<String>> all_patterns = new ArrayList<>();
+        List<String> pattern = null;
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine().trim();
+            if (line.isEmpty()) continue;
+            if (line.startsWith("Final")) {
+                pattern = new ArrayList<>();
+                all_patterns.add(pattern);
+            } else {
+                pattern.add(line);
+            }
+        }
+        List<Graph> pattern_graphs = new ArrayList<>();
+        for (List<String> single_pattern : all_patterns)
+            pattern_graphs.add(parseRecommendedPatternFromString(single_pattern));
+        displayRecommendedPatterns(pattern_graphs, isCannedPattern);
+    }
 
-        if (metadata == null) throw new Exception("No Database");
-
+    public Graph parseRecommendedPatternFromString(List<String> text) throws Exception {
         Collection<Node> nodes = new HashSet<>();
         Collection<Relation> relations = new HashSet<>();
         Map<Long, Node> nodeMap = new HashMap<>();
@@ -764,24 +805,28 @@ public class VisualNeoController {
                 if (isVertex) {
                     // Vertex
                     String label = elements[2].equals("null") ? null : elements[2];
+                    if(metadata != null && label != null && !metadata.nodeLabels().contains(label)) throw new Exception("Wrong Label");
                     Node newNode = new Node(currentId++, label, new TreeMap<>());
                     nodeMap.put(Long.parseLong(elements[1]), newNode);
                     nodes.add(newNode);
                 } else {
                     // Edge
                     String label = elements[3].equals("null") ? null : elements[3];
+                    if(metadata != null && label != null && !metadata.relationLabels().contains(label)) throw new Exception("Wrong Label");
                     Node start = nodeMap.get(Long.parseLong(elements[1]));
                     Node end = nodeMap.get(Long.parseLong(elements[2]));
                     String startLabel = start.getLabel();
                     String endLabel = end.getLabel();
-                    Collection<String> sourceOfThisRelation = metadata.sourcesOf(label);
-                    boolean startLabelCanBeSource = sourceOfThisRelation.contains(startLabel);
-                    boolean endLabelCanBeSource = sourceOfThisRelation.contains(endLabel);
-                    if (endLabelCanBeSource && !startLabelCanBeSource) {
-                        // This relation must go from end to start, so we switch them
-                        Node temp = start;
-                        start = end;
-                        end = temp;
+                    if (metadata != null && label != null && startLabel != null && endLabel != null) {
+                        Collection<String> sourceOfThisRelation = metadata.sourcesOf(label);
+                        boolean startLabelCanBeSource = sourceOfThisRelation.contains(startLabel);
+                        boolean endLabelCanBeSource = sourceOfThisRelation.contains(endLabel);
+                        if (endLabelCanBeSource && !startLabelCanBeSource) {
+                            // This relation must go from end to start, so we switch them
+                            Node temp = start;
+                            start = end;
+                            end = temp;
+                        }
                     }
                     Relation newRelation = new Relation(currentId++, true, start, end, label, new TreeMap<>());
                     relations.add(newRelation);

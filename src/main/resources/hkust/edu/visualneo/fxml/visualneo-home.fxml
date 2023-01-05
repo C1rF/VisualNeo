@@ -31,7 +31,7 @@
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                     <MenuItem mnemonicParsing="false" onAction="#handleSave" text="Save Pattern" />
-                        <MenuItem mnemonicParsing="false" onAction="#handleLoad" text="Load Pattern" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleUserLoad" text="Load Pattern" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
@@ -55,17 +55,12 @@
                               <Font name="Arial Black" size="14.0" />
                            </font>
                         </Button>
-                        <Button mnemonicParsing="false" onAction="#handleGeneratePatterns" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Generate Patterns" textAlignment="CENTER">
+                        <Button fx:id="btn_generate_patterns" disable="true" mnemonicParsing="false" onAction="#handleGeneratePatterns" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Generate Patterns" textAlignment="CENTER">
                            <font>
                               <Font name="Arial Black" size="14.0" />
                            </font>
                         </Button>
-                        <Button mnemonicParsing="false" onAction="#handleExactSearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Exact Search" textAlignment="CENTER">
-                           <font>
-                              <Font name="Arial Black" size="14.0" />
-                           </font>
-                        </Button>
-                        <Button mnemonicParsing="false" onAction="#handleSimilaritySearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Similarity Search" textAlignment="CENTER">
+                        <Button fx:id="btn_exact_search" disable="true" mnemonicParsing="false" onAction="#handleExactSearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Exact Search" textAlignment="CENTER">
                            <font>
                               <Font name="Arial Black" size="14.0" />
                            </font>

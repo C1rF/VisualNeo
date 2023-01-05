@@ -1,24 +1,22 @@
 package hkust.edu.visualneo;
 
-import hkust.edu.visualneo.utils.backend.Graph;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 
 public class LoadPatternController {
 
+    @FXML
+    private Button btn_load_from_txt;
     private VisualNeoController controller;
     private Stage stage;
 
     @FXML
-    void loadPatternFromFile(){
+    void loadPatternFromFile() {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
         fileChooser.getExtensionFilters().add(extFilter);
@@ -26,52 +24,28 @@ public class LoadPatternController {
 
         try {
             if (selectedFile == null) return;
-            Scanner sc = new Scanner(selectedFile);
-            List<List<String>> all_patterns = new ArrayList<>();
-            List<String> pattern = null;
-            while (sc.hasNextLine()){
-                String line = sc.nextLine().trim();
-                if(line.isEmpty()) return;
-                if(line.startsWith("Final")){
-                    pattern = new ArrayList<>();
-                    all_patterns.add(pattern);
-                }
-                else{
-                    pattern.add(line);
-                }
-            }
-
-            List<Graph> pattern_graphs = new ArrayList<>();
-            for(List<String> single_pattern : all_patterns)
-                pattern_graphs.add(controller.parsePatternFromText(single_pattern));
-            controller.displayPatterns(pattern_graphs);
-
-        } catch (FileNotFoundException fe) {
+            controller.parseRecommendedPatternFromFile(selectedFile, true);
+            Stage stage = (Stage) btn_load_from_txt.getScene().getWindow();
+            stage.close();
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Load Pattern Error");
-            alert.setHeaderText("Cannot load the txt file.");
-            if(e.getMessage().equals("No Database")){
-                alert.setContentText("Your pattern contains labels/properties while no database is loaded.\nPlease load the database first!");
-            }
-            else{
-                alert.setContentText("The txt file has incorrect format!");
-            }
+            alert.setTitle("Pattern Loading Error");
+            alert.setHeaderText("Cannot load your pattern file.");
+            alert.setContentText("Cannot parse the information from pattern file.\nPlease check your file!");
             alert.showAndWait();
-            e.printStackTrace();
         }
     }
 
     @FXML
-    void generatePattern(){
+    void generatePattern() {
 
     }
-
 
 
     public void setVisualNeoController(VisualNeoController controller) {
         this.controller = controller;
     }
+
     public void setStage(Stage stage) {
         this.stage = stage;
     }
