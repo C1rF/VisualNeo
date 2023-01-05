@@ -161,7 +161,12 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
 
         Tooltip tooltip = new Tooltip();
         tooltip.textProperty().bind(labelProperty());
-        Tooltip.install(this, tooltip);
+        labelProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue == null)
+                Tooltip.install(this, tooltip);
+            else if (newValue == null)
+                Tooltip.uninstall(this, tooltip);
+        });
     }
 
     protected void initializeHandlers() {
