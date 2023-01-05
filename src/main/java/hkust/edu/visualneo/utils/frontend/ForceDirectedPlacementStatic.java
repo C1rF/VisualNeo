@@ -20,15 +20,18 @@ public class ForceDirectedPlacementStatic {
     private static final double SQR_OPT_DIST = OPT_DIST * OPT_DIST;
 
     private static final double GRAV_COEF = 0.05;  // Gravity coefficient
+    private static final double MAX_REP_DIST_COEF = 0.8;
 
     private static final double INIT_TEMP = 20.0;  // Initial temperature
 
     private static final double STOP_AVG_DISP = 80.0;  // Average displacement threshold for stopping simulation
-    private static final int MAX_TIME = 10000;  // Max duration of simulation;
+    private static final int MAX_ITERATIONS = 10000;  // Max number of iterations of simulation;
+    private static final double MAX_TIME = 20.0;
 
     private final Canvas canvas;
 
     private final int vertexCount;
+    private final int edgeCount;
 
     private final Long[] ids;
     private final Map<Long, Integer> indices;
@@ -40,7 +43,7 @@ public class ForceDirectedPlacementStatic {
 
     private final double maxRepDist;  // Maximum distance for applying repulsive force
 
-    private int time = 0;
+    private int itCount = 0;
 
     private double temp;  // Current temperature
 
@@ -59,12 +62,13 @@ public class ForceDirectedPlacementStatic {
                       .filter(edge -> !edge.isSelfLoop())
                       .map(edge -> new Pair<>(indices.get(edge.startVertex.getElementId()), indices.get(edge.endVertex.getElementId())))
                       .collect(Collectors.toSet());
+        edgeCount = pairs.size();
 
         double scale = Math.sqrt(vertexCount);
+        double fullness = Math.sqrt(edgeCount * 2.0 / (vertexCount * (vertexCount - 1)));
 
-        maxRepDist = OPT_DIST * scale;
+        maxRepDist = MAX_REP_DIST_COEF * OPT_DIST * scale * fullness;
 
-        //        double max = OPT_DIST * Math.min(Math.sqrt(vertexCount), 10.0) * 0.5;
         double max = OPT_DIST * scale * 0.5;
         double min = -max;
 
@@ -87,17 +91,22 @@ public class ForceDirectedPlacementStatic {
         return IntStream.range(0, vertexCount).boxed().collect(Collectors.toMap(i -> ids[i], i -> positions[i]));
     }
 
-    public void simulate(int duration) {
-        if (duration == 0) {
+    public void simulate(int iterations) {
+        long startTime = System.currentTimeMillis();
+        if (iterations == 0) {
             int equilibriumCount = 0;
-            while (equilibriumCount < 5 && time < MAX_TIME) {
+            while (equilibriumCount < 5 && itCount < MAX_ITERATIONS &&
+                   (System.currentTimeMillis() - startTime) / 1000.0 < MAX_TIME) {
                 simulate();
-                if (time% 100 == 0 && computeAvgDisp() < STOP_AVG_DISP)
+                if (itCount % 100 == 0 && computeAvgDisp() < STOP_AVG_DISP)
                     ++equilibriumCount;
             }
         }
         else {
-            for (int i = 0; i < duration && time < MAX_TIME; ++i)
+            for (int i = 0;
+                 i < iterations && itCount < MAX_ITERATIONS &&
+                 (System.currentTimeMillis() - startTime) / 1000.0 < MAX_TIME;
+                 ++i)
                 simulate();
         }
 
@@ -140,7 +149,7 @@ public class ForceDirectedPlacementStatic {
         cool();
 
         // Increment iteration count
-        ++time;
+        ++itCount;
     }
 
     // Attractive and repulsive displacements between u and v
@@ -162,7 +171,7 @@ public class ForceDirectedPlacementStatic {
     }
 
     private void cool() {
-        temp = INIT_TEMP / (1 + Math.log(1 + time));
+        temp = INIT_TEMP / (1 + Math.log(1 + itCount));
     }
 
     private double computeAvgDisp() {
