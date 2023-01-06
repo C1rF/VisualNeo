@@ -236,13 +236,19 @@ public class Canvas extends Pane implements Observable {
                            .get();
         GraphElement.raiseIdTo(maxId);
 
-        graph.getNodes().forEach(node -> vertices.put(node.getId(), new Vertex(this, node)));
-        graph.getRelations().forEach(relation -> edges.put(relation.getId(), new Edge(this, relation)));
+        graph.getNodes().forEach(node -> {
+            Vertex vertex = new Vertex(this, node);
+            vertices.put(node.getId(), vertex);
+            getChildren().add(vertex);
+            vertex.addListener(elementListener);
+        });
 
-        getChildren().addAll(getEdges());
-        getChildren().addAll(getVertices());
-
-        getElements().forEach(element -> element.addListener(elementListener));
+        graph.getRelations().forEach(relation -> {
+            Edge edge = new Edge(this, relation);
+            edges.put(relation.getId(), edge);
+            getChildren().add(0, edge);
+            edge.addListener(elementListener);
+        });
         markInvalid();
 
         // Compute the layout of the graph
@@ -255,21 +261,23 @@ public class Canvas extends Pane implements Observable {
 
     public void loadCanvas(Canvas other, Point2D positionShift) {
         Map<Long, Vertex> vertexCopies = new HashMap<>();
+
         other.getVertices().forEach(vertex -> {
             Vertex copy = new Vertex(this, vertex);
             copy.translate(positionShift);
             vertices.put(copy.getElementId(), copy);
+            getChildren().add(copy);
             vertexCopies.put(vertex.getElementId(), copy);
+            copy.addListener(elementListener);
         });
+
         other.getEdges().forEach(edge -> {
             Edge copy = new Edge(this, edge, vertexCopies);
             edges.put(copy.getElementId(), copy);
+            getChildren().add(0, copy);
+            copy.addListener(elementListener);
         });
 
-        getChildren().addAll(getEdges());
-        getChildren().addAll(getVertices());
-
-        getElements().forEach(element -> element.addListener(elementListener));
         markInvalid();
     }
 
