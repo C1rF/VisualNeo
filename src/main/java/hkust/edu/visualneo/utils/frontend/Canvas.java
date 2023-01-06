@@ -236,16 +236,8 @@ public class Canvas extends Pane implements Observable {
                            .get();
         GraphElement.raiseIdTo(maxId);
 
-        vertices.putAll(graph.getNodes()
-                             .stream()
-                             .collect(Collectors.toMap(Node::getId,
-                                                       node -> new Vertex(this,
-                                                                          node))));
-        edges.putAll(graph.getRelations()
-                          .stream()
-                          .collect(Collectors.toMap(Relation::getId,
-                                                    relation -> new Edge(this,
-                                                                         relation))));
+        graph.getNodes().forEach(node -> vertices.put(node.getId(), new Vertex(this, node)));
+        graph.getRelations().forEach(relation -> edges.put(relation.getId(), new Edge(this, relation)));
 
         getChildren().addAll(getEdges());
         getChildren().addAll(getVertices());
@@ -259,6 +251,17 @@ public class Canvas extends Pane implements Observable {
         placement.layout();
 
         frameAllElements(false, false);
+    }
+
+    public void loadCanvas(Canvas other) {
+        other.getVertices().forEach(vertex -> vertices.put(vertex.getElementId(), new Vertex(this, vertex)));
+        other.getEdges().forEach(edge -> edges.put(edge.getElementId(), new Edge(this, edge)));
+
+        getChildren().addAll(getEdges());
+        getChildren().addAll(getVertices());
+
+        getElements().forEach(element -> element.addListener(elementListener));
+        markInvalid();
     }
 
     public void rotateSearch(Callable<Double> criteria) {
@@ -403,7 +406,7 @@ public class Canvas extends Pane implements Observable {
         edges.remove(edge.getElementId());
     }
 
-    public void addElement(GraphElement element) {
+    private void addElement(GraphElement element) {
         element.addListener(elementListener);
         getChildren().add(element);
         clearHighlights();
@@ -411,7 +414,7 @@ public class Canvas extends Pane implements Observable {
         markInvalid();
     }
 
-    public void removeElement(GraphElement element) {
+    private void removeElement(GraphElement element) {
         element.removeListener(elementListener);
         getChildren().remove(element);
         element.erase();
@@ -419,7 +422,7 @@ public class Canvas extends Pane implements Observable {
         markInvalid();
     }
 
-    public void removeElements(Collection<GraphElement> elements) {
+    private void removeElements(Collection<GraphElement> elements) {
         elements.forEach(element -> element.removeListener(elementListener));
         getChildren().removeAll(elements);
         elements.forEach(GraphElement::erase);
