@@ -24,7 +24,7 @@ public class PositionProperty extends SimpleObjectProperty<Point2D> {
     }
 
     public static double angle(Point2D source, Point2D target) {
-        Point2D delta = source.subtract(target);
+        Point2D delta = target.subtract(source);
         return delta.getX() == 0.0 ?
                delta.getY() > 0.0 ? PI / 2 : -PI / 2 :
                Math.atan2(delta.getY(), delta.getX());
