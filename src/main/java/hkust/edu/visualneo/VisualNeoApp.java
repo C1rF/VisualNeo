@@ -20,7 +20,7 @@ public class VisualNeoApp extends Application {
         VisualNeoController controller = fxmlLoader.<VisualNeoController>getController();
         controller.setApp(this);
         this.stage = stage;
-        stage.getIcons().add(new Image(getClass().getResource("icon/icon1.png").toExternalForm()));
+        stage.getIcons().add(new Image(getClass().getResource("icon/visualneo_icon.png").toExternalForm()));
         stage.setTitle("VisualNeo");
         stage.setScene(scene);
         stage.show();
