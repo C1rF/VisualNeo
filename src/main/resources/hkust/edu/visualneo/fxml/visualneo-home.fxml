@@ -11,10 +11,12 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
@@ -31,7 +33,7 @@
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                     <MenuItem mnemonicParsing="false" onAction="#handleSave" text="Save Pattern" />
-                        <MenuItem mnemonicParsing="false" onAction="#handleLoad" text="Load Pattern" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleUserLoad" text="Load Pattern" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
@@ -55,17 +57,12 @@
                               <Font name="Arial Black" size="14.0" />
                            </font>
                         </Button>
-                        <Button mnemonicParsing="false" onAction="#handleGeneratePatterns" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Generate Patterns" textAlignment="CENTER">
+                        <Button fx:id="btn_generate_patterns" disable="true" mnemonicParsing="false" onAction="#handleGeneratePatterns" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Generate Patterns" textAlignment="CENTER">
                            <font>
                               <Font name="Arial Black" size="14.0" />
                            </font>
                         </Button>
-                        <Button mnemonicParsing="false" onAction="#handleExactSearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Exact Search" textAlignment="CENTER">
-                           <font>
-                              <Font name="Arial Black" size="14.0" />
-                           </font>
-                        </Button>
-                        <Button mnemonicParsing="false" onAction="#handleSimilaritySearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Similarity Search" textAlignment="CENTER">
+                        <Button fx:id="btn_exact_search" disable="true" mnemonicParsing="false" onAction="#handleExactSearch" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="60.0" prefWidth="200.0" text="Exact Search" textAlignment="CENTER">
                            <font>
                               <Font name="Arial Black" size="14.0" />
                            </font>
@@ -172,22 +169,35 @@
                         <content>
                           <AnchorPane style="-fx-background-color: white;">
                                  <children>
-                            <Canvas fx:id="constructCanvas" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                            <Button mnemonicParsing="false" onAction="#handleZoomOut" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="40.0" prefWidth="40.0" text="-" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="10.0">
-                               <font>
-                                  <Font name="Arial Black" size="18.0" />
-                               </font>
-                            </Button>
-                            <Button mnemonicParsing="false" onAction="#handleZoomIn" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="40.0" prefWidth="40.0" text="+" AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="10.0">
-                               <font>
-                                  <Font name="Arial Black" size="18.0" />
-                               </font>
-                            </Button>
+                                    <SplitPane dividerPositions="0.12339851652056642" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <items>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                             <children>
+                                                <TextArea id="textarea_query" fx:id="textarea_query" editable="false" focusTraversable="false" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                             </children>
+                                          </AnchorPane>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                             <children>
+                                        <Canvas fx:id="constructCanvas" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                        <Button mnemonicParsing="false" onAction="#handleZoomOut" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="40.0" prefWidth="40.0" text="-" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="10.0">
+                                           <font>
+                                              <Font name="Arial Black" size="18.0" />
+                                           </font>
+                                        </Button>
+                                        <Button mnemonicParsing="false" onAction="#handleZoomIn" onMouseEntered="#handleMouseEnterButton" onMouseExited="#handleMouseLeaveButton" prefHeight="40.0" prefWidth="40.0" text="+" AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="10.0">
+                                           <font>
+                                              <Font name="Arial Black" size="18.0" />
+                                           </font>
+                                        </Button>
+                                             </children>
+                                          </AnchorPane>
+                                      </items>
+                                    </SplitPane>
                          </children>
                       </AnchorPane>
                 </content>
               </Tab>
-              <Tab fx:id="tab_query_result" text="Query Result">
+              <Tab text="Query Result">
                 <content>
                   <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: white;">
                                  <children>
@@ -205,7 +215,7 @@
                                  </children></AnchorPane>
                         </content>
                       </Tab>
-                        <Tab fx:id="tab_database_info" text="Database Info">
+                        <Tab text="Database Info">
                            <content>
                               <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: white;">
                                  <children>

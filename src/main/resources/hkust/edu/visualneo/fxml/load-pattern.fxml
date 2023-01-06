@@ -7,7 +7,7 @@
 
 <AnchorPane prefHeight="280.0" prefWidth="292.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hkust.edu.visualneo.LoadPatternController">
    <children>
-      <Button layoutX="49.0" layoutY="70.0" mnemonicParsing="false" onAction="#loadPatternFromFile" prefHeight="50.0" text="Load from txt file" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="80.0" />
+      <Button fx:id="btn_load_from_txt" layoutX="49.0" layoutY="70.0" mnemonicParsing="false" onAction="#loadPatternFromFile" prefHeight="50.0" text="Load from txt file" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="80.0" />
       <Text layoutX="52.0" layoutY="50.0" stroke="BLACK" strokeLineCap="ROUND" strokeLineJoin="ROUND" strokeType="OUTSIDE" strokeWidth="0.5" text="Load Patterns" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
          <font>
             <Font name="Helvetica" size="33.0" />

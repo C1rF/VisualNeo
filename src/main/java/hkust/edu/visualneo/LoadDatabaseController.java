@@ -63,8 +63,8 @@ public class LoadDatabaseController {
                         loadAnimation.cancelLoadAnimation();
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Database Connection Error");
-                        alert.setHeaderText("Cannot connect the database. ");
-                        alert.setContentText("The provided information is not correct!");
+                        alert.setHeaderText("Cannot connect the database.");
+                        alert.setContentText("The provided information is incorrect!");
                         alert.showAndWait();
                     });
                 }
