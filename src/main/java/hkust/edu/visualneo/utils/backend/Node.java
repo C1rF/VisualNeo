@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class Node extends Entity {
 
-    private Collection<Relation> relations = new TreeSet<>();
+    private final Collection<Relation> relations = new TreeSet<>();
 
     public Node(long id, String label, Map<String, Value> properties) {
         super(id, label, properties);
@@ -23,30 +23,30 @@ public class Node extends Entity {
              schema ? Collections.emptyMap() : node.asMap(Function.identity()));
     }
 
-    public Collection<Relation> relations() {
+    public Collection<Relation> getRelations() {
         return relations;
     }
 
     public boolean hasRelations() {
-        return !relations().isEmpty();
+        return !getRelations().isEmpty();
     }
 
     public int relationCount() {
-        return relations().size();
+        return getRelations().size();
     }
 
-    public Set<Node> neighbors() {
-        return relations()
+    public Set<Node> getNeighbors() {
+        return getRelations()
                 .stream()
                 .map(relation -> relation.other(this))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public Set<Relation> relationsWith(Node other) {
+    public Set<Relation> getRelationsWith(Node other) {
         if (other == null)
             return Collections.emptySet();
 
-        return relations()
+        return getRelations()
                 .stream()
                 .filter(relation -> other.equals(relation.other(this)))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -55,41 +55,6 @@ public class Node extends Entity {
     void attach(Relation relation) {
         relations.add(relation);
     }
-
-    //    // Two distinct node are indistinguishable in the neighborhood of this node
-    //    // iff they and the relations between them and this node can match the same node
-    //    ArrayList<Pair<Node>> getDuplicateNeighborPairs() {
-    //        HashSet<Node> dups = new HashSet<>();
-    //        ArrayList<ArrayList<Node>> dupSets = new ArrayList<>();
-    //        for (int i = 0; i < relations.size(); ++i) {
-    //            Relation outerRelation = relations.get(i);
-    //            Node outerNode = outerRelation.other(this);
-    //            if (dups.contains(outerNode))
-    //                continue;
-    //            ArrayList<Node> dupSet = new ArrayList<>();
-    //            dupSet.add(outerNode);
-    //            for (int j = i + 1; j < relations.size(); ++ j) {
-    //                Relation innerRelation = relations.get(j);
-    //                Node innerNode = innerRelation.other(this);
-    //                if (!outerRelation.resembles(innerRelation))
-    //                    continue;
-    //                if (dups.contains(innerNode) || !outerNode.resembles(innerNode))
-    //                    continue;
-    //                dups.add(innerNode);
-    //                dupSet.add(innerNode);
-    //            }
-    //            dupSets.add(dupSet);
-    //        }
-    //
-    //        ArrayList<Pair<Node>> dupPairs = new ArrayList<>();
-    //        dupSets.forEach(dupSet -> {
-    //            for (int i = 0; i < dupSet.size(); ++i)
-    //                for (int j = i + 1; j < dupSet.size(); ++j)
-    //                    dupPairs.add(Pair.ordered(dupSet.get(i), dupSet.get(j)));
-    //        });
-    //
-    //        return dupPairs;
-    //    }
 
     // Check whether two distinct nodes can match the same node
     // This method assumes the other node is non-null
@@ -112,7 +77,7 @@ public class Node extends Entity {
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = super.toMap();
-        map.put("Relations", relations().stream().map(Relation::getName).toList());
+        map.put("Relations", getRelations().stream().map(Relation::getName).toList());
         return map;
     }
 }

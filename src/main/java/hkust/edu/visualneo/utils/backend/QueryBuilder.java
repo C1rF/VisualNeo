@@ -129,9 +129,6 @@ public class QueryBuilder {
         String query = buffer.toString();
         clear();
 
-        System.out.println(graph);
-        System.out.println(query);
-
         return query;
     }
 

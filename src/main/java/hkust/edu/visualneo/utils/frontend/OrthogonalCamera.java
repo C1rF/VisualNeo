@@ -4,7 +4,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 
@@ -33,7 +32,7 @@ public class OrthogonalCamera {
             new SimpleDoubleProperty(this, "viewHeight", 0.0);
 
     private final ObjectProperty<Point2D> position =
-            new SimpleObjectProperty<>(this, "position", Point2D.ZERO);
+            new PositionProperty(this, "position");
 
     public OrthogonalCamera(Canvas canvas) {
         this.canvas = Objects.requireNonNull(canvas);

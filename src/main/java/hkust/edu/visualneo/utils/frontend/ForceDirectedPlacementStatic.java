@@ -26,7 +26,7 @@ public class ForceDirectedPlacementStatic {
 
     private static final double STOP_AVG_DISP = 80.0;  // Average displacement threshold for stopping simulation
     private static final int MAX_ITERATIONS = 10000;  // Max number of iterations of simulation;
-    private static final double MAX_TIME = 20.0;
+    private static final double MAX_TIME = 10.0;
 
     private final Canvas canvas;
 

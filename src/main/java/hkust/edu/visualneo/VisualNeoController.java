@@ -152,9 +152,7 @@ public class VisualNeoController {
     @FXML
     private void initialize() {
         constructCanvas.setType(Canvas.CanvasType.MODIFIABLE);
-        Graph graph = new Graph();
-        constructCanvas.bind(graph);
-        graph.bind(queryHandler.getTranslator());
+        constructCanvas.addListener(observable -> queryHandler.getTranslator().update(new Graph(constructCanvas)));
         constructCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
             GraphElement temp = constructCanvas.getSingleHighlight();
             if (temp != null)
