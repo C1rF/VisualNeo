@@ -52,7 +52,7 @@ Fortunately, graph queries are close to human intuition and can be represented b
 
 VisualNeo includes many cutting-edge functions such as data-driven VQI design, action-aware graph query processing, and effective query results visualization.  
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 ### Built With
 
@@ -60,7 +60,7 @@ VisualNeo includes many cutting-edge functions such as data-driven VQI design, a
 * [![React][Maven]][Maven-url]
 * [![Neo4j][Neo4j]][Neo4j-url]
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -97,7 +97,7 @@ Please follow the instructions below to set up your VisualNeo locally:
    ```
    JavaFX is separated from JDK 11+ and needed to installed independently by users. To download JavaFX, click [here](https://gluonhq.com/products/javafx/). Use the path of lib directory as your command line input.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
@@ -125,7 +125,7 @@ Here is a quick guideline of how VisualNeo can be used.
 
 _For more examples, please refer to the manual._
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 <!-- CONTACT -->
@@ -135,7 +135,7 @@ LIANG Houdong - [@website](https://dongdong3272.github.io/) - hliangam@connect.u
 
 YAO Chongchong - cyaoad@connect.ust.hk
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
