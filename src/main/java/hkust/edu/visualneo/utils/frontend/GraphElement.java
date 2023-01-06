@@ -1,5 +1,7 @@
 package hkust.edu.visualneo.utils.frontend;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.geometry.Point2D;
@@ -15,21 +17,23 @@ import javafx.scene.text.TextBoundsType;
 import javafx.scene.transform.Scale;
 import org.neo4j.driver.Value;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import static java.lang.Math.PI;
 
-public abstract class GraphElement extends Group implements Comparable<GraphElement> {
+public abstract class GraphElement extends Group implements Comparable<GraphElement>, Observable {
+
+    protected static final Color HOVER_COLOR = Color.web("#001966", 0.1);
+    protected static final Color HIGHLIGHT_COLOR = Color.web("#001966", 0.2);
 
     private static long currentId = 0;
 
     protected final Canvas canvas;
 
-    private final long id;
+    private boolean valid = true;
+    private Collection<InvalidationListener> listeners = new ArrayList<>();
 
-    protected static final Color HOVER_COLOR = Color.web("#001966", 0.1);
-    protected static final Color HIGHLIGHT_COLOR = Color.web("#001966", 0.2);
+    private final long id;
 
     // String of the label
     private final StringProperty label =
@@ -41,7 +45,7 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
             new SimpleBooleanProperty(this, "highlight", false);
     // Position of the element
     private final ObjectProperty<Point2D> position =
-            new SimpleObjectProperty<>(this, "position", Point2D.ZERO);
+            new PositionProperty(this, "position");
     protected Shape shape;
     protected Shape highlightShape;
     // Label shown on the GraphElement
@@ -59,12 +63,12 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
 
     public void addProperty(String name, Value val) {
         properties.put(name, val);
+        markInvalid();
     }
-
     public void addProperties(Map<String, Value> properties) {
         this.properties.putAll(properties);
+        markInvalid();
     }
-
     public Map<String, Value> getElementProperties() {
         return properties;
     }
@@ -72,17 +76,15 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     public StringProperty labelProperty() {
         return label;
     }
-
     public String getLabel() {
         return labelProperty().get();
     }
-
     public boolean hasLabel() {
         return labelProperty().get() != null;
     }
-
     public void setLabel(String label) {
         labelProperty().set(label);
+        markInvalid();
     }
 
     public BooleanProperty highlightProperty() {
@@ -118,8 +120,7 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     public static long getCurrentId() { return currentId; }
 
     public void setPosition(Point2D p) {
-        if (!getPosition().equals(p))  // To function with ObjectProperty
-            positionProperty().set(p);
+        positionProperty().set(p);
     }
 
     public void translate(Point2D delta) {
@@ -210,6 +211,28 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
         return delta.getX() == 0.0 ?
                 delta.getY() > 0.0 ? PI / 2 : -PI / 2 :
                 Math.atan2(delta.getY(), delta.getX());
+    }
+
+    protected void markInvalid() {
+        if (valid) {
+            valid = false;
+            invalidated();
+        }
+    }
+
+    private void invalidated() {
+        listeners.forEach(listener -> listener.invalidated(this));
+        valid = true;
+    }
+
+    @Override
+    public void addListener(InvalidationListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(InvalidationListener listener) {
+        listeners.remove(listener);
     }
 
     @Override

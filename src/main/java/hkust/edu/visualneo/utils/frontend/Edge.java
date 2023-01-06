@@ -330,6 +330,7 @@ public class Edge extends GraphElement {
     }
     public void setDirected(boolean directed) {
         directedProperty().set(directed);
+        markInvalid();
     }
 
     public IntegerProperty idxProperty() {
