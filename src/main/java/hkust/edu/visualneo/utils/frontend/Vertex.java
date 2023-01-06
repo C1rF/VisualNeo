@@ -92,6 +92,17 @@ public class Vertex extends GraphElement {
         addProperties(node.getProperties());
     }
 
+    public Vertex(Canvas canvas, Vertex other) {
+        super(canvas, other);
+
+        setPosition(other.getPosition());
+
+        initializeGraphics();
+
+        positionProperty().addListener(positionListener);
+        neighborhoodProperty().addListener(neighborhoodListener);
+    }
+
     @Override
     protected void initializeGraphics() {
         shape = new Circle(VERTEX_RADIUS);
@@ -167,7 +178,7 @@ public class Vertex extends GraphElement {
         return getNeighbors()
                 .stream()
                 .filter(other -> !other.equals(this))
-                .map(other -> angle(this, other))
+                .map(other -> PositionProperty.angle(getPosition(), other.getPosition()))
                 .sorted()
                 .collect(Collectors.toCollection(ArrayList::new));
     }
