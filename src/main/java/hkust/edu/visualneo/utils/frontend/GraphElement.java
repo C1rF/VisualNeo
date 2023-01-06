@@ -52,14 +52,20 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     // Label shown on the GraphElement
     protected Text text;
 
-    GraphElement(Canvas canvas) {
+    protected GraphElement(Canvas canvas) {
         this(canvas, currentId++);
     }
 
-    GraphElement(Canvas canvas, long id) {
+    protected GraphElement(Canvas canvas, long id) {
         this.canvas = canvas;
         this.id = id;
         initializeHandlers();
+    }
+
+    protected GraphElement(Canvas canvas, GraphElement other) {
+        this(canvas);
+
+        addProperties(other.properties);
     }
 
     public void addProperty(String name, Value val) {

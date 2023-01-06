@@ -92,6 +92,17 @@ public class Vertex extends GraphElement {
         addProperties(node.getProperties());
     }
 
+    public Vertex(Canvas canvas, Vertex other) {
+        super(canvas, other);
+
+        setPosition(other.getPosition());
+
+        initializeGraphics();
+
+        positionProperty().addListener(positionListener);
+        neighborhoodProperty().addListener(neighborhoodListener);
+    }
+
     @Override
     protected void initializeGraphics() {
         shape = new Circle(VERTEX_RADIUS);

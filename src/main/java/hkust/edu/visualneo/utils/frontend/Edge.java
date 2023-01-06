@@ -44,7 +44,7 @@ public class Edge extends GraphElement {
             new SimpleBooleanProperty(this, "directed", true);
     private final IntegerProperty idx =
             new SimpleIntegerProperty(this, "idx", -1);
-    private final DoubleProperty angle;
+    private DoubleProperty angle;
 
     private final List<PathElement> arrowHead = new ArrayList<>();
 
@@ -75,8 +75,9 @@ public class Edge extends GraphElement {
 
     public Edge(Canvas canvas, Relation relation) {
         super(canvas, relation.getId());
-        this.startVertex = canvas.getVertex(relation.start.getId());
-        this.endVertex = canvas.getVertex(relation.end.getId());
+
+        startVertex = canvas.getVertex(relation.start.getId());
+        endVertex = canvas.getVertex(relation.end.getId());
         setDirected(relation.directed);
 
         if (isReverted()) {
@@ -88,11 +89,6 @@ public class Edge extends GraphElement {
             secondaryVertex = endVertex;
         }
 
-        // To change the pivot of rotation
-        Rotate rotate = new Rotate();
-        angle = rotate.angleProperty();
-        getTransforms().add(rotate);
-
         // Notify two vertices to attach it
         attach();
         initializeGraphics();
@@ -102,9 +98,35 @@ public class Edge extends GraphElement {
         addProperties(relation.getProperties());
     }
 
+    public Edge(Canvas canvas, Edge other) {
+        super(canvas, other);
+
+        startVertex = canvas.getVertex(other.startVertex.getElementId());
+        endVertex = canvas.getVertex(other.endVertex.getElementId());
+        setDirected(other.isDirected());
+
+        if (isReverted()) {
+            primaryVertex = endVertex;
+            secondaryVertex = startVertex;
+        }
+        else {
+            primaryVertex = startVertex;
+            secondaryVertex = endVertex;
+        }
+
+        // Notify two vertices to attach it
+        attach();
+        initializeGraphics();
+    }
+
     @Override
     protected void initializeGraphics() {
         super.initializeGraphics();
+
+        // To change the pivot of rotation
+        Rotate rotate = new Rotate();
+        angle = rotate.angleProperty();
+        getTransforms().add(rotate);
         
         shape = new Path();
         highlightShape = new Path();
