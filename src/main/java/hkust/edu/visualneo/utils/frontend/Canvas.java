@@ -254,8 +254,14 @@ public class Canvas extends Pane implements Observable {
     }
 
     public void loadCanvas(Canvas other) {
-        other.getVertices().forEach(vertex -> vertices.put(vertex.getElementId(), new Vertex(this, vertex)));
-        other.getEdges().forEach(edge -> edges.put(edge.getElementId(), new Edge(this, edge)));
+        other.getVertices().forEach(vertex -> {
+            Vertex copy = new Vertex(this, vertex);
+            vertices.put(copy.getElementId(), copy);
+        });
+        other.getEdges().forEach(edge -> {
+            Edge copy = new Edge(this, edge);
+            edges.put(copy.getElementId(), copy);
+        });
 
         getChildren().addAll(getEdges());
         getChildren().addAll(getVertices());
