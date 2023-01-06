@@ -29,7 +29,7 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#installation-&-running">Installation</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -58,7 +58,7 @@ VisualNeo includes many cutting-edge functions such as data-driven VQI design, a
 
 * [![Next][IntelliJ]][IntelliJ-url]
 * [![React][Maven]][Maven-url]
-* [![Vue][Neo4j]][Neo4j-url]
+* [![Neo4j][Neo4j]][Neo4j-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
