@@ -165,7 +165,7 @@ public class Edge extends GraphElement {
                     () -> primaryVertex.getPosition().midpoint(secondaryVertex.getPosition()),
                     primaryVertex.positionProperty(), secondaryVertex.positionProperty()));
             angleProperty().bind(Bindings.createDoubleBinding(
-                    () -> Math.toDegrees(angle(startVertex, endVertex)),
+                    () -> Math.toDegrees(PositionProperty.angle(startVertex.getPosition(), endVertex.getPosition())),
                     startVertex.positionProperty(), endVertex.positionProperty()));
 
             final DoubleBinding baseAngle = Bindings.createDoubleBinding(

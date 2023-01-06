@@ -17,9 +17,10 @@ import javafx.scene.text.TextBoundsType;
 import javafx.scene.transform.Scale;
 import org.neo4j.driver.Value;
 
-import java.util.*;
-
-import static java.lang.Math.PI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 public abstract class GraphElement extends Group implements Comparable<GraphElement>, Observable {
 
@@ -204,13 +205,6 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
                     .append(entry.getValue().toString().replaceAll("\"", ""))
                     .append(" ");
         return propertyText.toString().trim();
-    }
-
-    public static double angle(Vertex start, Vertex end) {
-        Point2D delta = end.getPosition().subtract(start.getPosition());
-        return delta.getX() == 0.0 ?
-                delta.getY() > 0.0 ? PI / 2 : -PI / 2 :
-                Math.atan2(delta.getY(), delta.getX());
     }
 
     protected void markInvalid() {
