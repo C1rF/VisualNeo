@@ -7,14 +7,19 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -82,6 +87,7 @@ public class VisualNeoController {
     private Map<String, String> current_property_map;
     private ChangeListener<String> property_change_listener;
     private ChangeListener<Boolean> directed_change_listener;
+    private EventHandler<MouseEvent> click_match_handler;
     /**
      * Drawing Space
      */
@@ -138,6 +144,9 @@ public class VisualNeoController {
     @FXML
     private TextArea textarea_query;
 
+    List<Canvas> basicPatternCanvases = new ArrayList<>();
+
+    List<Canvas> cannedPatternCanvases = new ArrayList<>();
     private static double PATTERN_CANVAS_HEIGHT = 150.0;
 
     private final String BASIC_PATTERN_PATH = "src/main/resources/hkust/edu/visualneo/data/basic/basicPattern.txt";
@@ -167,6 +176,26 @@ public class VisualNeoController {
             else
                 hideAllPane();
         });
+        constructCanvas.setOnDragOver(e -> {
+            e.acceptTransferModes(TransferMode.COPY);
+        });
+        constructCanvas.setOnDragDropped(e -> {
+            System.out.println("Drop me");
+            Dragboard dragboard = e.getDragboard();
+            if (dragboard.hasString()) {
+                String[] info = dragboard.getString().split("\\s+");
+                int listIdx = Integer.parseInt(info[0]);
+                int idxInList = Integer.parseInt(info[1]);
+                Canvas patternCanvas = listIdx == 0 ? basicPatternCanvases.get(idxInList) : cannedPatternCanvases.get(idxInList);
+                System.out.println(e.getX() + " " + e.getY());
+                pastePatternCanvasToConstructCanvas(patternCanvas, new Point2D(e.getX(), e.getY()));
+                e.setDropCompleted(true);
+            } else {
+                e.setDropCompleted(false);
+            }
+        });
+
+
         resultCanvas.setType(Canvas.CanvasType.NAVIGABLE);
         resultCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
             GraphElement temp = resultCanvas.getSingleHighlight();
@@ -211,6 +240,20 @@ public class VisualNeoController {
                 GraphElement current_highlight = constructCanvas.getSingleHighlight();
                 Edge highlight_edge = (Edge) current_highlight;
                 if (highlight_edge != null) highlight_edge.setDirected(newValue);
+            }
+        };
+
+        click_match_handler = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent e) {
+                MatchRecord currentRecord = (MatchRecord) e.getSource();
+                if (currentRecord != null) {
+                    Collection<GraphElement> elements = Stream
+                            .concat(currentRecord.getMatch().head().stream().map(id -> resultCanvas.getVertex(id)),
+                                    currentRecord.getMatch().tail().stream().map(id -> resultCanvas.getEdge(id)))
+                            .toList();
+                    resultCanvas.navigateTo(elements, true, false);
+                }
             }
         };
 
@@ -371,16 +414,7 @@ public class VisualNeoController {
 
                 record.setOnMouseEntered(e -> handleMouseEnterButton(e));
                 record.setOnMouseExited(e -> handleMouseLeaveButton(e));
-                record.setOnMouseClicked(e -> {
-                    MatchRecord currentRecord = (MatchRecord) e.getSource();
-                    if (currentRecord != null) {
-                        Collection<GraphElement> elements = Stream
-                                .concat(currentRecord.getMatch().head().stream().map(id -> resultCanvas.getVertex(id)),
-                                        currentRecord.getMatch().tail().stream().map(id -> resultCanvas.getEdge(id)))
-                                .toList();
-                        resultCanvas.navigateTo(elements, true, false);
-                    }
-                });
+                record.setOnMouseClicked(click_match_handler);
 
                 vbox_record.getChildren().add(record);
                 if (i < results.ids().size() - 1) vbox_record.getChildren().add(new Separator());
@@ -731,6 +765,8 @@ public class VisualNeoController {
     public void displayRecommendedPatterns(List<Graph> patterns, boolean isCannedPattern) {
         VBox vbox_to_add_pattern = isCannedPattern ? vbox_canned_patterns : vbox_basic_patterns;
         vbox_to_add_pattern.getChildren().clear();
+        if(isCannedPattern) cannedPatternCanvases.clear();
+        int canvasIdx = 0;
         Iterator<Graph> it = patterns.iterator();
         while (it.hasNext()) {
             Graph pattern = it.next();
@@ -746,6 +782,21 @@ public class VisualNeoController {
                             bounds.getHeight() * patternCanvas.getWidth());
                 });
                 patternCanvas.frameAllElements(false, true);
+            });
+
+            if(!isCannedPattern)
+                basicPatternCanvases.add(patternCanvas);
+            else
+                cannedPatternCanvases.add(patternCanvas);
+            int idxCopy = canvasIdx++;
+            String isCannedBinary = isCannedPattern ? "1" : "0";
+            patternCanvas.setOnDragDetected(e -> {
+                System.out.println("Drag Me");
+                Dragboard dragboard = patternCanvas.startDragAndDrop(TransferMode.COPY);
+                dragboard.setDragView(patternCanvas.snapshot(null, null), 0, 0);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(isCannedBinary+ " " + idxCopy);
+                dragboard.setContent(content);
             });
 
             AnchorPane.setTopAnchor(patternCanvas, 0.0);
@@ -831,6 +882,19 @@ public class VisualNeoController {
             }
         }
         return new Graph(nodes, relations);
+    }
+
+    private void pastePatternCanvasToConstructCanvas(Canvas patternCanvas, Point2D mousePosition){
+        Point2D patternViewCenter = patternCanvas.camera.getPosition();
+        Point2D constructCanvasMouseInWorldPosition = constructCanvas.camera.screenToWorld(mousePosition);
+        Collection<Vertex> vertices = patternCanvas.getVertices();
+        Collection<Edge> edges = patternCanvas.getEdges();
+        for(Vertex v : vertices){
+            Point2D vertexInWorldPosition = constructCanvasMouseInWorldPosition.add(v.getPosition()).subtract(patternViewCenter);
+            Vertex new_vertex = new Vertex(constructCanvas);
+            new_vertex.setPosition(vertexInWorldPosition);
+            constructCanvas.addElement(new_vertex);
+        }
     }
 
 }
