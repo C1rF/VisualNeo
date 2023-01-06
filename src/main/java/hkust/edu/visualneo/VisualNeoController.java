@@ -885,14 +885,7 @@ public class VisualNeoController {
     private void pastePatternCanvasToConstructCanvas(Canvas patternCanvas, Point2D mousePosition){
         Point2D patternViewCenter = patternCanvas.camera.getPosition();
         Point2D constructCanvasMouseInWorldPosition = constructCanvas.camera.screenToWorld(mousePosition);
-        Collection<Vertex> vertices = patternCanvas.getVertices();
-        Collection<Edge> edges = patternCanvas.getEdges();
-        for(Vertex v : vertices){
-            Point2D vertexInWorldPosition = constructCanvasMouseInWorldPosition.add(v.getPosition()).subtract(patternViewCenter);
-            Vertex new_vertex = new Vertex(constructCanvas);
-            new_vertex.setPosition(vertexInWorldPosition);
-            constructCanvas.addElement(new_vertex);
-        }
+        constructCanvas.loadCanvas(patternCanvas, constructCanvasMouseInWorldPosition.subtract(patternViewCenter));
     }
 
 }

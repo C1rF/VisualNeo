@@ -65,6 +65,7 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
     protected GraphElement(Canvas canvas, GraphElement other) {
         this(canvas);
 
+        setLabel(other.getLabel());
         addProperties(other.properties);
     }
 
