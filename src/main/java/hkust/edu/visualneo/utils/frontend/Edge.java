@@ -15,6 +15,7 @@ import javafx.scene.transform.Rotate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static hkust.edu.visualneo.utils.frontend.Vertex.VERTEX_RADIUS;
 import static java.lang.Math.PI;
@@ -98,11 +99,11 @@ public class Edge extends GraphElement {
         addProperties(relation.getProperties());
     }
 
-    public Edge(Canvas canvas, Edge other) {
+    public Edge(Canvas canvas, Edge other, Map<Long, Vertex> vertexMap) {
         super(canvas, other);
 
-        startVertex = canvas.getVertex(other.startVertex.getElementId());
-        endVertex = canvas.getVertex(other.endVertex.getElementId());
+        startVertex = vertexMap.get(other.startVertex.getElementId());
+        endVertex = vertexMap.get(other.endVertex.getElementId());
         setDirected(other.isDirected());
 
         if (isReverted()) {
