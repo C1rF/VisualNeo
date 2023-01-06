@@ -29,7 +29,7 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation-&-running">Installation</a></li>
+        <li><a href="#running">Running</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -77,7 +77,7 @@ Please follow the instructions below to set up your VisualNeo locally:
 
   
 
-### Installation & Running
+### Running
 
 1. Clone the repo
    ```sh
