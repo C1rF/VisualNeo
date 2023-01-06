@@ -254,13 +254,15 @@ public class Canvas extends Pane implements Observable {
     }
 
     public void loadCanvas(Canvas other, Point2D positionShift) {
+        Map<Long, Vertex> vertexCopies = new HashMap<>();
         other.getVertices().forEach(vertex -> {
             Vertex copy = new Vertex(this, vertex);
             copy.translate(positionShift);
             vertices.put(copy.getElementId(), copy);
+            vertexCopies.put(vertex.getElementId(), copy);
         });
         other.getEdges().forEach(edge -> {
-            Edge copy = new Edge(this, edge);
+            Edge copy = new Edge(this, edge, vertexCopies);
             edges.put(copy.getElementId(), copy);
         });
 
