@@ -114,7 +114,7 @@ Here is a quick guideline of how VisualNeo can be used.
 
    **Shift**: Create nodes/edges
 
-   **Ctrl**: Select Multiple nodes/edges
+   **Ctrl**: Select multiple nodes/edges
 
    **Backspace/Delete**: Delete nodes/edges
 4. Save/Load self-defined patterns (if needed)
