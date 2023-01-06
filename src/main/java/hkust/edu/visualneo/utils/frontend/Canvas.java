@@ -257,9 +257,10 @@ public class Canvas extends Pane implements Observable {
         frameAllElements(false, false);
     }
 
-    public void loadCanvas(Canvas other) {
+    public void loadCanvas(Canvas other, Point2D positionShift) {
         other.getVertices().forEach(vertex -> {
             Vertex copy = new Vertex(this, vertex);
+            copy.translate(positionShift);
             vertices.put(copy.getElementId(), copy);
         });
         other.getEdges().forEach(edge -> {
