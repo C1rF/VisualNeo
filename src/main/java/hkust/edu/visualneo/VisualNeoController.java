@@ -282,6 +282,7 @@ public class VisualNeoController {
         });
 
         // Bind the query code display textarea
+        textarea_query.setWrapText(true);
         textarea_query.textProperty().bind(queryHandler.getTranslator().translationProperty());
 
         // Load the basic patterns
@@ -791,7 +792,9 @@ public class VisualNeoController {
             patternCanvas.setOnDragDetected(e -> {
                 System.out.println("Drag Me");
                 Dragboard dragboard = patternCanvas.startDragAndDrop(TransferMode.COPY);
-                dragboard.setDragView(patternCanvas.snapshot(null, null), 0, 0);
+                dragboard.setDragView(patternCanvas.snapshot(null, null),
+                                      patternCanvas.getWidth() * 0.5,
+                                      patternCanvas.getHeight() * 0.5);
                 ClipboardContent content = new ClipboardContent();
                 content.putString(isCannedBinary+ " " + idxCopy);
                 dragboard.setContent(content);
