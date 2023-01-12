@@ -53,8 +53,7 @@ public class LoadDatabaseController {
             public void run() {
                 try {
                     // Try to connect to the database
-                    //controller.submitDBInfo(uri, user, password);
-                    controller.submitDBInfo("bolt://3.82.208.184:7687", "neo4j", "grip-poles-reproductions");
+                    controller.submitDBInfo(uri, user, password);
                     connect_success = true;
                 } catch (AuthenticationException e) {
                     connect_success = false;
