@@ -349,6 +349,8 @@ public class VisualNeoController {
         }
 
         // Update the label choice box
+        choicebox_node_label.getItems().clear();
+        choicebox_relation_label.getItems().clear();
         metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
         metadata.relationLabels().forEach(label -> choicebox_relation_label.getItems().add(label));
 
