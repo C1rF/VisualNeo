@@ -123,7 +123,7 @@ public class QueryBuilder {
             buffer.append(commaSeparator);
             buffer.append("collect(DISTINCT r) AS relationships");
             buffer.append(commaSeparator);
-            buffer.append("collect(DISTINCT [[n IN allNodes | ID(n)], [r IN allRelationships | ID(r)]]) AS resultIds");
+            buffer.append("collect([[n IN allNodes | ID(n)], [r IN allRelationships | ID(r)]]) AS resultIds");
         }
 
         String query = buffer.toString();
