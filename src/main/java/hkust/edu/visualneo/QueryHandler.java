@@ -147,9 +147,10 @@ public class QueryHandler {
         try (Session session = driver.session(SessionConfig.builder()
                                                            .withDefaultAccessMode(AccessMode.READ)
                                                            .build())) {
-            Results results = session.executeRead(tx -> {
+
+            return session.executeRead(tx -> {
                 Record record = tx.run(query).single();
-                
+
                 Map<Long, Node> nodes = record
                         .get("nodes")
                         .asList(Value::asNode)
@@ -178,9 +179,6 @@ public class QueryHandler {
 
                 return new Results(resultGraph, resultIds);
             });
-
-            // System.out.println(results);
-            return results;
         }
     }
 
