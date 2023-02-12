@@ -21,6 +21,7 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -46,45 +47,17 @@ public class VisualNeoController {
     @FXML
     private Button btn_generate_patterns;
     /**
-     * Buttons and Labels in the Label and Property Pane (9 in total)
+     * Buttons and Labels in Info Pane
      */
     @FXML
-    private ChoiceBox<String> choicebox_node_label;
-    @FXML
-    private Button btn_add_node_label;
-    @FXML
-    private ChoiceBox<String> choicebox_relation_label;
-    @FXML
-    private Button btn_add_relation_label;
-    @FXML
-    private ChoiceBox<String> choicebox_property_name;
-    @FXML
-    private TextField textfield_property_value;
-    @FXML
-    private Button btn_add_property;
-    @FXML
-    private CheckBox checkbox_directed;
-    /**
-     * Buttons and Texts in the Info Pane (4 in total)
-     */
-    @FXML
-    private ScrollPane info_pane;
-    @FXML
-    private Text text_node_or_relation;
-    @FXML
-    private Text text_label_info;
-    @FXML
-    private Text text_property_info;
+    private VBox info_box;
+    private Map<String, String> current_property_map;
+    TextField prop_value_textfield;
+    ChoiceBox<String> property_choices;
     /**
      * Node Label Pane + Relation Label Pane + Property Pane
      */
-    @FXML
-    private AnchorPane pane_node_label;
-    @FXML
-    private AnchorPane pane_relation_label;
-    @FXML
-    private AnchorPane pane_property;
-    private Map<String, String> current_property_map;
+    private ChangeListener<String> label_change_listener;
     private ChangeListener<String> property_change_listener;
     private ChangeListener<Boolean> directed_change_listener;
     private EventHandler<MouseEvent> click_match_handler;
@@ -170,9 +143,9 @@ public class VisualNeoController {
         constructCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
             GraphElement temp = constructCanvas.getSingleHighlight();
             if (temp != null)
-                refreshAllPane(temp, false);
+                refreshInfoPane(temp, true);
             else
-                hideAllPane();
+                hideInfoPane();
         });
         constructCanvas.setOnDragOver(e -> {
             e.acceptTransferModes(TransferMode.COPY);
@@ -198,37 +171,59 @@ public class VisualNeoController {
         resultCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
             GraphElement temp = resultCanvas.getSingleHighlight();
             if (temp != null)
-                refreshAllPane(temp, true);
+                refreshInfoPane(temp, false);
             else
-                hideAllPane();
+                hideInfoPane();
         });
         schemaCanvas.setType(Canvas.CanvasType.NAVIGABLE);
         schemaCanvas.getHighlights().addListener((SetChangeListener<GraphElement>) c -> {
             GraphElement temp = schemaCanvas.getSingleHighlight();
             if (temp != null)
-                refreshAllPane(temp, true);
+                refreshInfoPane(temp, false);
             else
-                hideAllPane();
+                hideInfoPane();
         });
 
         Rectangle schemaContainer = new Rectangle(648, 321.5);
         schemaCanvas.setClip(schemaContainer);
         tabpane_pattern.getTabs().remove(tab_result_record);
 
+        label_change_listener = new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                GraphElement current_highlight = constructCanvas.getSingleHighlight();
+                if(current_highlight == null) return;
+                boolean nullLabel = newValue.isEmpty();
+
+                // Update the current label
+                if(nullLabel) current_highlight.setLabel(null);
+                else current_highlight.setLabel(newValue);
+
+                // Update current property map
+                if (current_highlight instanceof Vertex)
+                    current_property_map = nullLabel ? metadata.nodeProperties() : metadata.nodePropertiesOf(newValue);
+                else
+                    current_property_map = nullLabel ? metadata.relationProperties() : metadata.relationPropertiesOf(newValue);
+
+                // Remove the redundant properties
+                Set<String> properties_to_be_removed = new HashSet<>();
+                Set<String> all_property_names = current_highlight.getElementProperties().keySet();
+                for (String name: all_property_names) {
+                    if(!current_property_map.keySet().contains(name))
+                        properties_to_be_removed.add(name);
+                }
+                for(String name : properties_to_be_removed)
+                    current_highlight.removeProperty(name);
+
+                refreshInfoPane(current_highlight, true);
+            }
+        };
         property_change_listener = new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                if(newValue == null) return;
                 String type = current_property_map.get(newValue);
-                System.out.println("Current Selected Property Type: " + type);
-                String propmt_text = "New Case! Please debug!";
-                if (type.equals("String")) {
-                    propmt_text = "Please input a String";
-                } else if (type.equals("Long")) {
-                    propmt_text = "Please input a Number";
-                } else if (type.equals("Double")) {
-                    propmt_text = "Please input a Double";
-                }
-                textfield_property_value.setPromptText(propmt_text);
+                prop_value_textfield.setPromptText("Please input a " + type);
             }
         };
 
@@ -348,22 +343,9 @@ public class VisualNeoController {
                 e.addProperty(relationProperty.getKey(), Values.value(relationProperty.getValue()));
             }
         }
-
-        // Update the label choice box
-        choicebox_node_label.getItems().clear();
-        choicebox_relation_label.getItems().clear();
-        metadata.nodeLabels().forEach(label -> choicebox_node_label.getItems().add(label));
-        metadata.relationLabels().forEach(label -> choicebox_relation_label.getItems().add(label));
-
-        // Set initial state of all the buttons and choice box
-        btn_add_node_label.setDisable(false);
-        btn_add_relation_label.setDisable(false);
-        btn_add_property.setDisable(false);
-        choicebox_node_label.getSelectionModel().selectFirst();
-        choicebox_relation_label.getSelectionModel().selectFirst();
-
         // If there is a single highlight, refresh all panes
-        if (constructCanvas.getSingleHighlight() != null) refreshAllPane(constructCanvas.getSingleHighlight(), false);
+        if (constructCanvas.getSingleHighlight() != null)
+            refreshInfoPane(constructCanvas.getSingleHighlight(), true);
 
         // Enable exact search function
         btn_exact_search.setDisable(false);
@@ -430,37 +412,28 @@ public class VisualNeoController {
     private void handleSimilaritySearch() {
     }
 
-    @FXML
-    void handleAddNodeLabel() {
+    void addProperty() {
         GraphElement current_highlight = constructCanvas.getSingleHighlight();
-        current_highlight.setLabel(choicebox_node_label.getValue());
-        refreshAllPane(current_highlight, false);
-    }
+        String name = property_choices.getValue();
+        if(name == null){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Add Property Error");
+            alert.setHeaderText("Cannot add the property.");
+            alert.setContentText("Please select a property first");
+            alert.showAndWait();
+            return;
+        }
+        String type = current_property_map.get(name);
+        Value prop_value = parsePropValue(type, prop_value_textfield.getText());
 
-    @FXML
-    void handleAddRelationLabel() {
-        GraphElement current_highlight = constructCanvas.getSingleHighlight();
-        current_highlight.setLabel(choicebox_relation_label.getValue());
-        refreshAllPane(current_highlight, false);
-    }
-
-    @FXML
-    void handleAddProperty() {
-        GraphElement current_highlight = constructCanvas.getSingleHighlight();
-        // Add Node/Relation properties to the Node/Relation
-        String prop_name = choicebox_property_name.getValue();
-        String prop_type = current_property_map.get(prop_name);
-        String prop_value_text = textfield_property_value.getText().trim();
-        Value prop_value = parsePropValue(prop_type, prop_value_text);
         if (prop_value != null) {
-            current_highlight.addProperty(prop_name, prop_value);
-            textfield_property_value.clear();
-            refreshAllPane(current_highlight, false);
+            current_highlight.addProperty(name, prop_value);
+            refreshInfoPane(current_highlight, true);
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Add Property Error");
             alert.setHeaderText("Cannot add the property.");
-            alert.setContentText("Please input a " + prop_type);
+            alert.setContentText("Please input a " + type);
             alert.showAndWait();
         }
     }
@@ -482,17 +455,10 @@ public class VisualNeoController {
         return null;
     }
 
-    /**
-     * Called when the user's mouse enter a button
-     */
     @FXML
     private void handleMouseEnterButton(MouseEvent m) {
         constructCanvas.getScene().setCursor(Cursor.HAND);
     }
-
-    /**
-     * Called when the user's mouse leaves a button
-     */
     @FXML
     private void handleMouseLeaveButton(MouseEvent m) {
         constructCanvas.getScene().setCursor(Cursor.DEFAULT);
@@ -542,61 +508,135 @@ public class VisualNeoController {
      * Helper Function
      * Given a GraphElement, REFRESH the InfoPane according to the information
      */
-    private void refreshAllPane(GraphElement current_highlight, boolean info_only) {
+    private void refreshInfoPane(GraphElement current_highlight, boolean modifiable) {
+        if(current_highlight == null) return;
+        info_box.getChildren().clear();
+        boolean hasDatabase = (metadata != null);
         boolean isVertex = current_highlight instanceof Vertex;
+        boolean emptyLabel = !current_highlight.hasLabel();
 
         // Display the information on the information pane
-        info_pane.setVisible(true);
-        text_node_or_relation.setText(isVertex ? "Node Information" : "Relation Information");
-        StringBuilder builder = new StringBuilder();
-        text_label_info.setText(current_highlight.getLabel());
-        Map<String, Value> properties = current_highlight.getElementProperties();
-        for (String propertyKey : properties.keySet())
-            builder.append(propertyKey).append(" : ").append(properties.get(propertyKey)).append("\n");
-        text_property_info.setText(builder.toString());
+        info_box.setVisible(true);
+        Text info_text = new Text(isVertex ? "Node Information" : "Relation Information");
+        info_text.getStyleClass().add("info_text");
+        info_box.getChildren().add(info_text);
 
-        if (info_only) return;
-
-        // Display the information on the label and property pane
-        pane_property.setVisible(true);
-        pane_node_label.setVisible(isVertex);
-        pane_relation_label.setVisible(!isVertex);
-        choicebox_property_name.getSelectionModel()
-                .selectedItemProperty().removeListener(property_change_listener);
-        choicebox_property_name.getItems().clear();
-        checkbox_directed.selectedProperty().removeListener(directed_change_listener);
-        if (!isVertex) {
+        // Display the direction checkbox if this is a relation
+        if(!isVertex){
             // Display the checkbox according to current status and add listener
-            Edge highlight_edge = (Edge) current_highlight;
-            checkbox_directed.setSelected(highlight_edge.isDirected());
+            CheckBox checkbox_directed = new CheckBox();
+            checkbox_directed.setSelected(((Edge) current_highlight).isDirected());
             checkbox_directed.selectedProperty().addListener(directed_change_listener);
+            Text directed_text = new Text("Directed:");
+            directed_text.getStyleClass().add("headline");
+            HBox dir_hbox = new HBox(directed_text, checkbox_directed);
+            dir_hbox.setSpacing(20);
+            info_box.getChildren().add(dir_hbox);
         }
 
-        // Update current property map
-        if (metadata == null) return;
-        if (isVertex)
-            current_property_map = current_highlight.getLabel() == null ? metadata.nodeProperties() : metadata.nodePropertiesOf(current_highlight.getLabel());
-        else
-            current_property_map = current_highlight.getLabel() == null ? metadata.relationProperties() : metadata.relationPropertiesOf(current_highlight.getLabel());
+        // Label Choice Box Creation
+        ChoiceBox<String> label_choices = new ChoiceBox<>();
+        label_choices.setPrefWidth(150);
+        label_choices.getItems().add("");
+        if(hasDatabase){
+            if(isVertex)
+                metadata.nodeLabels().forEach(label -> label_choices.getItems().add(label));
+            else
+                metadata.relationLabels().forEach(label -> label_choices.getItems().add(label));
+            if(emptyLabel)
+                label_choices.getSelectionModel().selectFirst();
+            else
+                label_choices.getSelectionModel().select(current_highlight.getLabel());
+        }
 
-        // Update the property choice box according to current property map
-        if (current_property_map != null)
-            current_property_map.keySet().forEach(property -> choicebox_property_name.getItems().add(property));
-        else
-            choicebox_property_name.getItems().removeAll();
+        // Label Selection Module
+        Text label_headline = new Text("Label Info:");
+        label_headline.getStyleClass().add("headline");
+        Text label_text = new Text("Current Label:");
+        label_text.getStyleClass().add("normal_text");
+        VBox label_vbox = new VBox(label_text, label_choices);
+        label_vbox.setSpacing(5);
+        info_box.getChildren().addAll(label_headline, label_vbox);
+        if(!hasDatabase || !modifiable) label_choices.setDisable(true);
+        label_choices.getSelectionModel().selectedItemProperty().addListener(label_change_listener);
 
-        // Set the listener for choicebox_property_name
-        choicebox_property_name.getSelectionModel().selectFirst();
-        choicebox_property_name.getSelectionModel()
-                .selectedItemProperty()
-                .addListener(property_change_listener);
+
+        // Line separator
+        info_box.getChildren().add(new Separator());
+
+        // Current Properties
+        Text property_headline = new Text("Property Info:");
+        property_headline.getStyleClass().add("headline");
+        Text property_text = new Text("Current Properties:");
+        property_text.getStyleClass().add("normal_text");
+        info_box.getChildren().addAll(property_headline, property_text);
+        VBox property_box = new VBox();
+        property_box.setSpacing(10);
+        PropertyRecord.setParent(property_box);
+        PropertyRecord.setHost(current_highlight);
+        Map<String, Value> properties = current_highlight.getElementProperties();
+        for (String propertyKey : properties.keySet()){
+            PropertyRecord newRecord = new PropertyRecord(modifiable);
+            newRecord.setDisplay(propertyKey, String.valueOf(properties.get(propertyKey)));
+            property_box.getChildren().add(newRecord);
+        }
+        info_box.getChildren().add(property_box);
+
+        // Line separator
+        info_box.getChildren().add(new Separator());
+
+        // Add/Update Property Module (if modifiable)
+        if(modifiable){
+
+            Text add_property_text = new Text("Add New Properties:");
+            add_property_text.getStyleClass().add("normal_text");
+
+            // Update current property map (based on label of graph element(node/relationships))
+            if(hasDatabase){
+                if (isVertex)
+                    current_property_map = current_highlight.getLabel() == null ? metadata.nodeProperties() : metadata.nodePropertiesOf(current_highlight.getLabel());
+                else
+                    current_property_map = current_highlight.getLabel() == null ? metadata.relationProperties() : metadata.relationPropertiesOf(current_highlight.getLabel());
+            }
+
+            // Create property choice box according to current property map
+            property_choices = new ChoiceBox<>();
+            property_choices.setPrefWidth(150);
+            if (current_property_map != null)
+                current_property_map.keySet().forEach(property -> property_choices.getItems().add(property));
+
+            property_choices.getSelectionModel().selectFirst();
+            property_choices.getSelectionModel()
+                    .selectedItemProperty()
+                    .addListener(property_change_listener);
+
+            // Text Field
+            prop_value_textfield = new TextField();
+            prop_value_textfield.setPrefWidth(150);
+            if(hasDatabase && current_property_map != null)
+                prop_value_textfield.setPromptText("Please input a " + current_property_map.get(property_choices.getValue()));
+
+            // Button
+            Button add_prop_btn = new Button("Add/Update");
+            add_prop_btn.setPrefWidth(100);
+            add_prop_btn.setOnAction(e -> addProperty());
+
+            if(!hasDatabase){
+                property_choices.setDisable(true);
+                prop_value_textfield.setDisable(true);
+                add_prop_btn.setDisable(true);
+            }
+
+            // VBox
+            VBox add_prop_vbox = new VBox(new Text("Property Type:"), property_choices, new Text("Property Value:"), prop_value_textfield , add_prop_btn);
+            add_prop_vbox.setSpacing(5);
+
+            info_box.getChildren().addAll(add_property_text, add_prop_vbox);
+        }
     }
 
-    private void hideAllPane() {
-        info_pane.setVisible(false);
-        pane_property.setVisible(false);
-        pane_node_label.setVisible(false);
-        pane_relation_label.setVisible(false);
+    private void hideInfoPane() {
+        info_box.setVisible(false);
     }
 
     @FXML
@@ -795,8 +835,8 @@ public class VisualNeoController {
                 System.out.println("Drag Me");
                 Dragboard dragboard = patternCanvas.startDragAndDrop(TransferMode.COPY);
                 dragboard.setDragView(patternCanvas.snapshot(null, null),
-                                      patternCanvas.getWidth() * 0.5,
-                                      patternCanvas.getHeight() * 0.5);
+                        0,
+                        0);
                 ClipboardContent content = new ClipboardContent();
                 content.putString(isCannedBinary+ " " + idxCopy);
                 dragboard.setContent(content);

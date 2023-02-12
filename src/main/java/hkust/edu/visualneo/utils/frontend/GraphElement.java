@@ -77,6 +77,11 @@ public abstract class GraphElement extends Group implements Comparable<GraphElem
         this.properties.putAll(properties);
         markInvalid();
     }
+    public void removeProperty(String name) {
+        Value removed = properties.remove(name);
+        if (removed != null)
+            markInvalid();
+    }
     public Map<String, Value> getElementProperties() {
         return properties;
     }
