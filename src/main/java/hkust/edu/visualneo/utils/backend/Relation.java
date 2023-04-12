@@ -60,34 +60,6 @@ public class Relation extends Entity {
         return null;
     }
 
-    // Check whether two relations are duplicate/indistinguishable
-    // Two distinct relations are indistinguishable iff they have the same origin, target, label, and properties
-    // This method assumes the other relation is non-null and the two relations are distinct
-    boolean duplicates(Relation other) {
-        //        if (other == null || this == other)
-        //            return false;
-
-        if (directed && other.directed) {
-            if (start != other.start || end != other.end)
-                return false;
-        }
-        else if ((start != other.start || end != other.end) &&
-                 (start != other.end || end != other.start))
-            return false;
-
-        return resembles(other);
-    }
-
-    // Check whether two relations can match the same relation
-    // This method assumes the other relation is non-null and the two relations are distinct
-    @Override
-    public boolean resembles(Entity other) {
-        if (!(other instanceof Relation))
-            return false;
-
-        return super.resembles(other);
-    }
-
     @Override
     public String getName() {
         return 'e' + (index == -1 ? String.valueOf(id) : String.valueOf(index));
