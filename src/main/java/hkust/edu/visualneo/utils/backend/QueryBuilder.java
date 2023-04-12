@@ -61,12 +61,14 @@ public class QueryBuilder {
         buffer.append(NEW_LINE);
 
         // WHERE clause
-        // TODO: Modify this naive approach
         List<Pair<Node>> dupPairs = new ArrayList<>();
         List<Node> nodes = new ArrayList<>(graph.getNodes());
         for (int i = 0; i < nodes.size(); ++i) {
             for (int j = i + 1; j < nodes.size(); ++j) {
-                dupPairs.add(Pair.ordered(nodes.get(i), nodes.get(j)));
+                Node left = nodes.get(i);
+                Node right = nodes.get(j);
+                if (left.resembles(right))
+                    dupPairs.add(Pair.ordered(left, right));
             }
         }
 

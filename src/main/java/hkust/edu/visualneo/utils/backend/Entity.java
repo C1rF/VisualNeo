@@ -37,21 +37,6 @@ public abstract class Entity implements Comparable<Entity>, Mappable {
 
     public String getLabel() { return label; }
 
-    // Check whether two entities can match the same entity,
-    // i.e., whether the two sets of nodes that the two entities match have non-empty intersection
-    // This method assumes the other entity is non-null and the two entities are distinct
-    public boolean resembles(Entity other) {
-        if (hasLabel() && other.hasLabel() && !label.equals(other.label))
-            return false;
-
-        for (String propertyKey : properties.keySet())
-            if (other.properties.containsKey(propertyKey) &&
-                !properties.get(propertyKey).equals(other.properties.get(propertyKey)))
-                return false;
-
-        return true;
-    }
-
     public long getId() {
         return id;
     }
