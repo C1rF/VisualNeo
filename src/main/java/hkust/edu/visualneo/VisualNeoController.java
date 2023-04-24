@@ -151,14 +151,12 @@ public class VisualNeoController {
             e.acceptTransferModes(TransferMode.COPY);
         });
         constructCanvas.setOnDragDropped(e -> {
-            System.out.println("Drop me");
             Dragboard dragboard = e.getDragboard();
             if (dragboard.hasString()) {
                 String[] info = dragboard.getString().split("\\s+");
                 int listIdx = Integer.parseInt(info[0]);
                 int idxInList = Integer.parseInt(info[1]);
                 Canvas patternCanvas = listIdx == 0 ? basicPatternCanvases.get(idxInList) : cannedPatternCanvases.get(idxInList);
-                System.out.println(e.getX() + " " + e.getY());
                 pastePatternCanvasToConstructCanvas(patternCanvas, new Point2D(e.getX(), e.getY()));
                 e.setDropCompleted(true);
             } else {
@@ -694,7 +692,7 @@ public class VisualNeoController {
             outputText.append(v.toText()).append('\n');
         for (Edge e : edges)
             outputText.append(e.toText()).append('\n');
-        System.out.println(outputText);
+        // System.out.println(outputText);
         FileChooser fileChooser = new FileChooser();
         // Set extension filter for txt files
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
@@ -832,7 +830,6 @@ public class VisualNeoController {
             int idxCopy = canvasIdx++;
             String isCannedBinary = isCannedPattern ? "1" : "0";
             patternCanvas.setOnDragDetected(e -> {
-                System.out.println("Drag Me");
                 Dragboard dragboard = patternCanvas.startDragAndDrop(TransferMode.COPY);
                 dragboard.setDragView(patternCanvas.snapshot(null, null),
                         0,
