@@ -6,6 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/*
+* GraphLabelReplacer will load the label maps from node_label_map.txt and relation_label_map.txt
+* Then, it replaces all the numbers in final_patterns.txt with corresponding label texts
+* The output will be visualneo_patterns_file.txt
+* visualneo_patterns_file.txt is the final file we are going to feed into VisualNeo
+*
+* */
 public class GraphLabelReplacer {
     private static final String PREFIX = "src/main/resources/hkust/edu/visualneo/data/worldcup/";
     private static final String INPUT_NODE_LABEL_NAME = "node_label_map.txt";

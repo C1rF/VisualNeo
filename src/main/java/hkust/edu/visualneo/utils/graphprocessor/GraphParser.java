@@ -10,6 +10,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * GraphParser will be the first step after getting the CSV file.
+ * It will parse the csv file and output graph_adj_lists.txt which contains all adjacency lists
+ * */
+
 public class GraphParser {
 
     private static final String PREFIX = "src/main/resources/hkust/edu/visualneo/data/";

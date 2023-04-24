@@ -11,6 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/*
+ * GraphPartitioner is the intermediate step after getting the graph_partition.txt
+ * and before getting the collections subgraph using TED framework
+ * It reads original csv file to generate two label maps
+ * It reads graph_partition.txt (output of METIS) and outputs subgraph_collection.txt (input of TED)
+ * */
+
 public class GraphPartitioner {
     private static final String PREFIX = "src/main/resources/hkust/edu/visualneo/data/worldcup/";
     private static final String DATA_NAME = "worldcup.csv";
