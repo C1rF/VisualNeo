@@ -56,17 +56,18 @@ public class Node extends Entity {
         relations.add(relation);
     }
 
-    // Check whether two distinct nodes can match the same node
-    // This method assumes the other node is non-null
-    @Override
-    public boolean resembles(Entity other) {
-        if (!(other instanceof Node))
+    // Check whether two nodes in the query can match the same node in the database
+    public boolean resembles(Node other) {
+        if (hasLabel() && other.hasLabel() && !getLabel().equals(other.getLabel()))
             return false;
 
-        if (this == other)
-            return false;
-        
-        return super.resembles(other);
+        Map<String, Value> otherProperties = other.getProperties();
+        for (String propertyKey : getProperties().keySet())
+            if (otherProperties.containsKey(propertyKey) &&
+                !getProperties().get(propertyKey).equals(otherProperties.get(propertyKey)))
+                return false;
+
+        return true;
     }
 
     @Override
