@@ -63,9 +63,9 @@ public class Queries {
             MATCH
               (n%s)
             RETURN
-              [n] AS nodes,
+              collect(n) AS nodes,
               [] AS relationships,
-              [[[ID(n)], []]] AS resultIds""";
+              collect([[ID(n)], []]) AS resultIds""";
 
     public static final String SIMPLE_SINGLETON_QUERY = """
             MATCH (n%s)

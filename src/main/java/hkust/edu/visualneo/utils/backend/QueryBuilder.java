@@ -22,7 +22,6 @@ public class QueryBuilder {
 
     private final StringProperty translation = new SimpleStringProperty(this, "translation", null);
 
-    // TODO: Modify this
     public String translate(Graph graph, boolean simple) {
         if (graph.isEmpty())
             throw new Graph.BadTopologyException(Graph.BadTopologyException.TopologyType.EMPTY);
@@ -51,14 +50,16 @@ public class QueryBuilder {
         buffer.append(keywordSeparator);
 
         Iterator<Relation> relationIt = graph.getRelations().iterator();
-        while (true) {
-            Relation relation = relationIt.next();
+        Relation relation = relationIt.next();
+        translate(relation.start, unusedNodes);
+        translate(relation);
+        translate(relation.end, unusedNodes);
+        while (relationIt.hasNext()) {
+            buffer.append(commaSeparator);
+            relation = relationIt.next();
             translate(relation.start, unusedNodes);
             translate(relation);
             translate(relation.end, unusedNodes);
-            if (!relationIt.hasNext())
-                break;
-            buffer.append(commaSeparator);
         }
 
         buffer.append(NEW_LINE);
@@ -144,14 +145,6 @@ public class QueryBuilder {
         catch (Graph.BadTopologyException e) {
             setTranslation("");
         }
-    }
-
-    public void unbind() {
-        setTranslation(null);
-    }
-
-    public boolean isBound() {
-        return getTranslation() == null;
     }
 
     public StringProperty translationProperty() {
