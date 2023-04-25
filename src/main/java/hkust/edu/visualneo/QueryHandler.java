@@ -149,6 +149,9 @@ public class QueryHandler {
                                                            .build())) {
 
             return session.executeRead(tx -> {
+                Result result = tx.run(query);
+                if (!result.hasNext())
+                    throw new EmptyResultException();
                 Record record = tx.run(query).single();
 
                 Map<Long, Node> nodes = record
@@ -167,6 +170,8 @@ public class QueryHandler {
                         .collect(Collectors.toSet());
 
                 Graph resultGraph = new Graph(new HashSet<>(nodes.values()), relations);
+                if (resultGraph.isEmpty())
+                    throw new EmptyResultException();
 
                 List<Pair<List<Long>>> resultIds = new ArrayList<>(record
                         .get("resultIds")
@@ -228,6 +233,13 @@ public class QueryHandler {
                                      LinkedHashMap::new)));
 
             return map;
+        }
+    }
+
+    public static class EmptyResultException extends NoSuchElementException {
+
+        public EmptyResultException() {
+            super("No matching result!");
         }
     }
 }
