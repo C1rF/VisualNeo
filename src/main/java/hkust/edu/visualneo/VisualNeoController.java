@@ -30,6 +30,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.Values;
+import org.neo4j.driver.exceptions.NoSuchRecordException;
 import org.neo4j.driver.types.IsoDuration;
 
 import java.io.File;
@@ -387,29 +388,23 @@ public class VisualNeoController {
             alert.setHeaderText("Cannot perform the exact search!");
             alert.setContentText(e.getMessage());
             alert.showAndWait();
+        } catch (QueryHandler.EmptyResultException e){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Exact Search Error");
+            alert.setHeaderText("There is no matching record!");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
         }
         if (results != null) {
-            try {
-                results.graph();
-            } catch (Exception e){
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Exact Search Error");
-                alert.setHeaderText("There is no matching result!");
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
-            }
-            resultCanvas.clearElements();
+            //resultCanvas.clearElements();
             resultCanvas.loadGraph(results.graph());
             vbox_record.getChildren().clear();
-            int matchIdx = 1;
             for (int i = 0; i < results.ids().size(); i++) {
                 Pair<List<Long>> match = results.ids().get(i);
-                MatchRecord record = new MatchRecord(match, matchIdx++);
-
+                MatchRecord record = new MatchRecord(match, i+1);
                 record.setOnMouseEntered(e -> handleMouseEnterButton(e));
                 record.setOnMouseExited(e -> handleMouseLeaveButton(e));
                 record.setOnMouseClicked(click_match_handler);
-
                 vbox_record.getChildren().add(record);
                 if (i < results.ids().size() - 1) vbox_record.getChildren().add(new Separator());
             }
@@ -421,6 +416,7 @@ public class VisualNeoController {
      */
     @FXML
     private void handleSimilaritySearch() {
+        //TODO: Complete the Similarity Search
     }
 
     void addProperty() {
