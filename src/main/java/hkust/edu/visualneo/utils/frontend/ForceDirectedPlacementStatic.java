@@ -56,7 +56,7 @@ public class ForceDirectedPlacementStatic {
                            .boxed()
                            .collect(Collectors.toMap(i -> ids[i], Function.identity()));
 
-        // Remove self-loops and only count
+        // Remove self-loops and only count ordered pairs
         pairs = canvas.getEdges()
                       .stream()
                       .filter(edge -> !edge.isSelfLoop())
@@ -65,7 +65,7 @@ public class ForceDirectedPlacementStatic {
         edgeCount = pairs.size();
 
         double scale = Math.sqrt(vertexCount);
-        double fullness = Math.sqrt(edgeCount * 2.0 / (vertexCount * (vertexCount - 1)));
+        double fullness = edgeCount == 0 ? 1.0 : Math.sqrt(edgeCount * 2.0 / (vertexCount * (vertexCount - 1)));
 
         maxRepDist = MAX_REP_DIST_COEF * OPT_DIST * scale * fullness;
 
@@ -74,7 +74,10 @@ public class ForceDirectedPlacementStatic {
 
         positions = new Point2D[vertexCount];
         displacements = new Point2D[vertexCount];
-        Arrays.setAll(positions, i -> randomPoint(min, max));
+        if (vertexCount == 1)
+            positions[0] = Point2D.ZERO;
+        else
+            Arrays.setAll(positions, i -> randomPoint(min, max));
     }
 
     public void layout() {
@@ -92,6 +95,9 @@ public class ForceDirectedPlacementStatic {
     }
 
     public void simulate(int iterations) {
+        if (vertexCount == 1)
+            return;
+
         long startTime = System.currentTimeMillis();
         if (iterations == 0) {
             int equilibriumCount = 0;
@@ -109,9 +115,6 @@ public class ForceDirectedPlacementStatic {
                  ++i)
                 simulate();
         }
-
-//        System.out.println(time);
-//        System.out.println(computeAvgDisp());
     }
 
     public void simulate() {
@@ -129,6 +132,27 @@ public class ForceDirectedPlacementStatic {
         }
 
         // Compute attractive displacements
+        if (edgeCount == 0) {
+            for (int i = 0; i < vertexCount; ++i) {
+                for (int j = i + 1; j < vertexCount; ++j) {
+                    Point2D diff = positions[j].subtract(positions[i]);
+                    Point2D disp = attDisp(diff);
+                    displacements[i] = displacements[i].add(disp);
+                    displacements[j] = displacements[j].subtract(disp);
+                }
+            }
+        }
+        else {
+            for (Pair<Integer> pair : pairs) {
+                int i = pair.head();
+                int j = pair.tail();
+
+                Point2D diff = positions[j].subtract(positions[i]);
+                Point2D disp = attDisp(diff);
+                displacements[i] = displacements[i].add(disp);
+                displacements[j] = displacements[j].subtract(disp);
+            }
+        }
         for (Pair<Integer> pair : pairs) {
             int i = pair.head();
             int j = pair.tail();
@@ -142,7 +166,8 @@ public class ForceDirectedPlacementStatic {
         // Apply displacements
         for (int i = 0; i < vertexCount; ++i) {
             Point2D disp = displacements[i];
-            positions[i] = positions[i].add(disp.multiply(Math.min(1.0, temp / disp.magnitude())));
+            if (disp != Point2D.ZERO)
+                positions[i] = positions[i].add(disp.multiply(Math.min(1.0, temp / disp.magnitude())));
         }
 
         // Cooling
