@@ -3,7 +3,10 @@ package hkust.edu.visualneo.utils.backend;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.types.Type;
+import org.neo4j.driver.types.TypeSystem;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static hkust.edu.visualneo.utils.backend.Queries.singletonQuery;
@@ -196,7 +199,33 @@ public class QueryBuilder {
                 buffer.append(propertyKey);
                 buffer.append(": ");
                 Value value = entity.getProperties().get(propertyKey);
+                Type[] timeTypes = {
+                                    TypeSystem.getDefault().ANY(),
+                                    TypeSystem.getDefault().DATE(),
+                                    TypeSystem.getDefault().TIME(),
+                                    TypeSystem.getDefault().DATE_TIME(),
+                                    TypeSystem.getDefault().LOCAL_TIME(),
+                                    TypeSystem.getDefault().LOCAL_DATE_TIME(),
+                                    TypeSystem.getDefault().DURATION()
+                                };
+                String[] typeWrappers = {
+                                            "",
+                                            "date(\"",
+                                            "time(\"",
+                                            "datetime(\"",
+                                            "localtime(\"",
+                                            "localdatetime(\"",
+                                            "duration(\"",
+                                    };
+                int idx = 0;
+                for(int i = 1; i < timeTypes.length; i++){
+                    if(value.hasType(timeTypes[i]))
+                        idx = i;
+                }
+                buffer.append(typeWrappers[idx]);
                 buffer.append(value);
+                if(idx != 0) buffer.append("\")");
+
                 if (!propertyIt.hasNext())
                     break;
                 buffer.append(", ");

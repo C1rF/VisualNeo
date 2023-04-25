@@ -69,7 +69,7 @@ public class LoadAnimation {
     }
 
     public void activateLoadAnimation() {
-        System.out.println("Start the animation");
+        //System.out.println("Animation starts");
         dialogStage.show();
         whole_animation.play();
     }
@@ -79,7 +79,7 @@ public class LoadAnimation {
     }
 
     public void cancelLoadAnimation() {
-        System.out.println("Stop the animation");
+        //System.out.println("Animation ends");
         dialogStage.close();
         whole_animation.stop();
     }

@@ -39,26 +39,35 @@ public class LoadDatabaseController {
     @FXML
     void handleLoad() {
 
+        // Get the user's input
+        String uri = textfield_uri.getText().trim();
+        String user = textfield_user.getText().trim();
+        String password = textfield_password.getText().trim();
+        if(uri.isEmpty() || user.isEmpty() || password.isEmpty()){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Database Connection Error");
+            alert.setHeaderText("Input Missing");
+            alert.setContentText("Please do not leave the authentication information blank!");
+            alert.showAndWait();
+            return;
+        }
+
         // Create the animation
         Stage stage = (Stage) btn_load.getScene().getWindow();
         LoadAnimation loadAnimation = new LoadAnimation(stage);
-
-        // Get the user's input
-        String uri = textfield_uri.getText();
-        String user = textfield_user.getText();
-        String password = textfield_password.getText();
 
         //worker thread for connecting the database
         Thread worker = new Thread(new Runnable() {
             public void run() {
                 try {
                     // Try to connect to the database
-                    controller.submitDBInfo(uri, user, password);
+                    //controller.submitDBInfo(uri, user, password);
+                    controller.submitDBInfo("bolt://44.201.194.57:7687", "neo4j", "unit-polisher-needs");
                     connect_success = true;
-                } catch (AuthenticationException e) {
+                } catch (Exception e) {
                     connect_success = false;
                     Platform.runLater(() -> {
-                        System.out.println(e.getMessage());
+                        //System.out.println(e.getMessage());
                         loadAnimation.cancelLoadAnimation();
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Database Connection Error");
@@ -84,7 +93,7 @@ public class LoadDatabaseController {
                     ;
                 } finally {
                     Platform.runLater(() -> {
-                        System.out.println("The load database thread ends");
+                        //System.out.println("The load database thread ends");
                         if (connect_success) {
                             loadAnimation.cancelLoadAnimation();
                             // If the database is successfully connected, close the window

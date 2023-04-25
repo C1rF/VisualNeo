@@ -30,13 +30,17 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.Values;
+import org.neo4j.driver.types.IsoDuration;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Stream;
+
+import static org.neo4j.driver.Values.value;
 
 public class VisualNeoController {
 
@@ -332,13 +336,13 @@ public class VisualNeoController {
             Map<String, String> nodeProperties = labelToNodeProperty.get(v.getLabel());
             if (nodeProperties == null) continue;
             for (Map.Entry<String, String> nodeProperty : nodeProperties.entrySet())
-                v.addProperty(nodeProperty.getKey(), Values.value(nodeProperty.getValue()));
+                v.addProperty(nodeProperty.getKey(), value(nodeProperty.getValue()));
         }
         for (Edge e : schemaCanvas.getEdges()) {
             Map<String, String> relationProperties = labelToRelationProperty.get(e.getLabel());
             if (relationProperties == null) continue;
             for (Map.Entry<String, String> relationProperty : relationProperties.entrySet()) {
-                e.addProperty(relationProperty.getKey(), Values.value(relationProperty.getValue()));
+                e.addProperty(relationProperty.getKey(), value(relationProperty.getValue()));
             }
         }
         // If there is a single highlight, refresh all panes
@@ -385,6 +389,15 @@ public class VisualNeoController {
             alert.showAndWait();
         }
         if (results != null) {
+            try {
+                results.graph();
+            } catch (Exception e){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Exact Search Error");
+                alert.setHeaderText("There is no matching result!");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            }
             resultCanvas.clearElements();
             resultCanvas.loadGraph(results.graph());
             vbox_record.getChildren().clear();
@@ -437,16 +450,43 @@ public class VisualNeoController {
     }
 
     private Value parsePropValue(String type, String input) {
+        /*
+        Supported Types:
+         TypeSystem.INTEGER() - Long
+         TypeSystem.FLOAT() - Double
+         TypeSystem.STRING() - String
+         TypeSystem.BOOLEAN() - Boolean
+         TypeSystem.POINT() - Point
+         TypeSystem.DATE() - LocalDate
+         TypeSystem.TIME() - OffsetTime
+         TypeSystem.LOCAL_TIME() - LocalTime
+         TypeSystem.DATE_TIME() - ZonedDateTime
+         TypeSystem.LOCAL_DATE_TIME() - LocalDateTime
+         TypeSystem.DURATION() - IsoDuration
+        TypeSystem.LIST() - List (unsupported for now)
+        TypeSystem.MAP() - Map   (unsupported for now)
+        */
         try {
-            if (type.equals("String")) {
-                return Values.value(input);
-            } else if (type.equals("Long")) {
-                long num = Long.parseLong(input);
-                return Values.value(num);
-            } else if (type.equals("Float")) {
-                double num = Double.parseDouble(input);
-                return Values.value(num);
-            }
+            if (type.equals("Long"))
+                return value(Long.parseLong(input));
+            else if (type.equals("Double"))
+                return value(Double.parseDouble(input));
+            else if (type.equals("String"))
+                return value(input);
+            else if (type.equals("Boolean"))
+                return value(Boolean.parseBoolean(input));
+            else if (type.equals("Date"))
+                return value(LocalDate.parse(input));
+            else if (type.equals("Time"))
+                return value(OffsetTime.parse(input));
+            else if (type.equals("LocalTime"))
+                return value(LocalTime.parse(input));
+            else if (type.equals("ZonedDateTime"))
+                return value(ZonedDateTime.parse(input));
+            else if (type.equals("LocalDateTime"))
+                return value(LocalDateTime.parse(input));
+            else if (type.equals("IsoDuration"))
+                return value(Duration.parse(input));
         } catch (Exception e) {
             return null;
         }
@@ -524,6 +564,7 @@ public class VisualNeoController {
             // Display the checkbox according to current status and add listener
             CheckBox checkbox_directed = new CheckBox();
             checkbox_directed.setSelected(((Edge) current_highlight).isDirected());
+            if(!modifiable) checkbox_directed.setDisable(true);
             checkbox_directed.selectedProperty().addListener(directed_change_listener);
             Text directed_text = new Text("Directed:");
             directed_text.getStyleClass().add("headline");
