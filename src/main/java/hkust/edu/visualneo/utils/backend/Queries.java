@@ -2,6 +2,8 @@ package hkust.edu.visualneo.utils.backend;
 
 import java.util.Arrays;
 
+import static hkust.edu.visualneo.utils.backend.QueryBuilder.MAXIMUM_RECORDS;
+
 public class Queries {
 
     public static final String NODE_COUNT_QUERY = """
@@ -60,8 +62,14 @@ public class Queries {
               relType, properties""";
 
     public static final String SINGLETON_QUERY = """
-            MATCH
-              (n%s)
+            CALL {
+              MATCH
+                (n%s)
+              RETURN
+                n
+              LIMIT
+                %s
+            }
             RETURN
               collect(n) AS nodes,
               [] AS relationships,
@@ -85,6 +93,6 @@ public class Queries {
     }
 
     public static String singletonQuery(String translation, boolean simple) {
-        return String.format(simple ? SIMPLE_SINGLETON_QUERY : SINGLETON_QUERY, translation);
+        return String.format(simple ? SIMPLE_SINGLETON_QUERY : SINGLETON_QUERY, translation, MAXIMUM_RECORDS);
     }
 }

@@ -14,6 +14,8 @@ import static hkust.edu.visualneo.utils.backend.Queries.singletonQuery;
 // Class representing a Cypher query statement
 public class QueryBuilder {
 
+    public static final int MAXIMUM_RECORDS = 100;
+
     private static final String NEW_LINE = System.lineSeparator();
     private static final String TAB = "  ";
     private static final String NEW_LINE_INDENT = NEW_LINE + TAB;
@@ -45,9 +47,35 @@ public class QueryBuilder {
         String commaSeparator = simple ? ", " : "," + NEW_LINE_INDENT;
         String andSeparator = simple ? " AND " : " AND" + NEW_LINE_INDENT;
 
+        // CALL clause
+        if (!simple) {
+            buffer.append("CALL {");
+            buffer.append(keywordSeparator);
+
+            Node first = graph.getNodes().iterator().next();
+
+            buffer.append("MATCH");
+            buffer.append(keywordSeparator).append(TAB);
+            translate(first, unusedNodes);
+            buffer.append(keywordSeparator);
+
+            buffer.append("RETURN");
+            buffer.append(keywordSeparator).append(TAB);
+            buffer.append(first.getName());
+            buffer.append(keywordSeparator);
+
+            buffer.append("LIMIT");
+            buffer.append(keywordSeparator).append(TAB);
+            buffer.append(MAXIMUM_RECORDS);
+            buffer.append(NEW_LINE);
+
+            buffer.append("}").append(NEW_LINE);
+        }
+
         // MATCH clause
         buffer.append("MATCH");
         buffer.append(keywordSeparator);
+
 
         Iterator<Relation> relationIt = graph.getRelations().iterator();
         Relation relation = relationIt.next();
